@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.DonorBox" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.DonorBox" parent="android:Theme.Material.Light.NoActionBar" >
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowSplashScreenBackground">@color/black</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    </style>
+
+    <style name="Theme.Activity" parent="Theme.DonorBox">
+        <item name="android:windowBackground">@drawable/donate</item>
+        //false means it will not fit the system window like status bar for example
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
+
 </resources>

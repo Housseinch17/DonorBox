@@ -1,0 +1,3 @@
+package com.example.donorbox.data.dataSource.firebase.firebaseWriteData
+
+interface FirebaseWriteDataDataSource

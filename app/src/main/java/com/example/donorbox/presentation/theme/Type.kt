@@ -1,6 +1,7 @@
 package com.example.donorbox.presentation.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -31,4 +32,26 @@ val Typography = Typography(
         letterSpacing = 0.5.sp
     )
     */
+)
+
+val TitleTypography = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 18.sp,
+    color = Color.Black,
+    lineHeight = 20.sp,
+    fontWeight = FontWeight.Bold
+)
+val BodyTypography = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 16.sp,
+    color = Color.Black,
+    lineHeight = 18.sp,
+    fontWeight = FontWeight.Bold
+)
+val DescriptionTypography = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 14.sp,
+    color = Color.Gray,
+    lineHeight = 16.sp,
+    fontWeight = FontWeight.Normal
 )

@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
@@ -91,14 +90,6 @@ dependencies {
     //coil to display images as url
     implementation(libs.coil.compose)
 
-    //Room database
-    implementation (libs.androidx.room.runtime)
-    //noinspection KaptUsageInsteadOfKsp
-    kapt (libs.androidx.room.compiler)
-    implementation (libs.androidx.room.ktx)
-    //converters for classes inside room database
-    implementation (libs.gson)
-
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))
     // TODO: Add the dependencies for Firebase products you want to use
@@ -108,9 +99,4 @@ dependencies {
     implementation(libs.firebase.auth)
     //read data from Firebase
     implementation (libs.firebase.database.ktx)
-
-}
-// Allow references to generated code
-kapt {
-    correctErrorTypes =  true
 }
