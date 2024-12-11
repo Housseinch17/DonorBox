@@ -1,7 +1,9 @@
 package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 
+import android.annotation.SuppressLint
 import android.content.Context
-import com.example.donorbox.data.model.FirebaseReceivers
+import android.util.Log
+import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.isInternetAvailable
 import com.google.firebase.database.DataSnapshot
@@ -25,9 +27,8 @@ class FirebaseReadDataDataSourceImpl(
                 try {
                     databaseReference.addValueEventListener(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
-                            val receivers =
-                                snapshot.getValue(FirebaseReceivers::class.java)?.receivers
-                            if (receivers != null) {
+                            val receivers = snapshot.children.mapNotNull { it.getValue(Receiver::class.java) }
+                            if (receivers.isNotEmpty()) {
                                 continuation.resume(
                                     ReceiversResponse.Success(
                                         receivers = receivers
@@ -38,8 +39,9 @@ class FirebaseReadDataDataSourceImpl(
                             }
                         }
 
+                        @SuppressLint("SuspiciousIndentation")
                         override fun onCancelled(error: DatabaseError) {
-                            val errorMessage = "Failed to read menu data$error"
+                            val errorMessage = "Failed to read menu data $error"
                                 continuation.resume(ReceiversResponse.Error(errorMessage))
                         }
                     })

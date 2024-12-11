@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface NavigationScreens {
+    //loading screen
     @Serializable
     data object Loading : NavigationScreens
 

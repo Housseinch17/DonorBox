@@ -63,7 +63,6 @@ fun Navigation(
         startDestination = startDestination
     ){
         registerGraph(
-            modifier = modifier,
             authenticationViewModel = authenticationViewModel,
             navHostController = navHostController,
             onResetEmailValue = authenticationUiState.resetEmailValue,
@@ -73,7 +72,6 @@ fun Navigation(
         )
 
         donorBoxGraph(
-            modifier = modifier,
             navHostController = navHostController
         )
     }

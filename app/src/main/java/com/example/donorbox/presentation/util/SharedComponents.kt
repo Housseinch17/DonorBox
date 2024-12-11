@@ -43,6 +43,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -54,6 +56,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.donorbox.R
 import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.theme.Orange
@@ -121,7 +125,7 @@ fun ShowDialog(
             modifier = modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(25.dp))
-                .border(1.dp,Color.Blue, RoundedCornerShape(25.dp))
+                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
                 .background(Color.White),
             onDismissRequest = {},
             confirmButton = {
@@ -238,8 +242,13 @@ fun EmailAndPassword(
     //it will perform the onDone function that we will implement in keyboardAction
     Column(modifier) {
         EmailTextField(
-            modifier = modifier, label = stringResource(R.string.email), value = emailValue,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done ),
+            modifier = modifier,
+            label = stringResource(R.string.email),
+            value = emailValue,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            ),
             onValueChange = { newEmail ->
                 onEmailChange(newEmail)
             },
@@ -249,7 +258,10 @@ fun EmailAndPassword(
             modifier = modifier,
             label = stringResource(R.string.password),
             value = passwordValue,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,imeAction = ImeAction.Done),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
             visualTransformation = getPasswordVisualTransformation(showPassword),
             onValueChange = { newPassword ->
                 onPasswordChange(newPassword)
@@ -320,8 +332,8 @@ fun PasswordTextField(
 @Composable
 fun EmailTextField(
     modifier: Modifier, label: String,
-    value: String, keyboardOptions: KeyboardOptions,
-    onValueChange: (String) -> Unit,
+    value: String,
+    keyboardOptions: KeyboardOptions, onValueChange: (String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -336,6 +348,7 @@ fun EmailTextField(
     if (!isImeVisible) {
         focusManager.clearFocus()
     }
+
 
     OutlinedTextField(
         maxLines = 1,
@@ -378,5 +391,21 @@ fun getPasswordVisualTransformation(showValue: Boolean): VisualTransformation {
         VisualTransformation.None
     } else {
         PasswordVisualTransformation()
+    }
+}
+
+@Composable
+fun DonorBoxImage(modifier: Modifier, imageUrl: String?) {
+    if (imageUrl != null) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl).crossfade(true)
+                .placeholder(R.drawable.loading)
+                .error(R.drawable.connectionerror)
+                .build(),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = modifier
+        )
     }
 }

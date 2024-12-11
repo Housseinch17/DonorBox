@@ -32,7 +32,6 @@ import org.koin.androidx.compose.koinViewModel
 
 
 fun NavGraphBuilder.registerGraph(
-    modifier: Modifier,
     authenticationViewModel: AuthenticationViewModel,
     navHostController: NavHostController,
     onResetEmailValue: String,
@@ -106,7 +105,6 @@ fun NavGraphBuilder.registerGraph(
                 },
                 resetShowDialog = resetShowDialog,
                 resetPassword = {
-                    Log.d("MyTag", "hey")
                     authenticationViewModel.resetPassword(
                         email = email,
                         resetPage = ResetPage.LogInPage

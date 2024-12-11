@@ -1,9 +1,9 @@
 package com.example.donorbox.presentation.sealedInterfaces
 
-import com.example.donorbox.data.model.Receivers
+import com.example.donorbox.data.model.Receiver
 
 sealed interface ReceiversResponse {
-    data class Success(val receivers: List<Receivers>): ReceiversResponse
-
+    data class Success(val receivers:  List<Receiver>): ReceiversResponse
+    data object IsLoading: ReceiversResponse
     data class Error(val message: String): ReceiversResponse
 }

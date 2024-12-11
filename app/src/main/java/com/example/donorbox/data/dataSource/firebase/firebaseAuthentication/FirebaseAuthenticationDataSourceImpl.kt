@@ -2,14 +2,11 @@ package com.example.donorbox.data.dataSource.firebase.firebaseAuthentication
 
 import android.util.Log
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
+import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -47,7 +44,6 @@ class FirebaseAuthenticationDataSourceImpl (
     override suspend fun resetPassword(email: String): PasswordChangement = withContext(coroutineDispatcher) {
         suspendCoroutine { continuation ->
             try {
-                Log.d("MyTag", "f1")
                 auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(PasswordChangement.Success("Check your email, to reset your password ! "))
@@ -65,31 +61,39 @@ class FirebaseAuthenticationDataSourceImpl (
         }
     }
 
-    //firebase login is asynchronous using await ensuring that it has to wait
-    //for  signInWithEmailAndPassword to complete same as using async await
+    //firebase apis are callback apis so we have to use suspendCoroutine or suspendCancellableCoroutine
     override suspend fun logIn(email: String, password: String): AuthState =
         withContext(coroutineDispatcher) {
-            return@withContext try {
-                auth.signInWithEmailAndPassword(email, password).await()
-                AuthState.LoggedIn
-
-            } catch (e: Exception) {
-                val errorMessage = e.message ?: "Something went wrong"
-                AuthState.Error(errorMessage)
+            suspendCoroutine { continuation ->
+                try {
+                    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task->
+                        if(task.isSuccessful){
+                            continuation.resume(AuthState.LoggedIn)
+                        }else{
+                            continuation.resume(AuthState.Error("error: ${task.exception}"))
+                        }
+                    }
+                }catch (e: Exception){
+                    continuation.resume(AuthState.Error("Error: ${e.message}"))
+                }
             }
         }
 
-    //firebase signup is asynchronous using await ensuring that it has to wait
-    //for  createUserWithEmailAndPassword to complete same as using async await
+    //firebase apis are callback apis so we have to use suspendCoroutine or suspendCancellableCoroutine
     override suspend fun signUp(email: String, password: String): AccountStatus =
         withContext(coroutineDispatcher) {
-            return@withContext try {
-                val deferred1 = async {
-                    auth.createUserWithEmailAndPassword(email, password)
-                }.await()
-                AccountStatus.IsCreated("Account Created")
-            } catch (e: Exception) {
-                AccountStatus.Error(e.message ?: "Check your Internet")
+            suspendCoroutine {  continuation ->
+                try {
+                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{ task->
+                    if (task.isSuccessful) {
+                        continuation.resume(AccountStatus.IsCreated("You successfully registered!"))
+                    } else {
+                        continuation.resume(AccountStatus.Error("Failed! ${task.exception}"))
+                    }
+                }
+                }catch (e: Exception){
+                    continuation.resume(AccountStatus.Error("${e.message}"))
+                }
             }
         }
 

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,8 @@ fun SignUpScreen(
     onCreateAccount: (email: String, password: String) -> Unit,
     onExistingAccount: () -> Unit
 ) {
+    //keyboard controller to show or hide keyboard
+    val keyboardController = LocalSoftwareKeyboardController.current
     Box(
         modifier = modifier
     ) {
@@ -71,6 +74,7 @@ fun SignUpScreen(
             }
             Spacer(Modifier.height(16.dp))
             AccountButton(Modifier, buttonText, buttonEnabled = createAccountEnabled) {
+                keyboardController?.hide()
                 onCreateAccount(emailValue, passwordValue)
             }
             Spacer(Modifier.height(24.dp))

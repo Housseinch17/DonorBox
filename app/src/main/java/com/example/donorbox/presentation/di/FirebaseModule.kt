@@ -11,7 +11,6 @@ import com.example.donorbox.domain.repository.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -19,8 +18,6 @@ import org.koin.dsl.module
 object FirebaseModule {
 
     val firebaseModule = module {
-        single(named("Dispatchers.IO")) { Dispatchers.IO }
-
         // Provide FirebaseAuth instance
         single {
             FirebaseAuth.getInstance()
