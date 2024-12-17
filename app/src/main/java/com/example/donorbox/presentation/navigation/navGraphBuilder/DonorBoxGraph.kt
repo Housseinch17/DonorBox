@@ -1,9 +1,12 @@
 package com.example.donorbox.presentation.navigation.navGraphBuilder
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -17,19 +20,30 @@ import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.donorBoxGraph(
     navHostController: NavHostController,
-){
+) {
     navigation<NavigationScreens.DonorBox>(
         startDestination = NavigationScreens.HomePage
-    ){
+    ) {
         composable<NavigationScreens.HomePage> {
-            Log.d("BackStack","${navHostController.currentBackStackEntry}")
+            val context = LocalContext.current
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val parentBackStackEntry: NavBackStackEntry =
                 navHostController.getBackStackEntry(NavigationScreens.DonorBox)
-            val homeViewModel = koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
+            val homeViewModel =
+                koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
             val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
-            HomePage(modifier = Modifier.fillMaxSize(),
-                response = uiState.receiversResponse){
-                Log.d("MyTag","$it")
+
+            LaunchedEffect(homeViewModel.sharedFlow) {
+                homeViewModel.sharedFlow.collect { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            }
+
+            HomePage(
+                modifier = Modifier.fillMaxSize(),
+                response = uiState.receiversResponse
+            ) {
+                Log.d("MyTag", "$it")
             }
         }
     }

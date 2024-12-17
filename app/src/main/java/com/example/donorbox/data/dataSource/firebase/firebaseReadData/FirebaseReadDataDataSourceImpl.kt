@@ -25,7 +25,10 @@ class FirebaseReadDataDataSourceImpl(
             val hasInternet = context.isInternetAvailable()
             if (hasInternet) {
                 try {
-                    databaseReference.addValueEventListener(object : ValueEventListener {
+                    //addValueEventListener will crash everytime we update the firebase
+                    //addListenerForSingleValueEvent will avoid crashing when we update firebase
+                    //its like reading only once and not keep on reading
+                    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             val receivers = snapshot.children.mapNotNull { it.getValue(Receiver::class.java) }
                             if (receivers.isNotEmpty()) {

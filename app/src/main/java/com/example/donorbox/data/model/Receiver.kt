@@ -11,5 +11,6 @@ data class Receiver(
     val name: String = "",
     val omt: String = "",
     val whish: String = "",
+    val username: String = "",
     val picUrl: String = ""
 )
