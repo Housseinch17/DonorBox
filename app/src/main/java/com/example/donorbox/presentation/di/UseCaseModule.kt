@@ -7,6 +7,7 @@ import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.ResetPa
 import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.SignOutUseCase
 import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.SignUpUseCase
 import com.example.donorbox.domain.useCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
+import com.example.donorbox.domain.useCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
 import org.koin.dsl.module
@@ -40,7 +41,10 @@ object UseCaseModule {
 
         single<FirebaseReadReceiversUseCase> {
             FirebaseReadReceiversUseCase(get())
+        }
 
+        single<FirebaseWriteTokenUseCase>{
+            FirebaseWriteTokenUseCase(get())
         }
 
         single<GetSharedPrefUsernameUseCase> {
@@ -50,6 +54,7 @@ object UseCaseModule {
         single<SaveSharedPrefUsernameUseCase> {
             SaveSharedPrefUsernameUseCase(get())
         }
+
 
     }
 }

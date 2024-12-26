@@ -13,4 +13,6 @@ interface FirebaseRepository {
     suspend fun changePassword(email: String,newPassword: String): PasswordChangement
     suspend fun resetPassword(email: String): PasswordChangement
     suspend fun readReceivers(): ReceiversResponse
+    suspend fun writeToken(username: String, token: String)
+
 }

@@ -2,6 +2,7 @@ package com.example.donorbox.data.dataSource.firebase
 
 import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataDataSourceImpl
+import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataDataSourceImpl
 import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
@@ -10,7 +11,8 @@ import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 class FirebaseRepositoryImpl(
     private val firebaseAuthenticationDataSourceImpl: FirebaseAuthenticationDataSourceImpl,
-    private val firebaseReadDataDataSourceImpl: FirebaseReadDataDataSourceImpl
+    private val firebaseReadDataDataSourceImpl: FirebaseReadDataDataSourceImpl,
+    private val firebaseWriteDataDataSourceImpl: FirebaseWriteDataDataSourceImpl
 ): FirebaseRepository {
     override suspend fun getCurrentUser(): String? {
         return firebaseAuthenticationDataSourceImpl.getCurrentUser()
@@ -38,6 +40,10 @@ class FirebaseRepositoryImpl(
 
     override suspend fun readReceivers(): ReceiversResponse {
         return firebaseReadDataDataSourceImpl.readReceivers()
+    }
+
+    override suspend fun writeToken(username: String, token: String) {
+        return firebaseWriteDataDataSourceImpl.writeToken(username,token)
     }
 
 }

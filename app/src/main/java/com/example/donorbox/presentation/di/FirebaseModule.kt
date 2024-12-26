@@ -42,23 +42,26 @@ object FirebaseModule {
             )
         }
 
-        single<FirebaseWriteDataDataSourceImpl>{
-            FirebaseWriteDataDataSourceImpl()
+        single<FirebaseWriteDataDataSourceImpl> {
+            FirebaseWriteDataDataSourceImpl(
+                databaseReference = get(named("receiversReference")),
+                coroutineDispatcher = get(named("Dispatchers.IO")),
+            )
         }
 
         single<FirebaseRepositoryImpl> {
-            FirebaseRepositoryImpl(get(), get())
+            FirebaseRepositoryImpl(get(), get(), get())
         }
 
 
-        single<FirebaseAuthenticationDataSource>{
+        single<FirebaseAuthenticationDataSource> {
             FirebaseAuthenticationDataSourceImpl(
                 auth = get(),
                 coroutineDispatcher = get(named("Dispatchers.IO"))
             )
         }
 
-        single<FirebaseReadDataDataSource>{
+        single<FirebaseReadDataDataSource> {
             FirebaseReadDataDataSourceImpl(
                 databaseReference = get(named("receiversReference")),
                 context = androidContext(),
@@ -66,12 +69,15 @@ object FirebaseModule {
             )
         }
 
-        single<FirebaseWriteDataDataSource>{
-            FirebaseWriteDataDataSourceImpl()
+        single<FirebaseWriteDataDataSource> {
+            FirebaseWriteDataDataSourceImpl(
+                databaseReference = get(named("receiversReference")),
+                coroutineDispatcher = get(named("Dispatchers.IO"))
+            )
         }
 
-        single<FirebaseRepository>{
-            FirebaseRepositoryImpl(get(), get())
+        single<FirebaseRepository> {
+            FirebaseRepositoryImpl(get(), get(), get())
         }
     }
 

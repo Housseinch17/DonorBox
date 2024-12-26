@@ -2,7 +2,6 @@ package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.isInternetAvailable
