@@ -265,6 +265,14 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 )
             )
             ReceiverText(
+                text = "Phone: ",
+                description = receiver.phoneNumber,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = BrightBlue,
+                    fontSize = 14.sp,
+                )
+            )
+            ReceiverText(
                 text = "Address: ",
                 description = receiver.address.location,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
