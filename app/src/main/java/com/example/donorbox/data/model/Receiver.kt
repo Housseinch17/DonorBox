@@ -6,8 +6,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class Receiver(
+    val phoneNumber: String = "",
     val token: String = "",
-    val address: String = "",
+    val address: Address = Address(),
     val bank: String = "",
     val name: String = "",
     val omt: String = "",

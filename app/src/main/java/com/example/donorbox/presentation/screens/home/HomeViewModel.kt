@@ -3,6 +3,7 @@ package com.example.donorbox.presentation.screens.home
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.domain.useCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase
-): ViewModel() {
+) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -28,21 +29,70 @@ class HomeViewModel(
         }
     }
 
-    private fun emitFlow(message: String){
+    private fun emitFlow(message: String) {
         viewModelScope.launch {
             _sharedFlow.emit(message)
         }
     }
 
-    private suspend fun readValues(){
-
+    private suspend fun readValues() {
         val response = firebaseReadReceiversUseCase.readReceivers()
-        Log.d("MyTag","$response")
-        if(response is ReceiversResponse.Error){
+        Log.d("MyTag", "$response")
+        if (response is ReceiversResponse.Error) {
             emitFlow(response.message)
         }
-        _uiState.update { newState->
+
+        //take the first receiver as the modalBottomSheetReceiver
+        if (response is ReceiversResponse.Success) {
+            _uiState.update { newState ->
+                newState.copy(
+                    modalBottomSheetReceiver = newState.modalBottomSheetReceiver.copy(
+                        modalBottomSheetReceiver = response.receivers.first()
+                    )
+                )
+            }
+        }
+
+        _uiState.update { newState ->
             newState.copy(receiversResponse = response)
         }
     }
+
+    fun showBottomSheetReceiver() {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(
+                    modalBottomSheetReceiver = newState.modalBottomSheetReceiver.copy(
+                        showBottomSheet = true
+                    )
+                )
+            }
+        }
+    }
+
+    fun hideBottomSheetReceiver() {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(
+                    modalBottomSheetReceiver = newState.modalBottomSheetReceiver.copy(
+                        showBottomSheet = false
+                    )
+                )
+            }
+        }
+    }
+
+    //update ModalBottomSheetReceiver
+    fun updateModalBottomSheetReceiver(modalBottomSheetReceiver: Receiver) {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(
+                    modalBottomSheetReceiver = newState.modalBottomSheetReceiver.copy(
+                        modalBottomSheetReceiver = modalBottomSheetReceiver
+                    )
+                )
+            }
+        }
+    }
+
 }

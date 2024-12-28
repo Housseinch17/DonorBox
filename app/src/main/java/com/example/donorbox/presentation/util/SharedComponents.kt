@@ -2,6 +2,9 @@
 
 package com.example.donorbox.presentation.util
 
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachEmail
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -407,5 +411,25 @@ fun DonorBoxImage(modifier: Modifier, imageUrl: String?) {
             contentScale = ContentScale.FillBounds,
             modifier = modifier
         )
+    }
+}
+
+
+@Composable
+fun CopyTextExample(text: String) {
+    val context = LocalContext.current
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+    IconButton(
+        modifier = Modifier,
+        onClick = {
+            val clip = android.content.ClipData.newPlainText("Copied Text", text)
+            clipboardManager.setPrimaryClip(clip)
+
+            // Optionally, show a toast as feedback
+            Toast.makeText(context, "Text copied", Toast.LENGTH_SHORT).show()
+        },
+    ) {
+        Icon(imageVector = Icons.Filled.ContentCopy, contentDescription = null)
     }
 }

@@ -16,6 +16,9 @@ import androidx.navigation.compose.navigation
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
+import com.example.donorbox.presentation.util.callPhoneDirectly
+import com.example.donorbox.presentation.util.openApp
+import com.example.donorbox.presentation.util.openGoogleMap
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.donorBoxGraph(
@@ -26,6 +29,7 @@ fun NavGraphBuilder.donorBoxGraph(
     ) {
         composable<NavigationScreens.HomePage> {
             val context = LocalContext.current
+
             Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val parentBackStackEntry: NavBackStackEntry =
                 navHostController.getBackStackEntry(NavigationScreens.DonorBox)
@@ -41,10 +45,28 @@ fun NavGraphBuilder.donorBoxGraph(
 
             HomePage(
                 modifier = Modifier.fillMaxSize(),
-                response = uiState.receiversResponse
-            ) {
-                Log.d("MyTag", "$it")
-            }
+                response = uiState.receiversResponse,
+                onReceiverClick = {
+                    homeViewModel.updateModalBottomSheetReceiver(it)
+                    homeViewModel.showBottomSheetReceiver()
+                },
+                modalBottomSheetReceiver = uiState.modalBottomSheetReceiver,
+                hideBottomSheetReceiver = homeViewModel::hideBottomSheetReceiver,
+                onCall = { phoneNumber->
+                    context.callPhoneDirectly(phoneNumber){
+                        Toast.makeText(context,"Permission not granted!", Toast.LENGTH_LONG).show()
+                    }
+                },
+                onOpenApp = {
+                    context.openApp(packageName = "com.tedmob.omt")
+                },
+                onOpenWhishApp = {
+                    context.openApp(packageName = "money.whish.android")
+                },
+                onOpenGoogleMap = { latitude, longitude->
+                    context.openGoogleMap(latitude, longitude)
+                }
+            )
         }
     }
 }
