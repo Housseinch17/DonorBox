@@ -18,12 +18,15 @@
     <string name="empty_email_password">Email and Password can\'t be empty</string>
     <string name="account_created">Account is created</string>
     <string name="loading">Loading</string>
-    <string name="are_you..._reset">Are you sure that you want to reset your password?</string>
-    <string name="are_you..._signOut">Are you sure that you want to SignOut from this account?</string>
     <string name="reset_password_email">Enter your email</string>
     <style name="name">Name</style>
     <style name="address">Address</style>
     <style name="omt">Omt</style>
     <style name="whish">Whish</style>
     <style name="bank_iban">Bank iban</style>
+    <string name="your_password_must_be_at_least">Your password must be at least </string>
+    <string name="characters">Characters</string>
+    <string name="are_you..._reset">Are you sure that you want to reset your password?</string>
+    <string name="are_you..._signOut">Are you sure that you want to SignOut from this account?</string>
+
 </resources>

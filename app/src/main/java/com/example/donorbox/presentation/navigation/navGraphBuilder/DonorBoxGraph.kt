@@ -15,18 +15,29 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.data.model.MyDonations
+import com.example.donorbox.presentation.AuthenticationViewModel
+import com.example.donorbox.presentation.ResetPage
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
+import com.example.donorbox.presentation.screens.settings.SettingsPage
+import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.donorBoxGraph(
     navHostController: NavHostController,
+    authenticationViewModel: AuthenticationViewModel,
+    username: String,
+    resetShowDialog: Boolean,
+    resetIsLoading: Boolean,
+    signOutShowDialog: Boolean,
+    signOutIsLoading: Boolean
 ) {
     navigation<NavigationScreens.DonorBox>(
         startDestination = NavigationScreens.HomePage
@@ -104,8 +115,63 @@ fun NavGraphBuilder.donorBoxGraph(
 
         }
         composable<NavigationScreens.SettingsPage> {
+            Log.d("BackStack","${navHostController.currentBackStackEntry}")
+            val context = LocalContext.current
+            val settingsViewModel = koinViewModel<SettingsViewModel>()
+            val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
 
+            LaunchedEffect(settingsViewModel.emitValue) {
+                settingsViewModel.emitValue.collectLatest { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            }
+
+            SettingsPage(
+                modifier = Modifier.fillMaxSize(),
+                newPasswordValue = settingsUiState.newPasswordValue,
+                confirmPasswordValue = settingsUiState.confirmNewPasswordValue,
+                newPasswordValueChange = { newPassword ->
+                    settingsViewModel.newPasswordValueChange(newPassword)
+                },
+                confirmPasswordValueChange = { confirmPassword ->
+                    settingsViewModel.confirmNewPasswordValueChange(confirmPassword)
+                },
+                imageVector = settingsViewModel.getIconVisibility(
+                    settingsUiState.showPassword
+                ),
+                confirmImageVector = settingsViewModel.getIconVisibility(settingsUiState.confirmShowPassword),
+                onIconClick = settingsViewModel::setShowPassword,
+                confirmOnIconClick = settingsViewModel::setConfirmShowPassword,
+                showPassword = settingsUiState.showPassword,
+                confirmShowPassword = settingsUiState.confirmShowPassword,
+                showText = settingsUiState.showText,
+                confirmShowText = settingsUiState.confirmShowText,
+                onPasswordChange = { newPassword, confirmPassword ->
+                    settingsViewModel.changePassword(
+                        email = username,
+                        newPassword = newPassword,
+                        confirmNewPassword = confirmPassword
+                    )
+                },
+                resetShowDialog = resetShowDialog,
+                resetPassword = {
+                    Log.d("MyTag", "hey")
+                    authenticationViewModel.resetPassword(
+                        email = "",
+                        resetPage = ResetPage.SettingsPage
+                    )
+                },
+                resetDismiss = authenticationViewModel::resetResetHideDialog,
+                resetIsLoading = resetIsLoading,
+                onResetPassword = authenticationViewModel::resetResetShowDialog,
+                onSignOut = authenticationViewModel::resetShowDialog,
+                signOutShowDialog = signOutShowDialog,
+                signOutConfirm = authenticationViewModel::signOut,
+                signOutDismiss = authenticationViewModel::resetHideDialog,
+                signOutIsLoading = signOutIsLoading,
+            )
         }
+
         composable<NavigationScreens.ProfilePage> {
 
         }

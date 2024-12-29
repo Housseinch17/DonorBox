@@ -5,6 +5,7 @@ import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.main.MainViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
+import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -56,5 +57,11 @@ object ViewModelModule {
                 getAllDonationsUseCase = get()
             )
         }
+        viewModel {
+            SettingsViewModel(
+                changePasswordUseCase = get()
+            )
+        }
+
     }
 }

@@ -72,7 +72,13 @@ fun Navigation(
         )
 
         donorBoxGraph(
-            navHostController = navHostController
+            navHostController = navHostController,
+            authenticationViewModel = authenticationViewModel,
+            username = currentUsername ?: "",
+            resetShowDialog = authenticationUiState.resetShowDialog,
+            resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
+            signOutShowDialog = authenticationUiState.signOutShowDialog,
+            signOutIsLoading = authenticationUiState.signOut == SignOutResponse.IsLoading,
         )
     }
 }

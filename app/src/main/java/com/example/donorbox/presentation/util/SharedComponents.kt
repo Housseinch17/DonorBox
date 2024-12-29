@@ -414,6 +414,65 @@ fun DonorBoxImage(modifier: Modifier, imageUrl: String?) {
     }
 }
 
+@Composable
+fun SettingsShowDialog(
+    modifier: Modifier,
+    showDialog: Boolean,
+    title: String,
+    isProgressBar: Boolean,
+    description: @Composable () -> Unit,
+    confirmText: String,
+    confirmButton: () -> Unit,
+    onDismissButton: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(25.dp))
+                .border(1.dp,Color.Blue, RoundedCornerShape(25.dp))
+                .background(Color.White),
+            onDismissRequest = {},
+            confirmButton = {
+                Button(
+                    onClick = confirmButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrightBlue
+                    )
+                ) {
+                    Text(
+                        text = confirmText, color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                Button(
+                    enabled = !isProgressBar,
+                    onClick = onDismissButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrightBlue
+                    )
+                ) {
+                    Text(
+                        stringResource(R.string.dismiss),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+
+            title = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge.copy(color = Orange)
+                )
+            },
+            text = {
+                description()
+            })
+    }
+}
 
 @Composable
 fun CopyTextExample(text: String) {
