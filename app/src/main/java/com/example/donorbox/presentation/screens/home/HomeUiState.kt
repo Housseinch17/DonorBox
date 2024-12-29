@@ -12,7 +12,8 @@ data class HomeUiState(
     val modalBottomSheetReceiver: ModalBottomSheetReceiver = ModalBottomSheetReceiver(),
     val dialogVisibility: Boolean = false,
     val moneyToDonate: String = "",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showText: Boolean = false
 )
 
 @Immutable

@@ -8,6 +8,7 @@ import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -70,11 +71,26 @@ class HomeViewModel(
         }
     }
 
-    suspend fun saveDonations(donations: MyDonations) {
+    suspend fun saveDonations(moneyToDonate: String,donations: MyDonations) {
+        _uiState.update { newState->
+            newState.copy(showText = false)
+        }
         try {
-            saveDonationsUseCase.saveDonations(donations)
-            emitFlow("You're donations are succeed!")
+            if(moneyToDonate.isEmpty()){
+                _uiState.update { newState->
+                    newState.copy(showText = true)
+                }
+            }else {
+                _uiState.update { newState->
+                    newState.copy(showText = false)
+                }
+                saveDonationsUseCase.saveDonations(donations)
+                delay(2000)
+                emitFlow("You're donations are succeed!")
+                hideDialog()
+            }
         } catch (e: Exception) {
+            delay(2000)
             emitFlow(e.message.toString())
         }
 

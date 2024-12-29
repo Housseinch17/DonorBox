@@ -65,6 +65,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
+import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.util.CopyTextExample
 import com.example.donorbox.presentation.util.DonorBoxImage
@@ -86,7 +87,8 @@ fun HomePage(
     hideDialog: () -> Unit,
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean,
+    showText: Boolean
 ) {
     Box(
         modifier = modifier
@@ -128,7 +130,8 @@ fun HomePage(
                     hideDialog = hideDialog,
                     moneyToDonate = moneyToDonate,
                     onMoneyUpdate = onMoneyUpdate,
-                    isLoading = isLoading
+                    isLoading = isLoading,
+                    showText = showText
                 )
             }
         }
@@ -200,7 +203,8 @@ fun HomeSuccess(
     hideDialog: () -> Unit,
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
-    isLoading: Boolean
+    isLoading: Boolean,
+    showText: Boolean
 ) {
     Box(
         modifier = Modifier.background(Color.Transparent)
@@ -211,7 +215,8 @@ fun HomeSuccess(
             onDismissButton = hideDialog,
             moneyToDonate = moneyToDonate,
             onMoneyUpdate = onMoneyUpdate,
-            isLoading = isLoading
+            isLoading = isLoading,
+            showText = showText
         )
 
         Column(
@@ -588,6 +593,7 @@ fun ShowDialog(
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
     isLoading: Boolean,
+    showText: Boolean,
 ) {
     if (showDialog) {
         AlertDialog(
@@ -645,20 +651,35 @@ fun ShowDialog(
                         )
                     }
                 } else {
-                    TextField(
-                        modifier = Modifier
-                            .padding(top = 10.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.5.dp)),
-                        value = moneyToDonate,
-                        onValueChange = {
-                            onMoneyUpdate(it)
-                        },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = {
-                            Text("Enter the amount")
+                    Column {
+                        TextField(
+                            modifier = Modifier
+                                .padding(top = 10.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.5.dp)),
+                            value = moneyToDonate,
+                            onValueChange = {
+                                onMoneyUpdate(it)
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            label = {
+                                Text("Enter the amount")
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        if (showText) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.amount_empty),
+                                style = BodyTypography.copy(
+                                    color = Color.Red, fontSize = 12.sp,
+                                    fontWeight = FontWeight.Light
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
-                    )
+                    }
                 }
             })
     }

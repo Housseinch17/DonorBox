@@ -27,7 +27,6 @@ import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -89,15 +88,13 @@ fun NavGraphBuilder.donorBoxGraph(
                 sendMoney = {
                     homeViewModel.updateLoader(true)
                     scope.launch {
-                        homeViewModel.saveDonations(
+                        homeViewModel.saveDonations(moneyToDonate = it,
                             donations = MyDonations(
                                 myDonations = "Donated $it$  to: ${uiState.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
                             )
                         )
-                        delay(2000)
                         homeViewModel.updateLoader(false)
                         homeViewModel.updateMoneyToDonate("")
-                        homeViewModel.hideDialog()
                     }
                 },
                 showDialog = uiState.dialogVisibility,
@@ -106,7 +103,8 @@ fun NavGraphBuilder.donorBoxGraph(
                 onMoneyUpdate = {
                     homeViewModel.updateMoneyToDonate(it)
                 },
-                isLoading = uiState.isLoading
+                isLoading = uiState.isLoading,
+                showText =  uiState.showText
             )
         }
 

@@ -29,5 +29,6 @@
     <string name="are_you..._reset">Are you sure that you want to reset your password?</string>
     <string name="are_you..._signOut">Are you sure that you want to SignOut from this account?</string>
     <string name="no_donations_yet">No donations yet!</string>
+    <string name="amount_empty">Amount is empty</string>
 
 </resources>
