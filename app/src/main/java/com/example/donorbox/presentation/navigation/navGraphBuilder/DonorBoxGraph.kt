@@ -20,6 +20,8 @@ import com.example.donorbox.presentation.ResetPage
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
+import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
+import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.util.callPhoneDirectly
@@ -109,11 +111,20 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.MyDonationsPage> {
+            val myDonationsViewModel = koinViewModel<MyDonationsViewModel>()
+            val myDonationsUiState by myDonationsViewModel.myDonationsUiState.collectAsStateWithLifecycle()
 
+            MyDonationPage(
+                isLoading = myDonationsUiState.isLoading,
+                list = myDonationsUiState.list,
+                isRefreshing = myDonationsUiState.isRefreshing,
+                onRefresh = myDonationsViewModel::loadNewOrders
+            )
         }
         composable<NavigationScreens.ReceivedDonationsPage> {
 
         }
+        
         composable<NavigationScreens.SettingsPage> {
             Log.d("BackStack","${navHostController.currentBackStackEntry}")
             val context = LocalContext.current
