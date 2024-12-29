@@ -24,11 +24,18 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.AlertDialog
+import androidx.compose.material3.TextField
+import androidx.compose.material3.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,9 +51,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -70,7 +79,14 @@ fun HomePage(
     onCall: (String) -> Unit,
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit
+    onOpenGoogleMap: (Double, Double) -> Unit,
+    onSendButton: () -> Unit,
+    sendMoney: (String) -> Unit,
+    showDialog: Boolean,
+    hideDialog: () -> Unit,
+    moneyToDonate: String,
+    onMoneyUpdate: (String) -> Unit,
+    isLoading: Boolean
 ) {
     Box(
         modifier = modifier
@@ -105,7 +121,14 @@ fun HomePage(
                     onCall = onCall,
                     onOpenApp = onOpenApp,
                     onOpenWhishApp = onOpenWhishApp,
-                    onOpenGoogleMap = onOpenGoogleMap
+                    onOpenGoogleMap = onOpenGoogleMap,
+                    onSendButton = onSendButton,
+                    sendMoney = sendMoney,
+                    showDialog = showDialog,
+                    hideDialog = hideDialog,
+                    moneyToDonate = moneyToDonate,
+                    onMoneyUpdate = onMoneyUpdate,
+                    isLoading = isLoading
                 )
             }
         }
@@ -170,19 +193,234 @@ fun HomeSuccess(
     onCall: (String) -> Unit,
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit
+    onOpenGoogleMap: (Double, Double) -> Unit,
+    onSendButton: () -> Unit,
+    sendMoney: (String) -> Unit,
+    showDialog: Boolean,
+    hideDialog: () -> Unit,
+    moneyToDonate: String,
+    onMoneyUpdate: (String) -> Unit,
+    isLoading: Boolean
 ) {
-    Column(
-        verticalArrangement = Arrangement.SpaceBetween
+    Box(
+        modifier = Modifier.background(Color.Transparent)
     ) {
-        ReceiverList(receiverList, onReceiverClick)
-        PartialBottomSheet(
-            modalBottomSheetReceiver, hideBottomSheetReceiver,
-            onCall = onCall,
-            onOpenApp = onOpenApp,
-            onOpenWhishApp = onOpenWhishApp,
-            onOpenGoogleMap = onOpenGoogleMap,
+        ShowDialog(
+            showDialog = showDialog,
+            confirmButton = { sendMoney(moneyToDonate) },
+            onDismissButton = hideDialog,
+            moneyToDonate = moneyToDonate,
+            onMoneyUpdate = onMoneyUpdate,
+            isLoading = isLoading
         )
+
+        Column(
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            ReceiverList(receiverList, onReceiverClick)
+            PartialBottomSheet(
+                modalBottomSheetReceiver, hideBottomSheetReceiver,
+                onCall = onCall,
+                onOpenApp = onOpenApp,
+                onOpenWhishApp = onOpenWhishApp,
+                onOpenGoogleMap = onOpenGoogleMap,
+                onSendButton = onSendButton
+            )
+        }
+    }
+}
+
+
+//Using ModalBottomSheet is simpler sometimes
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PartialBottomSheet(
+    modalBottomSheetReceiver: ModalBottomSheetReceiver, hideBottomSheetReceiver: () -> Unit,
+    onCall: (String) -> Unit,
+    onOpenApp: () -> Unit,
+    onOpenWhishApp: () -> Unit,
+    onOpenGoogleMap: (Double, Double) -> Unit,
+    onSendButton: () -> Unit,
+) {
+    //skipPartiallyExpanded here it means to expand alone or when i drag it up
+    //its like not fill max height just take the height im giving to screen
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false,
+    )
+
+    val verticalScroll = rememberScrollState()
+
+    val receiver by derivedStateOf {
+        modalBottomSheetReceiver.modalBottomSheetReceiver
+    }
+
+    if (modalBottomSheetReceiver.showBottomSheet) {
+        ModalBottomSheet(
+            modifier = Modifier,
+            sheetState = sheetState,
+            onDismissRequest = { hideBottomSheetReceiver() },
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 20.dp, end = 20.dp,
+                        bottom = 20.dp
+                    )
+                    .verticalScroll(verticalScroll),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                DonorBoxImage(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    imageUrl = modalBottomSheetReceiver.modalBottomSheetReceiver.picUrl
+                )
+                ModalBottomSheetItem(prefixText = "Name: ", text = receiver.name, copyText = false)
+                ModalBottomSheetItem(prefixText = "Bank Iban: ", text = receiver.bank)
+                ModalBottomSheetIntent(
+                    prefixText = "Phone number: ",
+                    text = receiver.phoneNumber
+                ) {
+                    ModalBottomSheetIconButton(
+                        imageVector = Icons.Filled.Call,
+                        color = Color.Blue
+                    ) {
+                        onCall(receiver.phoneNumber)
+                    }
+                }
+                ModalBottomSheetIntent(prefixText = "Omt Account: ", text = receiver.omt) {
+                    ModalBottomSheetIconButton(
+                        imageVector = ImageVector.vectorResource(R.drawable.omt),
+                        color = Color.Blue, onClick = onOpenApp
+                    )
+                }
+                ModalBottomSheetIntent(prefixText = "Whish Account: ", text = receiver.whish) {
+                    ModalBottomSheetIconButton(
+                        imageVector = ImageVector.vectorResource(R.drawable.whish),
+                        color = Color.Blue, onClick = onOpenWhishApp
+                    )
+                }
+                ModalBottomSheetIntent(
+                    prefixText = "Address: ",
+                    text = receiver.address.location
+                ) {
+                    ModalBottomSheetIconButton(
+                        imageVector = ImageVector.vectorResource(R.drawable.googlemap),
+                        color = Color.Blue,
+                        onClick = {
+                            onOpenGoogleMap(
+                                receiver.address.latitude,
+                                receiver.address.longitude
+                            )
+                        }
+                    )
+                }
+                Button(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(25.dp))
+                        .align(Alignment.CenterHorizontally),
+                    onClick = onSendButton,
+                    colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)
+                ) {
+                    Text(
+                        text = "Send Money",
+                        style = MaterialTheme.typography.titleMedium.copy(color = Color.White)
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ModalBottomSheetIconButton(
+    imageVector: ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = {
+            onClick()
+        },
+        modifier = Modifier
+            .clip(CircleShape)
+            .border(
+                color = color,
+                width = 1.dp,
+                shape = CircleShape
+            ),
+    ) {
+        Image(
+            modifier = Modifier.size(32.dp),
+            imageVector = imageVector, contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+@Composable
+fun ModalBottomSheetIntent(
+    prefixText: String,
+    text: String,
+    content: @Composable (() -> Unit)? = null
+) {
+    val horizontalScrollState = rememberScrollState()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(horizontalScrollState),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ModalBottomSheetItem(prefixText, text)
+        //if content not null display it
+        content?.let {
+            it()
+        }
+    }
+}
+
+@Composable
+fun ModalBottomSheetItem(
+    prefixText: String,
+    text: String,
+    copyText: Boolean = true
+) {
+    Row(
+        modifier = Modifier,
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            modifier = Modifier,
+            text = prefixText,
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = Color.Black, fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            ),
+        )
+        Text(
+            modifier = Modifier
+                .widthIn(max = 140.dp)
+                .padding(end = 2.dp)
+                .horizontalScroll(rememberScrollState()),
+            text = text,
+            style = MaterialTheme.typography.titleMedium.copy(
+                color = BrightBlue, fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (copyText) {
+            CopyTextExample(text)
+        }
     }
 }
 
@@ -342,182 +580,86 @@ fun ReceiverText(
 
 }
 
-//Using ModalBottomSheet is simpler sometimes
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PartialBottomSheet(
-    modalBottomSheetReceiver: ModalBottomSheetReceiver, hideBottomSheetReceiver: () -> Unit,
-    onCall: (String) -> Unit,
-    onOpenApp: () -> Unit,
-    onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit,
-
-    ) {
-    //skipPartiallyExpanded here it means to expand alone or when i drag it up
-    //its like not fill max height just take the height im giving to screen
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
-    )
-
-    val verticalScroll = rememberScrollState()
-
-    val receiver by derivedStateOf {
-        modalBottomSheetReceiver.modalBottomSheetReceiver
-    }
-
-    if (modalBottomSheetReceiver.showBottomSheet) {
-        ModalBottomSheet(
-            modifier = Modifier,
-            sheetState = sheetState,
-            onDismissRequest = { hideBottomSheetReceiver() },
-            containerColor = Color.White
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 20.dp, end = 20.dp,
-                        bottom = 20.dp
+fun ShowDialog(
+    showDialog: Boolean,
+    confirmButton: () -> Unit,
+    onDismissButton: () -> Unit,
+    moneyToDonate: String,
+    onMoneyUpdate: (String) -> Unit,
+    isLoading: Boolean,
+) {
+    if (showDialog) {
+        AlertDialog(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(25.dp))
+                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
+                .background(Color.White),
+            onDismissRequest = {},
+            confirmButton = {
+                Button(
+                    onClick = confirmButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrightBlue
                     )
-                    .verticalScroll(verticalScroll),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                DonorBoxImage(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .align(Alignment.CenterHorizontally),
-                    imageUrl = modalBottomSheetReceiver.modalBottomSheetReceiver.picUrl
+                ) {
+                    Text(
+                        text = "Send Money", color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = onDismissButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrightBlue
+                    )
+                ) {
+                    Text(
+                        stringResource(R.string.dismiss),
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            title = {
+                Text(
+                    modifier = Modifier.padding(bottom = 10.dp),
+                    text = "Donate money",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        color = BrightBlue,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 16.sp
+                    )
                 )
-                ModalBottomSheetItem(prefixText = "Name: ", text = receiver.name, copyText = false)
-                ModalBottomSheetItem(prefixText = "Bank Iban: ", text = receiver.bank)
-                ModalBottomSheetIntent(
-                    prefixText = "Phone number: ",
-                    text = receiver.phoneNumber
-                ) {
-                    ModalBottomSheetIconButton(
-                        imageVector = Icons.Filled.Call,
-                        color = Color.Blue
-                    ) {
-                        onCall(receiver.phoneNumber)
-                    }
-                }
-                ModalBottomSheetIntent(prefixText = "Omt Account: ", text = receiver.omt) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.omt),
-                        color = Color.Blue, onClick = onOpenApp
-                    )
-                }
-                ModalBottomSheetIntent(prefixText = "Whish Account: ", text = receiver.whish) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.whish),
-                        color = Color.Blue, onClick = onOpenWhishApp
-                    )
-                }
-                ModalBottomSheetIntent(
-                    prefixText = "Address: ",
-                    text = receiver.address.location
-                ) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.googlemap),
-                        color = Color.Blue,
-                        onClick = {onOpenGoogleMap(
-                            receiver.address.latitude,
-                            receiver.address.longitude
+            },
+            text = {
+                if (isLoading) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .align(Alignment.Center)
                         )
+                    }
+                } else {
+                    TextField(
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.5.dp)),
+                        value = moneyToDonate,
+                        onValueChange = {
+                            onMoneyUpdate(it)
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        label = {
+                            Text("Enter the amount")
                         }
                     )
                 }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun ModalBottomSheetIconButton(
-    imageVector: ImageVector,
-    color: Color,
-    onClick: () -> Unit
-) {
-    IconButton(
-        onClick = {
-            onClick()
-        },
-        modifier = Modifier
-            .clip(CircleShape)
-            .border(
-                color = color,
-                width = 1.dp,
-                shape = CircleShape
-            ),
-    ) {
-        Image(
-            modifier = Modifier.size(32.dp),
-            imageVector = imageVector, contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-@Composable
-fun ModalBottomSheetIntent(
-    prefixText: String,
-    text: String,
-    content: @Composable (() -> Unit)? = null
-) {
-    val horizontalScrollState = rememberScrollState()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(horizontalScrollState),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ModalBottomSheetItem(prefixText, text)
-        //if content not null display it
-        content?.let {
-            it()
-        }
-    }
-}
-
-@Composable
-fun ModalBottomSheetItem(
-    prefixText: String,
-    text: String,
-    copyText: Boolean = true
-) {
-    Row(
-        modifier = Modifier,
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            modifier = Modifier,
-            text = prefixText,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = Color.Black, fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            ),
-        )
-        Text(
-            modifier = Modifier
-                .widthIn(max = 140.dp)
-                .padding(end = 2.dp)
-                .horizontalScroll(rememberScrollState()),
-            text = text,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = BrightBlue, fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            ),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (copyText) {
-            CopyTextExample(text)
-        }
+            })
     }
 }

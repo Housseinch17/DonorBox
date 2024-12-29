@@ -6,9 +6,9 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
-import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.ResetPasswordUseCase
-import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.SignOutUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ResetPasswordUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignOutUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement

@@ -1,4 +1,4 @@
-package com.example.donorbox.domain.useCase.firebaseWriteDataUseCase
+package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase
 
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataDataSourceImpl
 

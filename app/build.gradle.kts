@@ -5,6 +5,7 @@ plugins {
     // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("kotlin-kapt")
 }
 
 android {
@@ -99,4 +100,14 @@ dependencies {
     implementation(libs.firebase.auth)
     //read data from Firebase
     implementation (libs.firebase.database.ktx)
+
+    //Room database
+    implementation (libs.androidx.room.runtime)
+    //noinspection KaptUsageInsteadOfKsp
+    kapt (libs.androidx.room.compiler)
+    implementation (libs.androidx.room.ktx)
+}
+// Allow references to generated code
+kapt {
+    correctErrorTypes =  true
 }

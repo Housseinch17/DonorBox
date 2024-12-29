@@ -1,4 +1,4 @@
-package com.example.donorbox.domain.useCase.firebaseReadDataUseCase
+package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase
 
 import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse

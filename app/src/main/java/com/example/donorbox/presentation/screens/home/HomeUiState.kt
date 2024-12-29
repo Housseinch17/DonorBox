@@ -9,7 +9,10 @@ import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 @Stable
 data class HomeUiState(
     val receiversResponse: ReceiversResponse = ReceiversResponse.IsLoading,
-    val modalBottomSheetReceiver: ModalBottomSheetReceiver = ModalBottomSheetReceiver()
+    val modalBottomSheetReceiver: ModalBottomSheetReceiver = ModalBottomSheetReceiver(),
+    val dialogVisibility: Boolean = false,
+    val moneyToDonate: String = "",
+    val isLoading: Boolean = false
 )
 
 @Immutable

@@ -13,13 +13,27 @@ sealed interface NavigationScreens {
     data object Register: NavigationScreens
 
     //Register screens
+    @Serializable
+    data object LogInPage: NavigationScreens{
+        const val ROUTE = "LogInPage"
+    }
 
     @Serializable
-    data object LogInPage: NavigationScreens
+    data object SignUpPage: NavigationScreens{
+        const val ROUTE = "SignUpPage"
+    }
 
     @Serializable
-    data object SignUpPage: NavigationScreens
+    data object MyDonationsPage: NavigationScreens
 
+    @Serializable
+    data object ReceivedDonationsPage: NavigationScreens
+
+    @Serializable
+    data object ProfilePage: NavigationScreens
+
+    @Serializable
+    data object SettingsPage: NavigationScreens
 
     //DonorBox graph
     @Serializable

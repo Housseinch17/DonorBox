@@ -7,8 +7,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
-import com.example.donorbox.domain.useCase.firebaseAuthenticationUseCase.LogInUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.LogInUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import kotlinx.coroutines.delay

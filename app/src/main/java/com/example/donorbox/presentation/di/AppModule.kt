@@ -21,7 +21,10 @@ object AppModule {
             androidContextModule,
             FirebaseModule.firebaseModule,
             SharedPreferenceModule.sharedPreferenceModule,
+            DataBaseModule.databaseModule,
+            LocalDataBaseModule.localDataBaseModule,
             UseCaseModule.useCaseModule,
             ViewModelModule.viewModelModule,
+
         )
 }
