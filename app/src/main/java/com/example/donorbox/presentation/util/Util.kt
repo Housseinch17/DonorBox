@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -50,13 +51,30 @@ fun Context.callPhoneDirectly(
     }
 }
 
-fun Context.openApp(packageName: String){
-    val intent = this.packageManager.getLaunchIntentForPackage(packageName)
-    if (intent != null) {
-        // App is installed, launch it
-        this.startActivity(intent)
+fun Context.isAppInstalled(packageName: String): Boolean {
+    return try {
+        packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+        true  // App is installed
+    } catch (e: PackageManager.NameNotFoundException) {
+        false  // App is not installed
+    }
+}
+
+fun Context.openApp(packageName: String) {
+    if (isAppInstalled(packageName)) {
+        Log.d("MyTag","Entered if")
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        if (intent != null) {
+            this.startActivity(intent)
+        } else {
+            val playStoreIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+            this.startActivity(playStoreIntent)
+        }
     } else {
-        // App is not installed, show a message or redirect to Play Store
+        Log.d("MyTag","Entered else")
         val playStoreIntent = Intent(
             Intent.ACTION_VIEW,
             Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
