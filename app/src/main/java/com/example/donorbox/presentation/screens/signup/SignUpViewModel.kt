@@ -83,6 +83,7 @@ class SignUpViewModel (
                         }
                     } else if (response is AccountStatus.IsCreated) {
                         _signupUiState.update { newState ->
+                            emitError(response.message)
                             newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
                         }
                     }

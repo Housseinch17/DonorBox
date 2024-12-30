@@ -4,4 +4,5 @@ import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 interface FirebaseReadDataDataSource{
     suspend fun readReceivers(): ReceiversResponse
+    suspend fun getAllReceivers(): List<String>
 }

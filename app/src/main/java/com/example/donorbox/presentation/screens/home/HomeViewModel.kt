@@ -1,11 +1,18 @@
 package com.example.donorbox.presentation.screens.home
 
 import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.data.model.Receiver
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import kotlinx.coroutines.delay
@@ -19,7 +26,9 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase,
-    private val saveDonationsUseCase: SaveDonationsUseCase
+    private val saveDonationsUseCase: SaveDonationsUseCase,
+    private val verifyPasswordUseCase: VerifyPasswordUseCase,
+
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
@@ -39,6 +48,37 @@ class HomeViewModel(
         }
     }
 
+    suspend fun verifyPassword(
+        password: String,
+        onVerified: () -> Unit,
+        setError: (String) -> Unit,
+    ) {
+        if(password.isEmpty()){
+            updateLoader(false)
+            emitFlow("Password is Empty")
+        }else{
+            verifyPasswordUseCase.verifyPassword(password,onVerified,setError)
+        }
+    }
+
+    fun newPasswordValueChange(newPassword: String) {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(newPasswordValue = newPassword)
+            }
+        }
+    }
+
+    fun setShowPassword() {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(
+                    showPassword = !newState.showPassword,
+                )
+            }
+        }
+    }
+
     fun showDialog() {
         viewModelScope.launch {
             _uiState.update { newState ->
@@ -47,9 +87,9 @@ class HomeViewModel(
         }
     }
 
-    fun updateLoader(loaderVisibility: Boolean){
+    private fun updateLoader(loaderVisibility: Boolean) {
         viewModelScope.launch {
-            _uiState.update { newState->
+            _uiState.update { newState ->
                 newState.copy(isLoading = loaderVisibility)
             }
         }
@@ -71,28 +111,32 @@ class HomeViewModel(
         }
     }
 
-    suspend fun saveDonations(moneyToDonate: String,donations: MyDonations) {
-        _uiState.update { newState->
+    suspend fun saveDonations(moneyToDonate: String, donations: MyDonations) {
+        _uiState.update { newState ->
             newState.copy(showText = false)
         }
         try {
-            if(moneyToDonate.isEmpty()){
-                _uiState.update { newState->
+            if (moneyToDonate.isEmpty()) {
+                _uiState.update { newState ->
                     newState.copy(showText = true)
                 }
-            }else {
-                _uiState.update { newState->
+            } else {
+                updateLoader(true)
+                delay(1000)
+                _uiState.update { newState ->
                     newState.copy(showText = false)
                 }
                 saveDonationsUseCase.saveDonations(donations)
-                delay(2000)
+                updateMoneyToDonate("")
+                newPasswordValueChange("")
+                updateLoader(false)
                 emitFlow("You're donations are succeed!")
                 hideDialog()
             }
         } catch (e: Exception) {
-            delay(2000)
             emitFlow(e.message.toString())
         }
+        updateLoader(false)
 
     }
 
@@ -153,6 +197,14 @@ class HomeViewModel(
                     )
                 )
             }
+        }
+    }
+
+    fun getIconVisibility(showPassword: Boolean): ImageVector {
+        return if (showPassword) {
+            Icons.Filled.Visibility
+        } else {
+            Icons.Filled.VisibilityOff
         }
     }
 

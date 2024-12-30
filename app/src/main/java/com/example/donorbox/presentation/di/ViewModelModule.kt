@@ -22,7 +22,9 @@ object ViewModelModule {
                 saveSharedPrefUsernameUseCase = get(),
                 getSharedPrefUsernameUseCase = get(),
                 resetPasswordUseCase = get(),
-                getCurrentUserUseCase = get()
+                getCurrentUserUseCase = get(),
+                writeTokenUseCase = get(),
+                getAllReceiversUseCase = get()
             )
         }
 
@@ -49,7 +51,8 @@ object ViewModelModule {
         viewModel {
             HomeViewModel(
                 firebaseReadReceiversUseCase = get(),
-                saveDonationsUseCase = get()
+                saveDonationsUseCase = get(),
+                verifyPasswordUseCase = get()
             )
         }
         viewModel {

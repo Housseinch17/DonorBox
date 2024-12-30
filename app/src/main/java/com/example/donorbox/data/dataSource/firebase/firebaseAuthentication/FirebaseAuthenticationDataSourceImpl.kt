@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -59,6 +60,30 @@ class FirebaseAuthenticationDataSourceImpl (
                 )
             }
         }
+    }
+
+    override suspend fun verifyPassword(
+        password: String,
+        onVerified: () -> Unit,
+        setError: (String) -> Unit
+    ) {
+        val email = auth.currentUser?.email ?: return setError("User not logged in")
+
+        val credential = EmailAuthProvider.getCredential(email, password)
+
+        auth.currentUser!!.reauthenticate(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Password is correct
+                    onVerified()
+                } else {
+                    // Password is incorrect
+                    setError("Incorrect password")
+                }
+            }
+            .addOnFailureListener { exception ->
+                setError("Failed to authenticate: ${exception.message}")
+            }
     }
 
     //firebase apis are callback apis so we have to use suspendCoroutine or suspendCancellableCoroutine

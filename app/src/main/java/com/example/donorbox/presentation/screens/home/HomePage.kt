@@ -69,7 +69,10 @@ import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.util.CopyTextExample
 import com.example.donorbox.presentation.util.DonorBoxImage
+import com.example.donorbox.presentation.util.PasswordTextField
 import com.example.donorbox.presentation.util.ShimmerEffect
+import com.example.donorbox.presentation.util.TrailingIcon
+import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 
 @Composable
 fun HomePage(
@@ -82,13 +85,18 @@ fun HomePage(
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
     onSendButton: () -> Unit,
-    sendMoney: (String) -> Unit,
+    sendMoney: (moneyToDonate: String,password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
     isLoading: Boolean,
-    showText: Boolean
+    showText: Boolean,
+    newPasswordValue: String,
+    showPassword: Boolean,
+    newPasswordValueChange: (String) -> Unit,
+    imageVector: ImageVector,
+    onIconClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -131,7 +139,12 @@ fun HomePage(
                     moneyToDonate = moneyToDonate,
                     onMoneyUpdate = onMoneyUpdate,
                     isLoading = isLoading,
-                    showText = showText
+                    showText = showText,
+                    newPasswordValue = newPasswordValue,
+                    showPassword = showPassword,
+                    newPasswordValueChange = newPasswordValueChange,
+                    imageVector = imageVector,
+                    onIconClick = onIconClick,
                 )
             }
         }
@@ -198,25 +211,34 @@ fun HomeSuccess(
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
     onSendButton: () -> Unit,
-    sendMoney: (String) -> Unit,
+    sendMoney: (moneyToDonate: String,password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
     isLoading: Boolean,
-    showText: Boolean
+    showText: Boolean,    newPasswordValue: String,
+    showPassword: Boolean,
+    newPasswordValueChange: (String) -> Unit,
+    imageVector: ImageVector,
+    onIconClick: () -> Unit
 ) {
     Box(
         modifier = Modifier.background(Color.Transparent)
     ) {
         ShowDialog(
             showDialog = showDialog,
-            confirmButton = { sendMoney(moneyToDonate) },
+            confirmButton = { sendMoney(moneyToDonate,newPasswordValue) },
             onDismissButton = hideDialog,
             moneyToDonate = moneyToDonate,
             onMoneyUpdate = onMoneyUpdate,
             isLoading = isLoading,
-            showText = showText
+            showText = showText,
+            newPasswordValue = newPasswordValue,
+            showPassword = showPassword,
+            newPasswordValueChange = newPasswordValueChange,
+            imageVector = imageVector,
+            onIconClick = onIconClick,
         )
 
         Column(
@@ -594,6 +616,11 @@ fun ShowDialog(
     onMoneyUpdate: (String) -> Unit,
     isLoading: Boolean,
     showText: Boolean,
+    newPasswordValue: String,
+    showPassword: Boolean,
+    newPasswordValueChange: (String) -> Unit,
+    imageVector: ImageVector,
+    onIconClick: () -> Unit
 ) {
     if (showDialog) {
         AlertDialog(
@@ -601,7 +628,8 @@ fun ShowDialog(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(25.dp))
                 .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
-                .background(Color.White),
+                ,
+            backgroundColor = Color.Black,
             onDismissRequest = {},
             confirmButton = {
                 Button(
@@ -646,8 +674,10 @@ fun ShowDialog(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         CircularProgressIndicator(
                             modifier = Modifier
-                                .size(50.dp)
-                                .align(Alignment.Center)
+                                .size(100.dp)
+                                .align(Alignment.Center),
+                            color = Color.Red,
+                            strokeWidth = 1.dp
                         )
                     }
                 } else {
@@ -679,6 +709,17 @@ fun ShowDialog(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
+                        Spacer(modifier = Modifier.height(14.dp))
+                        PasswordTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            label = stringResource(R.string.password), value = newPasswordValue,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            visualTransformation = getPasswordVisualTransformation(showPassword),
+                            onValueChange = newPasswordValueChange,
+                            trailingIcon = {
+                                TrailingIcon(imageVector = imageVector, onIconClick = onIconClick)
+                            }
+                        )
                     }
                 }
             })

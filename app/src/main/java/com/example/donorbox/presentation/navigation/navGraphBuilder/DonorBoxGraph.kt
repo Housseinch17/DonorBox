@@ -85,16 +85,24 @@ fun NavGraphBuilder.donorBoxGraph(
                     context.openGoogleMap(latitude, longitude)
                 },
                 onSendButton = homeViewModel::showDialog,
-                sendMoney = {
-                    homeViewModel.updateLoader(true)
+                sendMoney = { moneyToDonate, password ->
                     scope.launch {
-                        homeViewModel.saveDonations(moneyToDonate = it,
-                            donations = MyDonations(
-                                myDonations = "Donated $it$  to: ${uiState.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
-                            )
-                        )
-                        homeViewModel.updateLoader(false)
-                        homeViewModel.updateMoneyToDonate("")
+                        homeViewModel.verifyPassword(password = password,
+                            onVerified = {
+                                Log.d("MyTag","verified")
+                                scope.launch {
+                                    homeViewModel.saveDonations(
+                                        moneyToDonate = moneyToDonate,
+                                        donations = MyDonations(
+                                            myDonations = "Donated $moneyToDonate$  to: ${uiState.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
+                                        )
+                                    )
+                                }
+                            },
+                            setError = {
+                                Log.d("MyTag","error")
+                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                            })
                     }
                 },
                 showDialog = uiState.dialogVisibility,
@@ -104,7 +112,14 @@ fun NavGraphBuilder.donorBoxGraph(
                     homeViewModel.updateMoneyToDonate(it)
                 },
                 isLoading = uiState.isLoading,
-                showText =  uiState.showText
+                showText = uiState.showText,
+                newPasswordValue = uiState.newPasswordValue,
+                showPassword = uiState.showPassword,
+                newPasswordValueChange = {
+                    homeViewModel.newPasswordValueChange(it)
+                },
+                imageVector = homeViewModel.getIconVisibility(uiState.showPassword),
+                onIconClick = homeViewModel::setShowPassword
             )
         }
 
@@ -122,9 +137,9 @@ fun NavGraphBuilder.donorBoxGraph(
         composable<NavigationScreens.ReceivedDonationsPage> {
 
         }
-        
+
         composable<NavigationScreens.SettingsPage> {
-            Log.d("BackStack","${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val context = LocalContext.current
             val settingsViewModel = koinViewModel<SettingsViewModel>()
             val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()

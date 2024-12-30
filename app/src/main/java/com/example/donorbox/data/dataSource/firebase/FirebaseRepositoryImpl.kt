@@ -46,4 +46,16 @@ class FirebaseRepositoryImpl(
         return firebaseWriteDataDataSourceImpl.writeToken(username,token)
     }
 
+    override suspend fun verifyPassword(
+        password: String,
+        onVerified: () -> Unit,
+        setError: (String) -> Unit
+    ) {
+        firebaseAuthenticationDataSourceImpl.verifyPassword(password,onVerified,setError)
+    }
+
+    override suspend fun getAllReceivers(): List<String> {
+        return firebaseReadDataDataSourceImpl.getAllReceivers()
+    }
+
 }

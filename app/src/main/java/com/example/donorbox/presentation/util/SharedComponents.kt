@@ -275,6 +275,7 @@ fun EmailAndPassword(
     }
 }
 
+
 @Composable
 fun PasswordTextField(
     modifier: Modifier, label: String,
@@ -282,6 +283,7 @@ fun PasswordTextField(
     keyboardOptions: KeyboardOptions,
     visualTransformation: VisualTransformation, onValueChange: (String) -> Unit,
     trailingIcon: @Composable () -> Unit,
+
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current

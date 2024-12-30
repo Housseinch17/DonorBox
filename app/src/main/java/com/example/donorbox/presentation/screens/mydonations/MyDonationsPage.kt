@@ -3,6 +3,7 @@ package com.example.donorbox.presentation.screens.mydonations
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.example.donorbox.R
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.theme.BrightBlue
+import com.example.donorbox.presentation.theme.MatteBlack
 import com.example.donorbox.presentation.theme.TitleTypography
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -44,6 +48,16 @@ fun MyDonationPage(
         refreshing = isRefreshing,
         onRefresh = onRefresh,
     )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ){
+        Image(
+            painter = painterResource(R.drawable.donate),
+            contentDescription = stringResource(R.string.background_image),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+
     if (list.isEmpty() && !isRefreshing) {
         Box(modifier = Modifier) {
             Text(
@@ -83,6 +97,7 @@ fun MyDonationPage(
         }
     }
 }
+}
 
 @Composable
 fun MyDonationList(list: List<MyDonations>) {
@@ -91,7 +106,8 @@ fun MyDonationList(list: List<MyDonations>) {
             .fillMaxWidth()
             .padding(20.dp),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Top,
+        contentPadding = PaddingValues(bottom = 20.dp)
     ) {
         items(list) { item ->
             MyDonationItem(item.myDonations)
@@ -105,7 +121,7 @@ fun MyDonationItem(donation: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.5.dp),
-        colors = CardDefaults.cardColors(containerColor = BrightBlue)
+        colors = CardDefaults.cardColors(containerColor = MatteBlack)
     ) {
         Text(
             text = donation,

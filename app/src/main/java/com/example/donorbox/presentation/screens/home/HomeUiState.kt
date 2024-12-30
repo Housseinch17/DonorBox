@@ -13,7 +13,9 @@ data class HomeUiState(
     val dialogVisibility: Boolean = false,
     val moneyToDonate: String = "",
     val isLoading: Boolean = false,
-    val showText: Boolean = false
+    val showText: Boolean = false,
+    val newPasswordValue: String = "",
+    val showPassword: Boolean = false
 )
 
 @Immutable

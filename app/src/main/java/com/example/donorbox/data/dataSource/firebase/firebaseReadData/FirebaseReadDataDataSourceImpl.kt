@@ -2,6 +2,7 @@ package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.isInternetAvailable
@@ -29,7 +30,8 @@ class FirebaseReadDataDataSourceImpl(
                     //its like reading only once and not keep on reading
                     databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
-                            val receivers = snapshot.children.mapNotNull { it.getValue(Receiver::class.java) }
+                            val receivers =
+                                snapshot.children.mapNotNull { it.getValue(Receiver::class.java) }
                             if (receivers.isNotEmpty()) {
                                 continuation.resume(
                                     ReceiversResponse.Success(
@@ -44,7 +46,7 @@ class FirebaseReadDataDataSourceImpl(
                         @SuppressLint("SuspiciousIndentation")
                         override fun onCancelled(error: DatabaseError) {
                             val errorMessage = "Failed to read menu data $error"
-                                continuation.resume(ReceiversResponse.Error(errorMessage))
+                            continuation.resume(ReceiversResponse.Error(errorMessage))
                         }
                     })
                 } catch (e: Exception) {
@@ -56,4 +58,24 @@ class FirebaseReadDataDataSourceImpl(
             }
         }
     }
+
+    override suspend fun getAllReceivers(): List<String> =
+        suspendCoroutine { continuation ->
+            val hasInternet = context.isInternetAvailable()
+            if (hasInternet) {
+                try {
+                    databaseReference.get().addOnSuccessListener { snapshot ->
+                        val receiversList = snapshot.children.mapNotNull {
+                            it.key
+                        }
+                        continuation.resume(receiversList)
+                        Log.d("MyTag", "$receiversList")
+                    }
+                } catch (e: Exception) {
+                    continuation.resume(emptyList())
+                }
+            } else {
+                continuation.resume((emptyList()))
+            }
+        }
 }
