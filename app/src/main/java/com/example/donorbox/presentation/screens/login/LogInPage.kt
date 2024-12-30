@@ -1,11 +1,11 @@
 package com.example.donorbox.presentation.screens.login
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,16 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.donorbox.R
-import com.example.donorbox.presentation.theme.Orange
 import com.example.donorbox.presentation.util.AccountButton
 import com.example.donorbox.presentation.util.AccountTextButton
 import com.example.donorbox.presentation.util.EmailAndPassword
+import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.ShimmerEffect
 import com.example.donorbox.presentation.util.ShowDialog
 import com.example.donorbox.presentation.util.TrailingIcon
@@ -69,15 +67,9 @@ fun LogInScreen(
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Box(
+    SharedScreen(
         modifier = modifier
     ) {
-        Image(
-            painterResource(id = R.drawable.donate),
-            contentDescription = stringResource(R.string.background_image),
-            modifier = modifier,
-            contentScale = ContentScale.FillBounds,
-        )
         if (resetShowDialog) {
             Box(
                 modifier = Modifier.fillMaxWidth()
@@ -129,7 +121,7 @@ fun LogInScreen(
         }
         Column(
             modifier = Modifier
-                .matchParentSize()
+                .fillMaxSize()
                 .padding(horizontal = 20.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -220,7 +212,12 @@ fun LogInScreen(
                     TrailingIcon(imageVector, onIconClick = onIconClick)
                 }
                 Spacer(Modifier.height(16.dp))
-                AccountButton(Modifier, buttonText, buttonEnabled = logInEnabled) {
+                AccountButton(
+                    Modifier,
+                    containerColor = Color.Green,
+                    text = buttonText,
+                    buttonEnabled = logInEnabled
+                ) {
                     keyboardController?.hide()
                     onLogInClick(emailValue, passwordValue)
                 }
@@ -236,7 +233,7 @@ fun LogInScreen(
                     enabled = resetPasswordEnabled,
                     onClick = onResetPassword,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Orange,
+                        containerColor = Color.Green,
                         disabledContainerColor = Color.Gray
                     )
                 ) {
@@ -247,4 +244,3 @@ fun LogInScreen(
         }
     }
 }
-

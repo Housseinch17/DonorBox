@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
@@ -39,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -51,6 +54,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -110,6 +114,27 @@ fun ShimmerEffect(
                 .matchParentSize()
                 .background(brush)
         )
+    }
+}
+
+@Composable
+fun SharedScreen(modifier: Modifier, content: @Composable () -> Unit) {
+    Box(
+        modifier = modifier
+    ) {
+        Image(
+            painter = painterResource(R.drawable.donate),
+            contentDescription = stringResource(R.string.background_image),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        // Semi-transparent overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+        )
+        content()
     }
 }
 
@@ -211,13 +236,13 @@ fun AccountTextButton(
 
 @Composable
 fun AccountButton(
-    modifier: Modifier, text: String, buttonEnabled: Boolean, onLogInClick: () -> Unit
+    modifier: Modifier, text: String,containerColor: Color = Orange, buttonEnabled: Boolean, onLogInClick: () -> Unit
 ) {
     Button(
         modifier = modifier,
         onClick = onLogInClick,
         enabled = buttonEnabled,
-        colors = ButtonDefaults.buttonColors(containerColor = Orange)
+        colors = ButtonDefaults.buttonColors(containerColor = containerColor)
     ) {
         if (buttonEnabled) {
             Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -283,7 +308,12 @@ fun PasswordTextField(
     keyboardOptions: KeyboardOptions,
     visualTransformation: VisualTransformation, onValueChange: (String) -> Unit,
     trailingIcon: @Composable () -> Unit,
-
+    colors: TextFieldColors = TextFieldDefaults.colors(
+        focusedIndicatorColor = Orange,
+        focusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Green
+    )
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -304,12 +334,7 @@ fun PasswordTextField(
         textStyle = TextStyle.Default.copy(
             color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold
         ),
-        colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Orange,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Green
-        ),
+        colors = colors,
         value = value,
         onValueChange = { newValue ->
             onValueChange(newValue)
@@ -467,7 +492,7 @@ fun SettingsShowDialog(
             title = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(color = Orange)
+                    style = MaterialTheme.typography.titleLarge.copy(color = Color.Green)
                 )
             },
             text = {

@@ -34,13 +34,13 @@ class LogInViewModel(
 
 
     init {
-        Log.d("ViewModelInitialization","Login created")
+        Log.d("ViewModelInitialization","LoginViewModel created")
         showLoader()
     }
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("ViewModelInitialization","login destroyed")
+        Log.d("ViewModelInitialization","LoginViewModel destroyed")
     }
 
     private fun showLoader(){

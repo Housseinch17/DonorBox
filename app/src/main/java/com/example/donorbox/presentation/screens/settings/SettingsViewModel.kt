@@ -29,12 +29,12 @@ class SettingsViewModel (
     val emitValue: SharedFlow<String> = _emitValue.asSharedFlow()
 
     init {
-        Log.d("ViewModelInitialization", "Settings created")
+        Log.d("ViewModelInitialization", "SettingsViewModel created")
     }
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("ViewModelInitialization", "settings destroyed")
+        Log.d("ViewModelInitialization", "SettingsViewModel destroyed")
     }
 
 

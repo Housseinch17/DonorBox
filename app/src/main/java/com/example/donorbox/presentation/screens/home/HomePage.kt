@@ -1,6 +1,8 @@
 package com.example.donorbox.presentation.screens.home
 
+//noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,12 +29,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.AlertDialog
-import androidx.compose.material3.TextField
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,7 +41,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -51,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -65,11 +70,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
-import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.util.CopyTextExample
 import com.example.donorbox.presentation.util.DonorBoxImage
 import com.example.donorbox.presentation.util.PasswordTextField
+import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.ShimmerEffect
 import com.example.donorbox.presentation.util.TrailingIcon
 import com.example.donorbox.presentation.util.getPasswordVisualTransformation
@@ -85,7 +90,7 @@ fun HomePage(
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
     onSendButton: () -> Unit,
-    sendMoney: (moneyToDonate: String,password: String) -> Unit,
+    sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
     moneyToDonate: String,
@@ -98,16 +103,8 @@ fun HomePage(
     imageVector: ImageVector,
     onIconClick: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .background(BrightBlue)
-            .padding(vertical = 10.dp, horizontal = 10.dp),
-        contentAlignment = if (response is ReceiversResponse.Success) {
-            Alignment.TopStart
-        } else {
-            Alignment.Center
-        }
-    ) {
+        SharedScreen(modifier = modifier) {
+            Box(modifier = Modifier.fillMaxSize().padding(10.dp)){
         when (response) {
             is ReceiversResponse.Error -> {
                 Text(
@@ -149,6 +146,7 @@ fun HomePage(
             }
         }
     }
+}
 }
 
 @Composable
@@ -211,13 +209,13 @@ fun HomeSuccess(
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
     onSendButton: () -> Unit,
-    sendMoney: (moneyToDonate: String,password: String) -> Unit,
+    sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
     moneyToDonate: String,
     onMoneyUpdate: (String) -> Unit,
     isLoading: Boolean,
-    showText: Boolean,    newPasswordValue: String,
+    showText: Boolean, newPasswordValue: String,
     showPassword: Boolean,
     newPasswordValueChange: (String) -> Unit,
     imageVector: ImageVector,
@@ -228,7 +226,7 @@ fun HomeSuccess(
     ) {
         ShowDialog(
             showDialog = showDialog,
-            confirmButton = { sendMoney(moneyToDonate,newPasswordValue) },
+            confirmButton = { sendMoney(moneyToDonate, newPasswordValue) },
             onDismissButton = hideDialog,
             moneyToDonate = moneyToDonate,
             onMoneyUpdate = onMoneyUpdate,
@@ -270,6 +268,9 @@ fun PartialBottomSheet(
     onOpenGoogleMap: (Double, Double) -> Unit,
     onSendButton: () -> Unit,
 ) {
+    //keyboard controller to show or hide keyboard
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     //skipPartiallyExpanded here it means to expand alone or when i drag it up
     //its like not fill max height just take the height im giving to screen
     val sheetState = rememberModalBottomSheetState(
@@ -287,25 +288,24 @@ fun PartialBottomSheet(
             modifier = Modifier,
             sheetState = sheetState,
             onDismissRequest = { hideBottomSheetReceiver() },
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.background,
+            tonalElevation = 4.dp
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        start = 20.dp, end = 20.dp,
-                        bottom = 20.dp
-                    )
+                    .padding(20.dp)
                     .verticalScroll(verticalScroll),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 DonorBoxImage(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .size(80.dp)
-                        .clip(CircleShape),
-                    imageUrl = modalBottomSheetReceiver.modalBottomSheetReceiver.picUrl
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    imageUrl = receiver.picUrl
                 )
                 ModalBottomSheetItem(prefixText = "Name: ", text = receiver.name, copyText = false)
                 ModalBottomSheetItem(prefixText = "Bank Iban: ", text = receiver.bank)
@@ -315,7 +315,7 @@ fun PartialBottomSheet(
                 ) {
                     ModalBottomSheetIconButton(
                         imageVector = Icons.Filled.Call,
-                        color = Color.Blue
+                        color = MaterialTheme.colorScheme.primary,
                     ) {
                         onCall(receiver.phoneNumber)
                     }
@@ -323,13 +323,13 @@ fun PartialBottomSheet(
                 ModalBottomSheetIntent(prefixText = "Omt Account: ", text = receiver.omt) {
                     ModalBottomSheetIconButton(
                         imageVector = ImageVector.vectorResource(R.drawable.omt),
-                        color = Color.Blue, onClick = onOpenApp
+                        color = MaterialTheme.colorScheme.secondary, onClick = onOpenApp
                     )
                 }
                 ModalBottomSheetIntent(prefixText = "Whish Account: ", text = receiver.whish) {
                     ModalBottomSheetIconButton(
                         imageVector = ImageVector.vectorResource(R.drawable.whish),
-                        color = Color.Blue, onClick = onOpenWhishApp
+                        color = MaterialTheme.colorScheme.tertiary, onClick = onOpenWhishApp
                     )
                 }
                 ModalBottomSheetIntent(
@@ -338,7 +338,7 @@ fun PartialBottomSheet(
                 ) {
                     ModalBottomSheetIconButton(
                         imageVector = ImageVector.vectorResource(R.drawable.googlemap),
-                        color = Color.Blue,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         onClick = {
                             onOpenGoogleMap(
                                 receiver.address.latitude,
@@ -349,9 +349,12 @@ fun PartialBottomSheet(
                 }
                 Button(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .align(Alignment.CenterHorizontally),
-                    onClick = onSendButton,
+                    onClick = {
+                        onSendButton()
+                        keyboardController?.hide()
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)
                 ) {
                     Text(
@@ -381,12 +384,13 @@ fun ModalBottomSheetIconButton(
                 color = color,
                 width = 1.dp,
                 shape = CircleShape
-            ),
+            )
+            .size(48.dp),
     ) {
         Image(
             modifier = Modifier.size(32.dp),
             imageVector = imageVector, contentDescription = null,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Fit
         )
     }
 }
@@ -504,12 +508,12 @@ fun ReceiverComponent(modifier: Modifier, receiver: Receiver, onReceiverClick: (
 fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Receiver) -> Unit) {
     Card(
         modifier = modifier
-            .clip(RoundedCornerShape(25.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onReceiverClick(receiver)
             },
-        colors = CardDefaults.cardColors(containerColor = Color.Black),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
     ) {
         Column(
             modifier = Modifier
@@ -518,14 +522,14 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                     top = 50.dp, bottom = 10.dp,
                     start = 8.dp, end = 8.dp
                 ),
-            verticalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.Start
         ) {
             ReceiverText(
                 text = "Name: ",
                 description = receiver.name,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                 )
             )
@@ -533,7 +537,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 text = "Phone: ",
                 description = receiver.phoneNumber,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                 )
             )
@@ -541,7 +545,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 text = "Address: ",
                 description = receiver.address.location,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                 )
             )
@@ -549,7 +553,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 text = "Omt: ",
                 description = receiver.omt,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp
                 )
             )
@@ -557,7 +561,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 text = "Whish: ",
                 description = receiver.whish,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp
                 )
             )
@@ -565,7 +569,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                 text = "Bank iban: ",
                 description = receiver.bank,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = BrightBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp
                 )
             )
@@ -580,33 +584,33 @@ fun ReceiverText(
     val horizontalScrollState = rememberScrollState()
     Row(
         Modifier.horizontalScroll(state = horizontalScrollState),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             modifier = Modifier,
             text = text,
             maxLines = 1,
-            style = textStyle.copy(lineHeight = 18.sp),
+            style = textStyle.copy(lineHeight = 20.sp),
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Start
         )
-        Spacer(modifier = Modifier.width(2.dp))
         Text(
             modifier = Modifier,
             text = description,
             maxLines = 1,
             style = textStyle.copy(
-                lineHeight = 18.sp,
+                lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             ),
             overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
         )
     }
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowDialog(
     showDialog: Boolean,
@@ -626,67 +630,77 @@ fun ShowDialog(
         AlertDialog(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(25.dp))
-                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
-                ,
-            backgroundColor = Color.Black,
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, BrightBlue, RoundedCornerShape(20.dp)),
+            containerColor = Color.Black.copy(alpha = 0.85f),
             onDismissRequest = {},
             confirmButton = {
                 Button(
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BrightBlue
-                    )
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "Send Money", color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             },
             dismissButton = {
-                Button(
+                OutlinedButton(
                     onClick = onDismissButton,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
-                    )
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = BrightBlue
+                    ),
+                    border = BorderStroke(1.dp, BrightBlue)
                 ) {
                     Text(
-                        stringResource(R.string.dismiss),
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.dismiss),
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             },
             title = {
                 Text(
-                    modifier = Modifier.padding(bottom = 10.dp),
-                    text = "Donate money",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "Donate money \n",
                     style = MaterialTheme.typography.titleLarge.copy(
                         color = BrightBlue,
                         fontWeight = FontWeight.Bold,
-                        lineHeight = 16.sp
                     )
                 )
             },
             text = {
                 if (isLoading) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator(
                             modifier = Modifier
-                                .size(100.dp)
-                                .align(Alignment.Center),
+                                .size(48.dp),
                             color = Color.Red,
-                            strokeWidth = 1.dp
+                            strokeWidth = 4.dp
                         )
                     }
                 } else {
-                    Column {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         TextField(
                             modifier = Modifier
-                                .padding(top = 10.dp)
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.5.dp)),
+                                .clip(RoundedCornerShape(12.dp))
+                                .padding(top = 8.dp),
                             value = moneyToDonate,
                             onValueChange = {
                                 onMoneyUpdate(it)
@@ -694,19 +708,25 @@ fun ShowDialog(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             label = {
                                 Text("Enter the amount")
-                            }
+                            },
+                            singleLine = true,
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.Black.copy(alpha = 0.1f),
+                                focusedIndicatorColor = BrightBlue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
                         if (showText) {
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(R.string.amount_empty),
-                                style = BodyTypography.copy(
-                                    color = Color.Red, fontSize = 12.sp,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodySmall.copy(
                                     fontWeight = FontWeight.Light
                                 ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                         Spacer(modifier = Modifier.height(14.dp))
@@ -718,7 +738,14 @@ fun ShowDialog(
                             onValueChange = newPasswordValueChange,
                             trailingIcon = {
                                 TrailingIcon(imageVector = imageVector, onIconClick = onIconClick)
-                            }
+                            },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.Black.copy(alpha = 0.1f),
+                                focusedIndicatorColor = BrightBlue,
+                                unfocusedIndicatorColor = Color.Gray,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            )
                         )
                     }
                 }

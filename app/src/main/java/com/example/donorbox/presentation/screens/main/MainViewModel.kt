@@ -19,7 +19,7 @@ class MainViewModel(
 
     init {
         checkSharedPreferUsername()
-            Log.d("ViewModelInitialization","Main created")
+            Log.d("ViewModelInitialization","MainViewModel created")
     }
 
     private suspend fun getCurrentUserName(): String? {

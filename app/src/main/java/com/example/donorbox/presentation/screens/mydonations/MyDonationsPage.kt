@@ -1,6 +1,5 @@
 package com.example.donorbox.presentation.screens.mydonations
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,8 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +34,7 @@ import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.theme.MatteBlack
 import com.example.donorbox.presentation.theme.TitleTypography
+import com.example.donorbox.presentation.util.SharedScreen
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -48,15 +46,7 @@ fun MyDonationPage(
         refreshing = isRefreshing,
         onRefresh = onRefresh,
     )
-    Box(
-        modifier = Modifier.fillMaxSize(),
-    ){
-        Image(
-            painter = painterResource(R.drawable.donate),
-            contentDescription = stringResource(R.string.background_image),
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
+    SharedScreen(modifier = Modifier.fillMaxSize()){
 
     if (list.isEmpty() && !isRefreshing) {
         Box(modifier = Modifier) {
@@ -87,15 +77,17 @@ fun MyDonationPage(
             } else {
                 MyDonationList(list)
             }
-
+        }
+    }
+        Box(modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter){
             // Adding the PullRefreshIndicator
             PullRefreshIndicator(
                 refreshing = isRefreshing,
                 state = pullRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier
             )
         }
-    }
 }
 }
 

@@ -38,6 +38,7 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
+            Log.d("ViewModelInitialization","HomeViewModel created")
             readValues()
         }
     }

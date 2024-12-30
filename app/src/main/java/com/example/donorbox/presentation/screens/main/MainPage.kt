@@ -132,7 +132,7 @@ fun FloatingButtonBar(onDonationClick: () -> Unit) {
     FloatingActionButton(
         onClick = onDonationClick,
         shape = RoundedCornerShape(50.dp),
-        containerColor = Orange
+        containerColor = Color.Green
     ) {
         Icon(
             imageVector = Icons.Filled.Outbox,

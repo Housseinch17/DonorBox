@@ -30,12 +30,12 @@ class SignUpViewModel (
     val signUpSharedFlow: SharedFlow<String> = _signUpSharedFlow.asSharedFlow()
 
     init {
-        Log.d("ViewModelInitialization", "Signup created")
+        Log.d("ViewModelInitialization", "SignupViewModel created")
     }
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("ViewModelInitialization", "signup destroyed")
+        Log.d("ViewModelInitialization", "SignupViewModel destroyed")
     }
 
     fun setAlreadyHaveAccountButton() {

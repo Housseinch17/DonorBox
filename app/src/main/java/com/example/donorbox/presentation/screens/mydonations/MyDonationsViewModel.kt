@@ -21,6 +21,7 @@ class MyDonationsViewModel(
 
     init {
         viewModelScope.launch {
+            Log.d("ViewModelInitialization","MyDonationsViewModel created")
             getAllDonations()
         }
     }

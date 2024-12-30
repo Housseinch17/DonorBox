@@ -1,6 +1,5 @@
 package com.example.donorbox.presentation.screens.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +31,7 @@ import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.PasswordTextField
 import com.example.donorbox.presentation.util.SettingsShowDialog
+import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.TrailingIcon
 import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 
@@ -64,15 +62,7 @@ fun SettingsPage(
     signOutDismiss: () -> Unit,
     signOutIsLoading: Boolean,
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        Image(
-            painter = painterResource(R.drawable.donate),
-            contentDescription = stringResource(R.string.background_image),
-            modifier = modifier,
-            contentScale = ContentScale.FillBounds
-        )
+    SharedScreen(modifier = modifier) {
         if (resetShowDialog) {
             Box(
                 modifier = Modifier.fillMaxWidth()
