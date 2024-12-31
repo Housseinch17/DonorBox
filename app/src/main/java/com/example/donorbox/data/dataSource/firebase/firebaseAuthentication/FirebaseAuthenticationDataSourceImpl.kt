@@ -80,9 +80,8 @@ class FirebaseAuthenticationDataSourceImpl (
                     // Password is incorrect
                     setError("Incorrect password")
                 }
-            }
-            .addOnFailureListener { exception ->
-                setError("Failed to authenticate: ${exception.message}")
+            }.addOnFailureListener { exception ->
+                Log.d("MyTag","verifyPassword() error $exception")
             }
     }
 
