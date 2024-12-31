@@ -58,13 +58,6 @@ fun MyDonationPage(
                 )
             )
         }
-    } else if (list.isEmpty() && isRefreshing) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(modifier = Modifier.size(200.dp))
-        }
     } else {
         Box(
             modifier = Modifier

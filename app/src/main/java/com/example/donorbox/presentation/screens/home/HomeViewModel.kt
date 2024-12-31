@@ -9,10 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.data.model.Receiver
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import kotlinx.coroutines.delay

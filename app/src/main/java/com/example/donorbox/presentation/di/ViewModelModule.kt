@@ -62,7 +62,8 @@ object ViewModelModule {
         }
         viewModel {
             SettingsViewModel(
-                changePasswordUseCase = get()
+                changePasswordUseCase = get(),
+                verifyPasswordUseCase = get()
             )
         }
 

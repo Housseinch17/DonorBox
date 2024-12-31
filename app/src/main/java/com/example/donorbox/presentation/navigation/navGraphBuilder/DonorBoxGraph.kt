@@ -31,6 +31,8 @@ import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
+import com.example.donorbox.presentation.screens.settings.ShowPassword
+import com.example.donorbox.presentation.screens.settings.UpdatePassword
 import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
@@ -106,8 +108,8 @@ fun NavGraphBuilder.donorBoxGraph(
                                     )
                                 }
                             },
-                            setError = {
-                                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                            setError = { error->
+                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                             })
                     }
                 },
@@ -151,6 +153,8 @@ fun NavGraphBuilder.donorBoxGraph(
             val settingsViewModel = koinViewModel<SettingsViewModel>()
             val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
 
+            val scope = rememberCoroutineScope()
+
             LaunchedEffect(settingsViewModel.emitValue) {
                 settingsViewModel.emitValue.collectLatest { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -159,30 +163,48 @@ fun NavGraphBuilder.donorBoxGraph(
 
             SettingsPage(
                 modifier = Modifier.fillMaxSize(),
+                currentPasswordValue = settingsUiState.currentPasswordValue,
                 newPasswordValue = settingsUiState.newPasswordValue,
                 confirmPasswordValue = settingsUiState.confirmNewPasswordValue,
+                currentPasswordValueChange = { currentPassword ->
+                    settingsViewModel.updatePassword(UpdatePassword.CurrentPassword(currentPassword))
+                },
                 newPasswordValueChange = { newPassword ->
-                    settingsViewModel.newPasswordValueChange(newPassword)
+                    settingsViewModel.updatePassword(UpdatePassword.NewPassword(newPassword))
                 },
                 confirmPasswordValueChange = { confirmPassword ->
-                    settingsViewModel.confirmNewPasswordValueChange(confirmPassword)
+                    settingsViewModel.updatePassword(UpdatePassword.ConfirmPassword(confirmPassword))
                 },
-                imageVector = settingsViewModel.getIconVisibility(
-                    settingsUiState.showPassword
+                currentPasswordImageVector = settingsViewModel.getIconVisibility(
+                    settingsUiState.currentShowPassword
+                ),
+                newImageVector = settingsViewModel.getIconVisibility(
+                    settingsUiState.newShowPassword
                 ),
                 confirmImageVector = settingsViewModel.getIconVisibility(settingsUiState.confirmShowPassword),
-                onIconClick = settingsViewModel::setShowPassword,
-                confirmOnIconClick = settingsViewModel::setConfirmShowPassword,
-                showPassword = settingsUiState.showPassword,
+                currentPasswordOnIconClick = { settingsViewModel.showPassword(ShowPassword.CurrentPassword) },
+                newOnIconClick = { settingsViewModel.showPassword(ShowPassword.NewPassword) },
+                confirmOnIconClick = { settingsViewModel.showPassword(ShowPassword.ConfirmPassword) },
+                currentShowPassword = settingsUiState.currentShowPassword,
+                newShowPassword = settingsUiState.newShowPassword,
                 confirmShowPassword = settingsUiState.confirmShowPassword,
                 showText = settingsUiState.showText,
                 confirmShowText = settingsUiState.confirmShowText,
-                onPasswordChange = { newPassword, confirmPassword ->
-                    settingsViewModel.changePassword(
-                        email = username,
-                        newPassword = newPassword,
-                        confirmNewPassword = confirmPassword
-                    )
+                onPasswordChange = { currentPassword,newPassword, confirmPassword ->
+                    scope.launch {
+                    settingsViewModel.verifyPassword(currentPassword,
+                        onVerified = {
+                            settingsViewModel.changePassword(
+                                email = username,
+                                newPassword = newPassword,
+                                confirmNewPassword = confirmPassword
+                            )
+                        },
+                        setError = { error->
+                            Toast.makeText(context,error,Toast.LENGTH_LONG).show()
+                        })
+                    }
+
                 },
                 resetShowDialog = resetShowDialog,
                 resetPassword = {
@@ -200,6 +222,7 @@ fun NavGraphBuilder.donorBoxGraph(
                 signOutConfirm = authenticationViewModel::signOut,
                 signOutDismiss = authenticationViewModel::resetHideDialog,
                 signOutIsLoading = signOutIsLoading,
+                isLoading = settingsUiState.isLoading
             )
         }
 
@@ -216,7 +239,7 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.ReceivedDonationsPage> {
-            
+
         }
     }
 }

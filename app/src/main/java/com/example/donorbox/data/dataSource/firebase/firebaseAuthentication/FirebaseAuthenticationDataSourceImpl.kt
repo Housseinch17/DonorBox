@@ -78,7 +78,7 @@ class FirebaseAuthenticationDataSourceImpl (
                     onVerified()
                 } else {
                     // Password is incorrect
-                    setError("Incorrect password")
+                    setError("Incorrect current password!")
                 }
             }.addOnFailureListener { exception ->
                 Log.d("MyTag","verifyPassword() error $exception")
