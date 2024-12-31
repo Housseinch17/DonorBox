@@ -2,7 +2,6 @@ package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.isInternetAvailable
@@ -15,7 +14,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class FirebaseReadDataDataSourceImpl(
+class FirebaseReadDataSourceImpl(
     private val databaseReference: DatabaseReference,
     private val context: Context,
     private val coroutineDispatcher: CoroutineDispatcher,
@@ -69,7 +68,6 @@ class FirebaseReadDataDataSourceImpl(
                             it.key
                         }
                         continuation.resume(receiversList)
-                        Log.d("MyTag", "$receiversList")
                     }
                 } catch (e: Exception) {
                     continuation.resume(emptyList())

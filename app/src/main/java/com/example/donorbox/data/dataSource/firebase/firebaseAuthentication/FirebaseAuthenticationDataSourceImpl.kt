@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class FirebaseAuthenticationDataSourceImpl (
+class FirebaseAuthenticationDataSourceImpl(
     private val auth: FirebaseAuth,
     private val coroutineDispatcher: CoroutineDispatcher,
     ) : FirebaseAuthenticationDataSource {
@@ -20,7 +20,7 @@ class FirebaseAuthenticationDataSourceImpl (
         return@withContext try {
             auth.currentUser?.email
         } catch (e: Exception) {
-            Log.d("MyTag", "getCurrentUser() ${e.message}")
+            Log.e("MyTag", "getCurrentUser() ${e.message}")
             null
         }
     }
@@ -81,7 +81,7 @@ class FirebaseAuthenticationDataSourceImpl (
                     setError("Incorrect current password!")
                 }
             }.addOnFailureListener { exception ->
-                Log.d("MyTag","verifyPassword() error $exception")
+                Log.e("MyTag","verifyPassword() error $exception")
             }
     }
 

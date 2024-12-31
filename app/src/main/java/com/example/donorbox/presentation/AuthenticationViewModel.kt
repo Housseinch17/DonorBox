@@ -6,11 +6,13 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.FetchTokenUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ResetPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignOutUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseGetAllReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
@@ -30,8 +32,7 @@ class AuthenticationViewModel(
     private val getSharedPrefUsernameUseCase: GetSharedPrefUsernameUseCase,
     private val resetPasswordUseCase: ResetPasswordUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val writeTokenUseCase: FirebaseWriteTokenUseCase,
-    private val getAllReceiversUseCase: FirebaseGetAllReceiversUseCase
+    private val updateDeviceTokenUseCase: UpdateDeviceTokenUseCase
 ) : AndroidViewModel(application = application) {
     private val _authenticationUiState: MutableStateFlow<AuthenticationUiState> =
         MutableStateFlow(AuthenticationUiState())
@@ -43,11 +44,11 @@ class AuthenticationViewModel(
 
 
     init {
+        Log.d("ViewModelInitialization", "Authentication created")
         viewModelScope.launch {
             updateCurrentUserName()
-            writeTokenIntoFirebase()
+            updateTokenIntoFirebase()
         }
-        Log.d("ViewModelInitialization", "Authentication created")
     }
 
     override fun onCleared() {
@@ -55,17 +56,11 @@ class AuthenticationViewModel(
         Log.d("ViewModelInitialization", "authentication destroyed")
     }
 
-    private suspend fun getAllReceivers(): List<String> {
-        return getAllReceiversUseCase.getAllReceivers()
+
+    private suspend fun updateTokenIntoFirebase(){
+        updateDeviceTokenUseCase.updateDeviceToken()
     }
 
-    private suspend fun writeTokenIntoFirebase() {
-        var username = getCurrentUserUseCase.getCurrentUser()
-        if (getAllReceivers().contains(username)) {
-            username = username?.replace("@", "*")?.replace(".", "_")
-            writeTokenUseCase.writeToken(username = username!!, "kifak")
-        }
-    }
 
     private fun emitMessage(message: String = "No internet connection") {
         viewModelScope.launch {
@@ -174,9 +169,6 @@ class AuthenticationViewModel(
                         getCurrentUserUseCase.getCurrentUser()!!
                     )
                 }
-
-
-                Log.d("MyTag", "resetPassword $resetPassword")
                 _authenticationUiState.update { newState ->
                     newState.copy(
                         resetPassword = resetPassword,
@@ -186,9 +178,7 @@ class AuthenticationViewModel(
                 when (resetPassword) {
                     is PasswordChangement.Error -> emitMessage(resetPassword.errorMessage)
                     is PasswordChangement.Success -> {
-                        Log.d("MyTag", _showMessage.toString())
                         emitMessage(resetPassword.successMessage)
-                        Log.d("MyTag", _showMessage.toString())
                         _authenticationUiState.update { newState ->
                             newState.copy(resetEmailValue = "")
                         }
@@ -198,7 +188,7 @@ class AuthenticationViewModel(
                         emitMessage("Check if email exists!")
                     }
                 }
-                Log.d("MyTag", _authenticationUiState.value.resetPassword.toString())
+                Log.d("MyTag","resetPassword() ${_authenticationUiState.value.resetPassword}" )
             } else {
                 emitMessage("Email not valid")
             }

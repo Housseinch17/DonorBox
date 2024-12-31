@@ -23,8 +23,7 @@ object ViewModelModule {
                 getSharedPrefUsernameUseCase = get(),
                 resetPasswordUseCase = get(),
                 getCurrentUserUseCase = get(),
-                writeTokenUseCase = get(),
-                getAllReceiversUseCase = get()
+                updateDeviceTokenUseCase = get(),
             )
         }
 

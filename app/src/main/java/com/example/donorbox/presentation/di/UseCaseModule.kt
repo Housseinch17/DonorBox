@@ -1,6 +1,7 @@
 package com.example.donorbox.presentation.di
 
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ChangePasswordUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.FetchTokenUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.LogInUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ResetPasswordUseCase
@@ -10,6 +11,8 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticatio
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseGetAllReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.HandleNotificationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.GetAllDonationsUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
@@ -43,6 +46,14 @@ object UseCaseModule {
             SignUpUseCase(get())
         }
 
+        single<VerifyPasswordUseCase>{
+            VerifyPasswordUseCase(get())
+        }
+
+        single<FirebaseGetAllReceiversUseCase>{
+            FirebaseGetAllReceiversUseCase(get())
+        }
+
         single<FirebaseReadReceiversUseCase> {
             FirebaseReadReceiversUseCase(get())
         }
@@ -51,12 +62,16 @@ object UseCaseModule {
             FirebaseWriteTokenUseCase(get())
         }
 
-        single<GetSharedPrefUsernameUseCase> {
-            GetSharedPrefUsernameUseCase(get())
+        single<FetchTokenUseCase> {
+            FetchTokenUseCase(get())
         }
 
-        single<SaveSharedPrefUsernameUseCase> {
-            SaveSharedPrefUsernameUseCase(get())
+        single<HandleNotificationUseCase> {
+            HandleNotificationUseCase(get())
+        }
+
+        single<UpdateDeviceTokenUseCase> {
+            UpdateDeviceTokenUseCase(get())
         }
 
         single<SaveDonationsUseCase>{
@@ -67,12 +82,17 @@ object UseCaseModule {
             GetAllDonationsUseCase(get())
         }
 
-        single<VerifyPasswordUseCase>{
-            VerifyPasswordUseCase(get())
+        single<GetSharedPrefUsernameUseCase> {
+            GetSharedPrefUsernameUseCase(get())
         }
 
-        single<FirebaseGetAllReceiversUseCase>{
-            FirebaseGetAllReceiversUseCase(get())
+        single<SaveSharedPrefUsernameUseCase> {
+            SaveSharedPrefUsernameUseCase(get())
         }
+
+
+
+
+
     }
 }

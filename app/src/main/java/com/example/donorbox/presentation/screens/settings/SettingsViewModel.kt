@@ -126,11 +126,11 @@ class SettingsViewModel (
             }
             if (newPassword.length < 6) {
                 _settingsUiState.update { newState ->
-                    newState.copy(showText = true, isLoading = false)
+                    newState.copy(showText = true)
                 }
             } else if (confirmNewPassword.length < 6) {
                 _settingsUiState.update { newState ->
-                    newState.copy(confirmShowText = true,isLoading = false)
+                    newState.copy(confirmShowText = true)
                 }
             } else if (newPassword != confirmNewPassword) {
                 emitValue("New password and confirm password should match")
@@ -147,7 +147,6 @@ class SettingsViewModel (
                         confirmNewPasswordValue = "",
                         showText = false,
                         confirmShowText = false,
-                        isLoading = false,
                         passwordChangement = passwordChangement,
                     )
                 }
@@ -156,6 +155,9 @@ class SettingsViewModel (
                     is PasswordChangement.Success -> emitValue(passwordChangement.successMessage)
                     else -> {}
                 }
+            }
+            _settingsUiState.update { newState ->
+                newState.copy(isLoading = false)
             }
         }
     }

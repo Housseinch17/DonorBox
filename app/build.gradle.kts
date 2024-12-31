@@ -15,6 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.example.donorbox"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -93,6 +94,9 @@ dependencies {
 
     // Import the Firebase BoM
     implementation(platform(libs.firebase.bom))
+    // Import the Firebase Messaging
+    implementation (libs.firebase.messaging)
+
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation(libs.firebase.analytics)

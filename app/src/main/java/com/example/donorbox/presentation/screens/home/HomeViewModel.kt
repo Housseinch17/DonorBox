@@ -26,8 +26,7 @@ class HomeViewModel(
     private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase,
     private val saveDonationsUseCase: SaveDonationsUseCase,
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
-
-) : ViewModel() {
+    ) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -141,7 +140,7 @@ class HomeViewModel(
 
     private suspend fun readValues() {
         val response = firebaseReadReceiversUseCase.readReceivers()
-        Log.d("MyTag", "$response")
+        Log.d("MyTag", "readValues() $response")
         if (response is ReceiversResponse.Error) {
             emitFlow(response.message)
         }

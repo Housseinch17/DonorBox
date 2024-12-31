@@ -5,9 +5,9 @@ import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-class FirebaseWriteDataDataSourceImpl (
+class FirebaseWriteDataSourceImpl(
     private val databaseReference: DatabaseReference,
-    private val coroutineDispatcher: CoroutineDispatcher,
+    private val coroutineDispatcher: CoroutineDispatcher
 ) : FirebaseWriteDataDataSource {
     override suspend fun writeToken(username: String, token: String): Unit = withContext(coroutineDispatcher){
         val userRef = databaseReference.child(username)

@@ -208,7 +208,6 @@ fun NavGraphBuilder.donorBoxGraph(
                 },
                 resetShowDialog = resetShowDialog,
                 resetPassword = {
-                    Log.d("MyTag", "hey")
                     authenticationViewModel.resetPassword(
                         email = "",
                         resetPage = ResetPage.SettingsPage
