@@ -90,10 +90,15 @@ class LogInViewModel(
         }
     }
 
-    private suspend fun getCurrentUserAndSaveIt() {
-            val currentUsername = getCurrentUserUseCase.getCurrentUser()
-            saveSharedPrefUsernameUseCase.saveUsername(currentUsername)
+    private suspend fun getCurrentUser(): String? {
+        return getCurrentUserUseCase.getCurrentUser()
     }
+
+    private suspend fun getCurrentUserAndSaveIt() {
+        val currentUsername = getCurrentUser()
+        saveSharedPrefUsernameUseCase.saveUsername(currentUsername)
+    }
+
 
     fun setEmail(email: String) {
         viewModelScope.launch {

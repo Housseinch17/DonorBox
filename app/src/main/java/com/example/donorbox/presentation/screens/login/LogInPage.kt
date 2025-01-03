@@ -76,7 +76,7 @@ fun LogInScreen(
             ) {
                 ShowDialog(
                     modifier = Modifier,
-                    showDialog = resetShowDialog,
+                    showDialog = true,
                     title = stringResource(R.string.reset_password),
                     isProgressBar = resetIsLoading,
                     description = {

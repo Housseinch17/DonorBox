@@ -1,5 +1,6 @@
 package com.example.donorbox.data.dataSource.firebase.firebaseAuthentication
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
@@ -92,9 +93,18 @@ class FirebaseAuthenticationDataSourceImpl(
                 try {
                     auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task->
                         if(task.isSuccessful){
-                            continuation.resume(AuthState.LoggedIn)
+                            val isAccountVerified = verifiedAccount()
+                            if(isAccountVerified) {
+                                continuation.resume(AuthState.LoggedIn)
+                            }
+                            else{
+                                auth.currentUser?.sendEmailVerification()
+                                //sign out authentication if not verified
+                                signOut()
+                             continuation.resume(AuthState.Error("Error: Account not verified!"))
+                            }
                         }else{
-                            continuation.resume(AuthState.Error("error: ${task.exception}"))
+                            continuation.resume(AuthState.Error("Error: ${task.exception}"))
                         }
                     }
                 }catch (e: Exception){
@@ -103,6 +113,18 @@ class FirebaseAuthenticationDataSourceImpl(
             }
         }
 
+    @SuppressLint("SuspiciousIndentation")
+    override fun verifiedAccount(): Boolean {
+        return try {
+            val isVerified = auth.currentUser?.isEmailVerified
+            Log.d("MyTag", "verifiedAccount() isVerified: $isVerified")
+            isVerified ?: false  // Return false if isVerified is null
+        } catch (e: Exception) {
+            Log.e("MyTag", "Error checking email verification: ${e.message}")
+            false
+        }
+    }
+
     //firebase apis are callback apis so we have to use suspendCoroutine or suspendCancellableCoroutine
     override suspend fun signUp(email: String, password: String): AccountStatus =
         withContext(coroutineDispatcher) {
@@ -110,7 +132,9 @@ class FirebaseAuthenticationDataSourceImpl(
                 try {
                 auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{ task->
                     if (task.isSuccessful) {
-                        continuation.resume(AccountStatus.IsCreated("You successfully registered!"))
+                        // Send the email verification link
+                        auth.currentUser?.sendEmailVerification()
+                        continuation.resume(AccountStatus.IsCreated("You successfully registered! Please verify your email."))
                     } else {
                         continuation.resume(AccountStatus.Error("Failed! ${task.exception}"))
                     }
@@ -122,7 +146,7 @@ class FirebaseAuthenticationDataSourceImpl(
         }
 
 
-    override suspend fun signOut() = withContext(coroutineDispatcher) {
+    override fun signOut(){
         auth.signOut()
     }
 

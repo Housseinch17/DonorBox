@@ -41,7 +41,11 @@ class FirebaseRepositoryImpl(
         return firebaseAuthenticationDataSourceImpl.signUp(email, password)
     }
 
-    override suspend fun signOut() {
+    override  fun verifiedAccount(): Boolean {
+        return firebaseAuthenticationDataSourceImpl.verifiedAccount()
+    }
+
+    override fun signOut() {
         return firebaseAuthenticationDataSourceImpl.signOut()
     }
 

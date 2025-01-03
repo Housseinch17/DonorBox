@@ -8,7 +8,8 @@ interface FirebaseAuthenticationDataSource {
     suspend fun getCurrentUser(): String?
     suspend fun logIn(email: String,password: String): AuthState
     suspend fun signUp(email: String,password: String): AccountStatus
-    suspend fun signOut()
+    fun verifiedAccount(): Boolean
+    fun signOut()
     suspend fun changePassword(email: String,newPassword: String): PasswordChangement
     suspend fun resetPassword(email: String): PasswordChangement
     suspend fun verifyPassword(password: String, onVerified: () -> Unit, setError: (String) -> Unit)
