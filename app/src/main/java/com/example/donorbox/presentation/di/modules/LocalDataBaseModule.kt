@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import com.example.donorbox.data.dataSource.localdatabase.LocalDataBaseDataSource
 import com.example.donorbox.data.dataSource.localdatabase.LocalDataBaseDataSourceImpl

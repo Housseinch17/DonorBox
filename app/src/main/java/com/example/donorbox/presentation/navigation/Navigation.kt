@@ -57,6 +57,7 @@ fun Navigation(
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
+
     NavHost(
         modifier = modifier,
         navController = navHostController,

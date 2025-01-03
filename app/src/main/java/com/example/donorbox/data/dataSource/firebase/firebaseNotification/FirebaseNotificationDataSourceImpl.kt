@@ -1,10 +1,11 @@
 package com.example.donorbox.data.dataSource.firebase.firebaseNotification
 
 import android.util.Log
+import com.example.donorbox.data.api.FCMApi
 import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
-import com.example.donorbox.data.model.NotificationData
+import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -16,8 +17,9 @@ class FirebaseNotificationDataSourceImpl(
     private val coroutineDispatcher: CoroutineDispatcher,
     private val firebaseAuthenticationDataSourceImpl: FirebaseAuthenticationDataSourceImpl,
     private val firebaseReadDataSourceImpl: FirebaseReadDataSourceImpl,
-    private val firebaseWriteDataSourceImpl: FirebaseWriteDataSourceImpl
-    ): FirebaseNotificationDataSource {
+    private val firebaseWriteDataSourceImpl: FirebaseWriteDataSourceImpl,
+    private val fcmApi: FCMApi
+): FirebaseNotificationDataSource {
 
     override suspend fun fetchToken(): String = withContext(coroutineDispatcher){
         suspendCoroutine { continuation ->
@@ -32,22 +34,33 @@ class FirebaseNotificationDataSourceImpl(
         }
     }
 
-    override suspend fun updateDeviceToken() {
+    override suspend fun updateDeviceToken(token: String) {
         var username = getCurrentUsername()
         username = username?.replace("@", "*")?.replace(".", "_")
         if (getAllReceivers().contains(username)) {
-            val token = fetchToken()
+            val newToken = token.ifEmpty { fetchToken() }
             try {
-                firebaseWriteDataSourceImpl.writeToken(username = username!!, token = token)
-                Log.d("MyTag","updateTokenIntoFirebase() successfully completed and token: $token")
+                firebaseWriteDataSourceImpl.writeToken(username = username!!, token = newToken)
+                Log.d("MyTag","updateTokenIntoFirebase() successfully completed and token: $newToken")
             }catch (e: Exception){
                 Log.e("MyTag","updateTokenIntoFirebase() ${e.message}")
             }
         }
     }
 
-    override suspend fun handleNotification(notificationData: NotificationData) {
+    override suspend fun sendNotificationToToken(notificationMessage: NotificationMessage): Unit = withContext(coroutineDispatcher){
+          try {
+              val response = fcmApi.sendNotification(notificationMessage)
+              if (response.isSuccessful) {
+                  Log.d("FCM", "Notification sent successfully")
+              } else {
+                  val responseBody = response.errorBody()?.string()
 
+                  Log.e("FCM", "Failed to send notification: $responseBody")
+              }
+          } catch (e: Exception) {
+              Log.e("FCM", "Exception while sending notification", e)
+          }
     }
 
     private suspend fun getAllReceivers(): List<String> {

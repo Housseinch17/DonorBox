@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ChangePasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.FetchTokenUseCase
@@ -11,7 +11,7 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticatio
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseGetAllReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.HandleNotificationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.GetAllDonationsUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
@@ -66,8 +66,8 @@ object UseCaseModule {
             FetchTokenUseCase(get())
         }
 
-        single<HandleNotificationUseCase> {
-            HandleNotificationUseCase(get())
+        single<SendNotificationToTokenUseCase> {
+            SendNotificationToTokenUseCase(get())
         }
 
         single<UpdateDeviceTokenUseCase> {

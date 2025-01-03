@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import com.example.donorbox.presentation.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.home.HomeViewModel
@@ -51,7 +51,8 @@ object ViewModelModule {
             HomeViewModel(
                 firebaseReadReceiversUseCase = get(),
                 saveDonationsUseCase = get(),
-                verifyPasswordUseCase = get()
+                verifyPasswordUseCase = get(),
+                sendNotificationToTokenUseCase = get()
             )
         }
         viewModel {

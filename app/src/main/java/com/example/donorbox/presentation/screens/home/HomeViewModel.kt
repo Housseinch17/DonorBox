@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.data.model.Receiver
+import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import kotlinx.coroutines.delay
@@ -26,7 +28,8 @@ class HomeViewModel(
     private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase,
     private val saveDonationsUseCase: SaveDonationsUseCase,
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
-    ) : ViewModel() {
+    private val sendNotificationToTokenUseCase: SendNotificationToTokenUseCase,
+) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -37,7 +40,14 @@ class HomeViewModel(
         viewModelScope.launch {
             Log.d("ViewModelInitialization","HomeViewModel created")
             readValues()
+
         }
+    }
+
+    suspend fun sendNotification(notificationMessage: NotificationMessage){
+        sendNotificationToTokenUseCase.sendNotificationToToken(
+            notificationMessage = notificationMessage
+        )
     }
 
     private fun emitFlow(message: String) {

@@ -1,6 +1,6 @@
 package com.example.donorbox.domain.repository
 
-import com.example.donorbox.data.model.NotificationData
+import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
@@ -9,8 +9,8 @@ import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 interface FirebaseRepository {
     suspend fun getCurrentUser(): String?
     suspend fun fetchToken(): String
-    suspend fun updateDeviceToken()
-    suspend fun handleNotification(notificationData: NotificationData)
+    suspend fun updateDeviceToken(token: String)
+    suspend fun sendNotificationToToken(notificationMessage: NotificationMessage)
     suspend fun logIn(email: String, password: String): AuthState
     suspend fun signUp(email: String, password: String): AccountStatus
     suspend fun signOut()

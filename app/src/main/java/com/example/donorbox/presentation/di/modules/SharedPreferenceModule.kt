@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -42,6 +42,10 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packagingOptions {
+        exclude("META-INF/DEPENDENCIES")
+    }
 }
 
 dependencies {
@@ -54,6 +58,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -97,6 +102,8 @@ dependencies {
     // Import the Firebase Messaging
     implementation (libs.firebase.messaging)
 
+
+
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation(libs.firebase.analytics)
@@ -110,6 +117,21 @@ dependencies {
     //noinspection KaptUsageInsteadOfKsp
     kapt (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
+
+
+    // Retrofit
+    implementation(libs.retrofit)
+
+    // Retrofit with Scalar Converter
+    implementation(libs.converter.scalars)
+    // Retrofit with Kotlin serialization Converter eza bde esta3mil serialization
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.okhttp)
+
+//    implementation("com.karumi:dexter:6.2.3")
+//    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    implementation(libs.dexter)
+    implementation(libs.google.auth.library.oauth2.http)
 }
 // Allow references to generated code
 kapt {

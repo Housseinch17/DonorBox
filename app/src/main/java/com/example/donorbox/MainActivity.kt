@@ -1,5 +1,6 @@
 package com.example.donorbox
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -15,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.donorbox.presentation.screens.main.MainPage
 import com.example.donorbox.presentation.theme.DonorBoxTheme
 import com.google.firebase.FirebaseApp
-import android.Manifest
 
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
@@ -25,6 +25,8 @@ class MainActivity : ComponentActivity() {
         Log.d("MainActivity", "onCreate started")
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        requestPhoneCallPermission()
+        requestNotificationPermission()
         val restoreState = savedInstanceState?.getBundle("nav_state")
         enableEdgeToEdge()
         setContent {
@@ -47,4 +49,29 @@ class MainActivity : ComponentActivity() {
             outState.putBundle("nav_state", navController.saveState())
         }
     }
+
+    //request for post notification permission
+    private fun requestNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+            if (!hasPermission) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    0)
+            }
+        }
+    }
+
+    private fun requestPhoneCallPermission(){
+            val hasPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) ==
+                    PackageManager.PERMISSION_GRANTED
+            if (!hasPermission) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE),
+                    1)
+            }else{
+                Log.d("Permissions", "CALL_PHONE permission already granted")
+            }
+    }
+
 }

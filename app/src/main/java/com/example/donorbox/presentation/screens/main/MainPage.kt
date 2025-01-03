@@ -50,10 +50,10 @@ fun MainPage(navController: NavHostController) {
     val currentScreenRoute = getScreenName(currentScreenDestination)
 
     //not hideBottomBar
-    val showBottomBar = !(hideBottomBar(currentScreenRoute))
+    val showBottomBar = !(hideBottomBar(currentScreenRoute)) && !status.isLoading
 
     //here if the status is NavigationScreens.Loading it will show the background image set in the theme
-    if (status != NavigationScreens.Loading) {
+    if (status.currentScreen != NavigationScreens.Loading) {
         //use material not material 3 to use docked
         androidx.compose.material.Scaffold(
             floatingActionButton = {
@@ -121,7 +121,7 @@ fun MainPage(navController: NavHostController) {
                     .statusBarsPadding()
                     .padding(innerPadding),
                 navHostController = navController,
-                startDestination = status
+                startDestination = status.currentScreen
             )
         }
     }

@@ -4,7 +4,7 @@ import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.Fire
 import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
-import com.example.donorbox.data.model.NotificationData
+import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
@@ -25,12 +25,12 @@ class FirebaseRepositoryImpl(
         return notificationDataSourceImpl.fetchToken()
     }
 
-    override suspend fun updateDeviceToken() {
-        notificationDataSourceImpl.updateDeviceToken()
+    override suspend fun updateDeviceToken(token: String) {
+        notificationDataSourceImpl.updateDeviceToken(token)
     }
 
-    override suspend fun handleNotification(notificationData: NotificationData) {
-        notificationDataSourceImpl.handleNotification(notificationData)
+    override suspend fun sendNotificationToToken(notificationMessage: NotificationMessage) {
+        notificationDataSourceImpl.sendNotificationToToken(notificationMessage)
     }
 
     override suspend fun logIn(email: String, password: String): AuthState {

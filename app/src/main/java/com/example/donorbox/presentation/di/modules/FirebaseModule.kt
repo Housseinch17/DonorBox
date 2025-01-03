@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSource
@@ -61,7 +61,8 @@ object FirebaseModule {
                 coroutineDispatcher = get(named("Dispatchers.IO")),
                 firebaseAuthenticationDataSourceImpl = get(),
                 firebaseReadDataSourceImpl = get(),
-                firebaseWriteDataSourceImpl = get()
+                firebaseWriteDataSourceImpl = get(),
+                fcmApi = get(),
             )
         }
 
@@ -98,7 +99,8 @@ object FirebaseModule {
                 coroutineDispatcher = get(named("Dispatchers.IO")),
                 firebaseAuthenticationDataSourceImpl = get(),
                 firebaseReadDataSourceImpl = get(),
-                firebaseWriteDataSourceImpl = get()
+                firebaseWriteDataSourceImpl = get(),
+                fcmApi = get(),
             )
         }
 

@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation.di
+package com.example.donorbox.presentation.di.modules
 
 import androidx.room.Room
 import com.example.donorbox.data.roomdb.MyDonationsDataBase
