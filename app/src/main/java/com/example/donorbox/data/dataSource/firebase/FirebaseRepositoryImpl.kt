@@ -74,6 +74,10 @@ class FirebaseRepositoryImpl(
         return firebaseWriteDataSourceImpl.writeToken(username, token)
     }
 
+    override suspend fun writeDonationsIntoFirebase(username: String, donation: String) {
+        firebaseWriteDataSourceImpl.writeDonationsIntoFirebase(username,donation)
+    }
+
     override suspend fun verifyPassword(
         password: String,
         onVerified: () -> Unit,
@@ -84,6 +88,10 @@ class FirebaseRepositoryImpl(
 
     override suspend fun getAllReceivers(): List<String> {
         return firebaseReadDataSourceImpl.getAllReceivers()
+    }
+
+    override suspend fun readAllDonations(): List<String> {
+        return firebaseReadDataSourceImpl.readAllDonations()
     }
 
 }

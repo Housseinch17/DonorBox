@@ -29,6 +29,8 @@ import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
+import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsPage
+import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.settings.ShowPassword
@@ -94,9 +96,9 @@ fun NavGraphBuilder.donorBoxGraph(
                 onOpenGoogleMap = { latitude, longitude ->
                     context.openGoogleMap(latitude, longitude)
                 },
-                onSendButton = { token ->
+                onSendButton = { receiverToken, receiverUsername ->
                     homeViewModel.showDialog()
-                    homeViewModel.updateCurrentToken(token)
+                    homeViewModel.updateCurrentTokenAndUsername(receiverToken, receiverUsername)
                 },
                 sendMoney = { moneyToDonate, password ->
                     scope.launch {
@@ -147,6 +149,16 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.ReceivedDonationsPage> {
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
+            val receivedDonationsViewModel = koinViewModel<ReceivedDonationsViewModel>()
+            val receivedDonationsUiState by receivedDonationsViewModel.receivedDonationsUiState.collectAsStateWithLifecycle()
+
+            ReceivedDonationsPage(
+                isLoading = receivedDonationsUiState.isLoading,
+                isRefreshing = receivedDonationsUiState.isRefreshing,
+                receivedDonationsList = receivedDonationsUiState.receivedDonationsList,
+                onRefresh = receivedDonationsViewModel::loadNewOrders
+            )
 
         }
 
@@ -240,8 +252,5 @@ fun NavGraphBuilder.donorBoxGraph(
             }
         }
 
-        composable<NavigationScreens.ReceivedDonationsPage> {
-
-        }
     }
 }

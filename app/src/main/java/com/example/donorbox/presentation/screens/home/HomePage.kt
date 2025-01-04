@@ -2,6 +2,7 @@ package com.example.donorbox.presentation.screens.home
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -89,7 +90,7 @@ fun HomePage(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: (token: String) -> Unit,
+    onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
     sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
@@ -208,7 +209,7 @@ fun HomeSuccess(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: (token: String) -> Unit,
+    onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
     sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
@@ -266,7 +267,7 @@ fun PartialBottomSheet(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: (token: String) -> Unit,
+    onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -352,7 +353,7 @@ fun PartialBottomSheet(
                         .clip(RoundedCornerShape(16.dp))
                         .align(Alignment.CenterHorizontally),
                     onClick = {
-                        onSendButton(receiver.token)
+                        onSendButton(receiver.token,receiver.username)
                         keyboardController?.hide()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)

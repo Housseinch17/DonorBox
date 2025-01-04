@@ -13,5 +13,7 @@ data class Receiver(
     val name: String = "",
     val omt: String = "",
     val whish: String = "",
-    val picUrl: String = ""
+    val picUrl: String = "",
+    val username: String = "",
+    val donationsReceived: Map<String, String> = emptyMap()
 )

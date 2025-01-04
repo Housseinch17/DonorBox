@@ -9,9 +9,11 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticatio
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseGetAllReceiversUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadAllDonationsUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseAddUserUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDonationsUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteTokenUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
@@ -56,6 +58,10 @@ object UseCaseModule {
             FirebaseGetAllReceiversUseCase(get())
         }
 
+        single<FirebaseReadAllDonationsUseCase>{
+            FirebaseReadAllDonationsUseCase(get())
+        }
+
         single<FirebaseReadFullNameUseCase>{
             FirebaseReadFullNameUseCase(get())
         }
@@ -66,6 +72,10 @@ object UseCaseModule {
 
         single<FirebaseAddUserUseCase>{
             FirebaseAddUserUseCase(get())
+        }
+
+        single<FirebaseWriteDonationsUseCase>{
+            FirebaseWriteDonationsUseCase(get())
         }
 
         single<FirebaseWriteTokenUseCase>{

@@ -5,6 +5,7 @@ import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.main.MainViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
+import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
 import org.koin.android.ext.koin.androidApplication
@@ -55,6 +56,7 @@ object ViewModelModule {
                 verifyPasswordUseCase = get(),
                 sendNotificationToTokenUseCase = get(),
                 firebaseReadFullNameUseCase = get(),
+                firebaseWriteDonationsUseCase = get(),
             )
         }
 
@@ -68,6 +70,11 @@ object ViewModelModule {
                 changePasswordUseCase = get(),
                 verifyPasswordUseCase = get()
             )
+        }
+
+        viewModel {
+            ReceivedDonationsViewModel(
+                firebaseReadAllDonationsUseCase = get(),)
         }
 
     }

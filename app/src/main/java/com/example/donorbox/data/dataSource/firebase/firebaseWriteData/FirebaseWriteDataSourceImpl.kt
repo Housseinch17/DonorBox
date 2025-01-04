@@ -39,4 +39,24 @@ class FirebaseWriteDataSourceImpl(
 
 
     }
+
+    override suspend fun writeDonationsIntoFirebase(username: String, donation: String): Unit = withContext(coroutineDispatcher) {
+        val newUsername = replaceUsername(username)
+        Log.d("MyTag", "newUsername: $newUsername")
+        if (newUsername!!.isNotEmpty()) {
+            val receiverRef =
+                receiversDatabaseReference.child(newUsername).child("donationsReceived")
+            // Add the donation string as a new child in the donationsReceived list
+            receiverRef.push().setValue(donation)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "writeDonationsIntoFirebase(): Donation added successfully.")
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(
+                        "Firebase",
+                        "writeDonationsIntoFirebase(): Failed to donate ${exception.message}"
+                    )
+                }
+        }
+    }
 }

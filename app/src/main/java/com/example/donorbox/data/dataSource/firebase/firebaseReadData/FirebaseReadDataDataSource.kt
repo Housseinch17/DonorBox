@@ -7,5 +7,6 @@ interface FirebaseReadDataDataSource{
     suspend fun readReceivers(): ReceiversResponse
     suspend fun getAllReceivers(): List<String>
     suspend fun readFullNameByUsername(): FullName
+    suspend fun readAllDonations(): List<String>
 
 }

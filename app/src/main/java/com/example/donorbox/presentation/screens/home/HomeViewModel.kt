@@ -15,10 +15,10 @@ import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDonationsUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,7 +32,8 @@ class HomeViewModel(
     private val saveDonationsUseCase: SaveDonationsUseCase,
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
     private val sendNotificationToTokenUseCase: SendNotificationToTokenUseCase,
-    private val firebaseReadFullNameUseCase: FirebaseReadFullNameUseCase
+    private val firebaseReadFullNameUseCase: FirebaseReadFullNameUseCase,
+    private val firebaseWriteDonationsUseCase: FirebaseWriteDonationsUseCase
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
@@ -52,7 +53,7 @@ class HomeViewModel(
         val fullName = firebaseReadFullNameUseCase.readFullNameByUsername()
         _uiState.update { newState ->
             newState.copy(
-                fullName = fullName
+                senderFullName = fullName
             )
         }
     }
@@ -63,10 +64,10 @@ class HomeViewModel(
         )
     }
 
-    fun updateCurrentToken(token: String) {
+    fun updateCurrentTokenAndUsername(token: String, username: String) {
         viewModelScope.launch {
             _uiState.update { newState ->
-                newState.copy(currentToken = token)
+                newState.copy(receiverToken = token, receiverUsername = username)
             }
         }
     }
@@ -141,20 +142,17 @@ class HomeViewModel(
     }
 
     suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
+        val homeUiState = _uiState.value
         _uiState.update { newState ->
             newState.copy(showText = false)
         }
-        try {
-            if (moneyToDonate.isEmpty()) {
-                _uiState.update { newState ->
-                    newState.copy(showText = true)
-                }
-            } else {
+        if (moneyToDonate.isEmpty()) {
+            _uiState.update { newState ->
+                newState.copy(showText = true)
+            }
+        } else {
+            try {
                 updateLoader(true)
-                delay(1000)
-                _uiState.update { newState ->
-                    newState.copy(showText = false)
-                }
 
                 //save donation first
                 saveDonationsUseCase.saveDonations(donations)
@@ -166,13 +164,19 @@ class HomeViewModel(
                 sendNotification(
                     notificationMessage = NotificationMessage(
                         message = Message(
-                            token = _uiState.value.currentToken,
+                            token = homeUiState.receiverToken,
                             notification = Notification(
                                 title = "Received Money",
-                                body = "You have received $moneyToDonate$ from ${_uiState.value.fullName.currentName} ${_uiState.value.fullName.currentFamily}"
+                                body = "You have received $moneyToDonate$ from ${homeUiState.senderFullName.currentName} ${homeUiState.senderFullName.currentFamily}"
                             )
                         )
                     )
+                )
+
+                //post to receiver firebase
+                firebaseWriteDonationsUseCase.writeDonationsIntoFirebase(
+                    homeUiState.receiverUsername,
+                    "You have received $moneyToDonate\$ from ${homeUiState.senderFullName.currentName} ${homeUiState.senderFullName.currentFamily}"
                 )
 
                 updateMoneyToDonate("")
@@ -181,9 +185,9 @@ class HomeViewModel(
 
                 emitFlow("You're donations are succeed!")
                 hideDialog()
+            } catch (e: Exception) {
+                emitFlow(e.message.toString())
             }
-        } catch (e: Exception) {
-            emitFlow(e.message.toString())
         }
         updateLoader(false)
 

@@ -16,8 +16,10 @@ data class HomeUiState(
     val showText: Boolean = false,
     val newPasswordValue: String = "",
     val showPassword: Boolean = false,
-    val currentToken: String = "",
-    val fullName: FullName = FullName(),
+    val receiverToken: String = "",
+    val receiverUsername: String = "",
+    val senderFullName: FullName = FullName(),
+
 )
 
 @Immutable
