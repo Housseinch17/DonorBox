@@ -9,8 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.data.model.Receiver
+import com.example.donorbox.data.model.notificationMessage.Message
+import com.example.donorbox.data.model.notificationMessage.Notification
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
@@ -29,6 +32,7 @@ class HomeViewModel(
     private val saveDonationsUseCase: SaveDonationsUseCase,
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
     private val sendNotificationToTokenUseCase: SendNotificationToTokenUseCase,
+    private val firebaseReadFullNameUseCase: FirebaseReadFullNameUseCase
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
@@ -38,16 +42,33 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            Log.d("ViewModelInitialization","HomeViewModel created")
+            Log.d("ViewModelInitialization", "HomeViewModel created")
             readValues()
 
         }
     }
 
-    suspend fun sendNotification(notificationMessage: NotificationMessage){
+    private suspend fun readFullName() {
+        val fullName = firebaseReadFullNameUseCase.readFullNameByUsername()
+        _uiState.update { newState ->
+            newState.copy(
+                fullName = fullName
+            )
+        }
+    }
+
+    private suspend fun sendNotification(notificationMessage: NotificationMessage) {
         sendNotificationToTokenUseCase.sendNotificationToToken(
             notificationMessage = notificationMessage
         )
+    }
+
+    fun updateCurrentToken(token: String) {
+        viewModelScope.launch {
+            _uiState.update { newState ->
+                newState.copy(currentToken = token)
+            }
+        }
     }
 
     private fun emitFlow(message: String) {
@@ -61,11 +82,11 @@ class HomeViewModel(
         onVerified: () -> Unit,
         setError: (String) -> Unit,
     ) {
-        if(password.isEmpty()){
+        if (password.isEmpty()) {
             updateLoader(false)
             emitFlow("Password is Empty")
-        }else{
-            verifyPasswordUseCase.verifyPassword(password,onVerified,setError)
+        } else {
+            verifyPasswordUseCase.verifyPassword(password, onVerified, setError)
         }
     }
 
@@ -119,7 +140,7 @@ class HomeViewModel(
         }
     }
 
-    suspend fun saveDonations(moneyToDonate: String, donations: MyDonations) {
+    suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
         _uiState.update { newState ->
             newState.copy(showText = false)
         }
@@ -134,10 +155,30 @@ class HomeViewModel(
                 _uiState.update { newState ->
                     newState.copy(showText = false)
                 }
+
+                //save donation first
                 saveDonationsUseCase.saveDonations(donations)
+
+                //read full name of sender
+                readFullName()
+
+                //send notification
+                sendNotification(
+                    notificationMessage = NotificationMessage(
+                        message = Message(
+                            token = _uiState.value.currentToken,
+                            notification = Notification(
+                                title = "Received Money",
+                                body = "You have received $moneyToDonate$ from ${_uiState.value.fullName.currentName} ${_uiState.value.fullName.currentFamily}"
+                            )
+                        )
+                    )
+                )
+
                 updateMoneyToDonate("")
                 newPasswordValueChange("")
                 updateLoader(false)
+
                 emitFlow("You're donations are succeed!")
                 hideDialog()
             }

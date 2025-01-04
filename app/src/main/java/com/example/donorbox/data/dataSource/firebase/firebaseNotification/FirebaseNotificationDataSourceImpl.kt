@@ -6,6 +6,7 @@ import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.Fire
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
+import com.example.donorbox.presentation.util.Constants.replaceUsername
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -36,7 +37,7 @@ class FirebaseNotificationDataSourceImpl(
 
     override suspend fun updateDeviceToken(token: String) {
         var username = getCurrentUsername()
-        username = username?.replace("@", "*")?.replace(".", "_")
+        username = replaceUsername(username)
         if (getAllReceivers().contains(username)) {
             val newToken = token.ifEmpty { fetchToken() }
             try {

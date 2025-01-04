@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,10 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.donorbox.R
 import com.example.donorbox.presentation.util.AccountButton
 import com.example.donorbox.presentation.util.AccountTextButton
 import com.example.donorbox.presentation.util.EmailAndPassword
+import com.example.donorbox.presentation.util.EmailTextField
 import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.TrailingIcon
 
@@ -27,7 +33,11 @@ fun SignUpScreen(
     modifier: Modifier = Modifier,
     textPage: String,
     emailValue: String,
+    nameValue: String,
+    familyValue: String,
     onEmailChange: (String) -> Unit,
+    onNameChange: (String) -> Unit,
+    onFamilyChange: (String) -> Unit,
     imageVector: ImageVector,
     onIconClick: () -> Unit,
     showPassword: Boolean,
@@ -37,7 +47,7 @@ fun SignUpScreen(
     accountTextButton: String,
     createAccountEnabled: Boolean,
     alreadyExistingEnabled: Boolean,
-    onCreateAccount: (email: String, password: String) -> Unit,
+    onCreateAccount: (name: String, family: String, email: String, password: String) -> Unit,
     onExistingAccount: () -> Unit
 ) {
     //keyboard controller to show or hide keyboard
@@ -53,6 +63,36 @@ fun SignUpScreen(
             Text(
                 textPage, style = MaterialTheme.typography.titleLarge, color = Color.White,
                 modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Spacer(Modifier.height(16.dp))
+            EmailTextField(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                label = stringResource(R.string.name),
+                value = nameValue,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Unspecified,
+                    imeAction = ImeAction.Done
+                ),
+                onValueChange = { newName ->
+                    onNameChange(newName)
+                },
+            )
+            Spacer(Modifier.height(16.dp))
+            EmailTextField(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                label = stringResource(R.string.family),
+                value = familyValue,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Unspecified,
+                    imeAction = ImeAction.Done
+                ),
+                onValueChange = { newFamily ->
+                    onFamilyChange(newFamily)
+                },
             )
             EmailAndPassword(
                 Modifier
@@ -76,7 +116,12 @@ fun SignUpScreen(
                 buttonEnabled = createAccountEnabled
             ) {
                 keyboardController?.hide()
-                onCreateAccount(emailValue, passwordValue)
+                onCreateAccount(
+                    nameValue,
+                    familyValue,
+                    emailValue,
+                    passwordValue
+                )
             }
             Spacer(Modifier.height(24.dp))
             AccountTextButton(

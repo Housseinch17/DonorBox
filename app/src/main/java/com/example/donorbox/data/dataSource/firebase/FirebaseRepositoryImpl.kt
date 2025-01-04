@@ -6,6 +6,7 @@ import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseRe
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
+import com.example.donorbox.presentation.screens.home.FullName
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
@@ -49,6 +50,10 @@ class FirebaseRepositoryImpl(
         return firebaseAuthenticationDataSourceImpl.signOut()
     }
 
+    override suspend fun addUser(username: String, name: String, family: String) {
+        return firebaseWriteDataSourceImpl.addUsers(username,name,family)
+    }
+
     override suspend fun changePassword(email: String, newPassword: String): PasswordChangement {
         return firebaseAuthenticationDataSourceImpl.changePassword(email, newPassword)
     }
@@ -59,6 +64,10 @@ class FirebaseRepositoryImpl(
 
     override suspend fun readReceivers(): ReceiversResponse {
         return firebaseReadDataSourceImpl.readReceivers()
+    }
+
+    override suspend fun readFullNameByUsername(): FullName {
+        return firebaseReadDataSourceImpl.readFullNameByUsername()
     }
 
     override suspend fun writeToken(username: String, token: String) {

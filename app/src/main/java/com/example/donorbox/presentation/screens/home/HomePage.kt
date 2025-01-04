@@ -89,7 +89,7 @@ fun HomePage(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: () -> Unit,
+    onSendButton: (token: String) -> Unit,
     sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
@@ -208,7 +208,7 @@ fun HomeSuccess(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: () -> Unit,
+    onSendButton: (token: String) -> Unit,
     sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
     hideDialog: () -> Unit,
@@ -266,7 +266,7 @@ fun PartialBottomSheet(
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
     onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: () -> Unit,
+    onSendButton: (token: String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -352,7 +352,7 @@ fun PartialBottomSheet(
                         .clip(RoundedCornerShape(16.dp))
                         .align(Alignment.CenterHorizontally),
                     onClick = {
-                        onSendButton()
+                        onSendButton(receiver.token)
                         keyboardController?.hide()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)

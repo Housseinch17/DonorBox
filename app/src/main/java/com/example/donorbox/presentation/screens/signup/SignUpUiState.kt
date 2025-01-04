@@ -5,6 +5,8 @@ import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 
 @Immutable
 data class SignUpUiState(
+    val name: String = "",
+    val family: String = "",
     val email: String = "",
     val password: String = "",
     val showPassword: Boolean = false,

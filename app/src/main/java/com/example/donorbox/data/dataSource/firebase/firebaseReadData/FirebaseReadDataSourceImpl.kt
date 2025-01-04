@@ -2,9 +2,13 @@ package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import com.example.donorbox.data.model.Receiver
+import com.example.donorbox.presentation.screens.home.FullName
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
+import com.example.donorbox.presentation.util.Constants.replaceUsername
 import com.example.donorbox.presentation.util.isInternetAvailable
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -15,7 +19,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class FirebaseReadDataSourceImpl(
-    private val databaseReference: DatabaseReference,
+    private val auth: FirebaseAuth,
+    private val receiversDatabaseReference: DatabaseReference,
+    private val usersDatabaseReference: DatabaseReference,
     private val context: Context,
     private val coroutineDispatcher: CoroutineDispatcher,
 ) : FirebaseReadDataDataSource {
@@ -27,10 +33,11 @@ class FirebaseReadDataSourceImpl(
                     //addValueEventListener will crash everytime we update the firebase
                     //addListenerForSingleValueEvent will avoid crashing when we update firebase
                     //its like reading only once and not keep on reading
-                    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                    receiversDatabaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
-                            val receivers =
-                                snapshot.children.mapNotNull { it.getValue(Receiver::class.java) }
+                            val receivers = snapshot.children.mapNotNull {
+                                it.getValue(Receiver::class.java)
+                            }
                             if (receivers.isNotEmpty()) {
                                 continuation.resume(
                                     ReceiversResponse.Success(
@@ -58,12 +65,12 @@ class FirebaseReadDataSourceImpl(
         }
     }
 
-    override suspend fun getAllReceivers(): List<String> =
+    override suspend fun getAllReceivers(): List<String> = withContext(coroutineDispatcher) {
         suspendCoroutine { continuation ->
             val hasInternet = context.isInternetAvailable()
             if (hasInternet) {
                 try {
-                    databaseReference.get().addOnSuccessListener { snapshot ->
+                    receiversDatabaseReference.get().addOnSuccessListener { snapshot ->
                         val receiversList = snapshot.children.mapNotNull {
                             it.key
                         }
@@ -74,6 +81,33 @@ class FirebaseReadDataSourceImpl(
                 }
             } else {
                 continuation.resume((emptyList()))
+            }
+        }
+    }
+
+    override suspend fun readFullNameByUsername(): FullName =
+        withContext(coroutineDispatcher) {
+            val user = replaceUsername(auth.currentUser?.email) ?: ""
+            Log.d("MyTag", "readFullNameByUsername $user")
+            suspendCoroutine { continuation ->
+                val userRef = usersDatabaseReference.child(user)
+                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val name = snapshot.child("name").getValue(String::class.java)
+                            val family = snapshot.child("family").getValue(String::class.java)
+                            val fullName = FullName(currentName = name ?: "", currentFamily = family ?: "")
+                            Log.d("MyTag", "full: $fullName")
+                            continuation.resume(
+                                fullName
+                            )
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        continuation.resume(FullName())
+                    }
+                })
             }
         }
 }

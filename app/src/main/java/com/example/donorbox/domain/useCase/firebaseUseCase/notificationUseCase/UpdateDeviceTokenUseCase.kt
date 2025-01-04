@@ -5,5 +5,5 @@ import com.example.donorbox.data.dataSource.firebase.firebaseNotification.Fireba
 class UpdateDeviceTokenUseCase(
     private val notificationDataSourceImpl: FirebaseNotificationDataSourceImpl
 ) {
-    suspend fun updateDeviceToken(token: String) = notificationDataSourceImpl.updateDeviceToken(token)
+    suspend fun updateDeviceToken(token: String = "") = notificationDataSourceImpl.updateDeviceToken(token)
 }

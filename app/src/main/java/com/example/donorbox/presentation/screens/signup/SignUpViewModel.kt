@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseAddUserUseCase
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,8 +21,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignUpViewModel (
-    private val signUpUseCase: SignUpUseCase
+class SignUpViewModel(
+    private val signUpUseCase: SignUpUseCase,
+    private val addUserUseCase: FirebaseAddUserUseCase,
 ) : ViewModel() {
     private val _signupUiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
     val signupUiState: StateFlow<SignUpUiState> = _signupUiState.asStateFlow()
@@ -57,44 +59,51 @@ class SignUpViewModel (
         }
     }
 
-    fun signUp(email: String, password: String) {
+    fun signUp(email: String, password: String, name: String, family: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(accountStatus = AccountStatus.IsLoading)
             }
-            if (email.isEmpty() || password.isEmpty()) {
-                emitError("Email and Password can't be empty")
+            if (name.isEmpty() || family.isEmpty()) {
+                emitError("Please fill name & password")
                 _signupUiState.update { newState ->
                     newState.copy(accountStatus = AccountStatus.NotCreated)
                 }
-            }else if(password.length <6){
-                emitError("Password should contains minimum 6 letters!")
-                _signupUiState.update { newState ->
-                    newState.copy(accountStatus = AccountStatus.NotCreated)
-                }
-            }
-            else {
-                if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    val response = signUpUseCase.signUp(email, password)
-                    if (response is AccountStatus.Error) {
-                        emitError(response.error)
-                        _signupUiState.update { newState ->
-                            newState.copy(accountStatus = AccountStatus.NotCreated)
-                        }
-                    } else if (response is AccountStatus.IsCreated) {
-                        _signupUiState.update { newState ->
-                            emitError(response.message)
-                            newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
-                        }
-                    }
-                } else {
-                    emitError("Please use a valid email account!")
+            } else {
+                if (email.isEmpty() || password.isEmpty()) {
+                    emitError("Email and Password can't be empty")
                     _signupUiState.update { newState ->
                         newState.copy(accountStatus = AccountStatus.NotCreated)
                     }
+                } else if (password.length < 6) {
+                    emitError("Password should contains minimum 6 letters!")
+                    _signupUiState.update { newState ->
+                        newState.copy(accountStatus = AccountStatus.NotCreated)
+                    }
+                } else {
+                    if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        val response = signUpUseCase.signUp(email, password)
+                        if (response is AccountStatus.Error) {
+                            emitError(response.error)
+                            _signupUiState.update { newState ->
+                                newState.copy(accountStatus = AccountStatus.NotCreated)
+                            }
+                        } else if (response is AccountStatus.IsCreated) {
+                            _signupUiState.update { newState ->
+                                newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
+                            }
+                            emitError(response.message)
+                            addUserUseCase.addUser(username = email, name = name, family = family)
+                        }
+                    } else {
+                        emitError("Please use a valid email account!")
+                        _signupUiState.update { newState ->
+                            newState.copy(accountStatus = AccountStatus.NotCreated)
+                        }
+                    }
                 }
             }
-            Log.d("MyTag",_signupUiState.value.accountStatus.toString())
+            Log.d("MyTag", _signupUiState.value.accountStatus.toString())
         }
 
     }
@@ -103,6 +112,22 @@ class SignUpViewModel (
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(email = email)
+            }
+        }
+    }
+
+    fun setName(name: String) {
+        viewModelScope.launch {
+            _signupUiState.update { newState ->
+                newState.copy(name = name)
+            }
+        }
+    }
+
+    fun setFamily(family: String) {
+        viewModelScope.launch {
+            _signupUiState.update { newState ->
+                newState.copy(family = family)
             }
         }
     }

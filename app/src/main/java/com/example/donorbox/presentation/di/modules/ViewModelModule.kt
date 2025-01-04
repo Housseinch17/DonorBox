@@ -43,7 +43,8 @@ object ViewModelModule {
 
         viewModel{
             SignUpViewModel(
-                signUpUseCase = get()
+                signUpUseCase = get(),
+                addUserUseCase = get(),
             )
         }
 
@@ -52,9 +53,11 @@ object ViewModelModule {
                 firebaseReadReceiversUseCase = get(),
                 saveDonationsUseCase = get(),
                 verifyPasswordUseCase = get(),
-                sendNotificationToTokenUseCase = get()
+                sendNotificationToTokenUseCase = get(),
+                firebaseReadFullNameUseCase = get(),
             )
         }
+
         viewModel {
             MyDonationsViewModel(
                 getAllDonationsUseCase = get()

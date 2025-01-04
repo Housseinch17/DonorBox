@@ -8,6 +8,11 @@ import java.nio.charset.StandardCharsets
 
 object Constants {
     const val BASE_URL = "https://fcm.googleapis.com/"
+
+    fun replaceUsername(username: String?): String? {
+        return username?.replace("@", "*")?.replace(".", "_")
+    }
+
     private val firebaseMessagingScope = "https://www.googleapis.com/auth/firebase.messaging"
 
     fun getAccessToken(): String?{

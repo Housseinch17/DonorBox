@@ -70,7 +70,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
     }
 
 
-
     private suspend fun saveTokenToFirebase(token: String){
         updateDeviceTokenUseCase.updateDeviceToken(token)
         Log.d("FCM", "saveTokenToFirebase: $token")

@@ -55,7 +55,7 @@ class AuthenticationViewModel(
 
 
     private suspend fun updateTokenIntoFirebase(){
-        updateDeviceTokenUseCase.updateDeviceToken("")
+        updateDeviceTokenUseCase.updateDeviceToken()
     }
 
 

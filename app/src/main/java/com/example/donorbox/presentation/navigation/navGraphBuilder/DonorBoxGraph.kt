@@ -94,13 +94,16 @@ fun NavGraphBuilder.donorBoxGraph(
                 onOpenGoogleMap = { latitude, longitude ->
                     context.openGoogleMap(latitude, longitude)
                 },
-                onSendButton = homeViewModel::showDialog,
+                onSendButton = { token ->
+                    homeViewModel.showDialog()
+                    homeViewModel.updateCurrentToken(token)
+                },
                 sendMoney = { moneyToDonate, password ->
                     scope.launch {
                         homeViewModel.verifyPassword(password = password,
                             onVerified = {
                                 scope.launch {
-                                    homeViewModel.saveDonations(
+                                    homeViewModel.sendMoney(
                                         moneyToDonate = moneyToDonate,
                                         donations = MyDonations(
                                             myDonations = "Donated $moneyToDonate$  to: ${uiState.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
@@ -108,7 +111,7 @@ fun NavGraphBuilder.donorBoxGraph(
                                     )
                                 }
                             },
-                            setError = { error->
+                            setError = { error ->
                                 Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                             })
                     }
@@ -190,19 +193,19 @@ fun NavGraphBuilder.donorBoxGraph(
                 confirmShowPassword = settingsUiState.confirmShowPassword,
                 showText = settingsUiState.showText,
                 confirmShowText = settingsUiState.confirmShowText,
-                onPasswordChange = { currentPassword,newPassword, confirmPassword ->
+                onPasswordChange = { currentPassword, newPassword, confirmPassword ->
                     scope.launch {
-                    settingsViewModel.verifyPassword(currentPassword,
-                        onVerified = {
-                            settingsViewModel.changePassword(
-                                email = username,
-                                newPassword = newPassword,
-                                confirmNewPassword = confirmPassword
-                            )
-                        },
-                        setError = { error->
-                            Toast.makeText(context,error,Toast.LENGTH_LONG).show()
-                        })
+                        settingsViewModel.verifyPassword(currentPassword,
+                            onVerified = {
+                                settingsViewModel.changePassword(
+                                    email = username,
+                                    newPassword = newPassword,
+                                    confirmNewPassword = confirmPassword
+                                )
+                            },
+                            setError = { error ->
+                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                            })
                     }
 
                 },

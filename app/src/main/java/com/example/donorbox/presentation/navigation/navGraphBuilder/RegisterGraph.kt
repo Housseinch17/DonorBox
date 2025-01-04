@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -148,7 +149,7 @@ fun NavGraphBuilder.registerGraph(
             }
 
             //set delay for signup button to avoid spamming it
-            val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+            val lifecycleOwner = LocalLifecycleOwner.current
             DisposableEffect(key1 = lifecycleOwner) {
                 val observer = LifecycleEventObserver { _, event ->
                     when (event) {
@@ -163,7 +164,8 @@ fun NavGraphBuilder.registerGraph(
                 }
             }
 
-            SignUpScreen(Modifier.fillMaxSize(),
+            SignUpScreen(
+                Modifier.fillMaxSize(),
                 textPage = "SignUp Page",
                 emailValue = signUpUiState.email,
                 onEmailChange = { newEmail ->
@@ -180,12 +182,22 @@ fun NavGraphBuilder.registerGraph(
                 accountTextButton = "Already have an account? Login!",
                 createAccountEnabled = signUpUiState.accountStatus == AccountStatus.NotCreated,
                 alreadyExistingEnabled = signUpUiState.alreadyHaveAccountButton && (signUpUiState.accountStatus == AccountStatus.NotCreated),
-                onCreateAccount = { email, password ->
-                    signUpViewModel.signUp(email, password)
+                onCreateAccount = { name, family, email, password ->
+                    Log.d("MyTag","$name $family $email $password ")
+                    signUpViewModel.signUp(email = email, password = password, name = name, family = family)
                 },
                 onExistingAccount = {
                     navHostController.navigateUp()
-                })
+                },
+                nameValue = signUpUiState.name,
+                familyValue = signUpUiState.family,
+                onNameChange = { name->
+                    signUpViewModel.setName(name)
+                },
+                onFamilyChange = { family->
+                    signUpViewModel.setFamily(family)
+                }
+            )
         }
 
     }

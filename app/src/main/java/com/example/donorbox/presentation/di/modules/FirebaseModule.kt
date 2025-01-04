@@ -29,8 +29,13 @@ object FirebaseModule {
         single {
             FirebaseMessaging.getInstance()
         }
+
         single<DatabaseReference>(named("receiversReference")) {
             FirebaseDatabase.getInstance().getReference("receivers")
+        }
+
+        single<DatabaseReference>(named("usersReference")) {
+            FirebaseDatabase.getInstance().getReference("users")
         }
 
         single<FirebaseAuthenticationDataSourceImpl> {
@@ -42,19 +47,22 @@ object FirebaseModule {
 
         single<FirebaseReadDataSourceImpl> {
             FirebaseReadDataSourceImpl(
-                databaseReference = get(named("receiversReference")),
+                receiversDatabaseReference = get(named("receiversReference")),
+                usersDatabaseReference = get(named("usersReference")),
                 context = androidContext(),
                 coroutineDispatcher = get(named("Dispatchers.IO")),
+                auth = get(),
             )
         }
 
         single<FirebaseWriteDataSourceImpl> {
             FirebaseWriteDataSourceImpl(
-                databaseReference = get(named("receiversReference")),
+                receiversDatabaseReference = get(named("receiversReference")),
+                usersDatabaseReference = get(named("usersReference")),
                 coroutineDispatcher = get(named("Dispatchers.IO")),
             )
         }
-        
+
         single<FirebaseNotificationDataSourceImpl>{
             FirebaseNotificationDataSourceImpl(
                 firebaseMessaging = get(),
@@ -80,16 +88,19 @@ object FirebaseModule {
 
         single<FirebaseReadDataDataSource> {
             FirebaseReadDataSourceImpl(
-                databaseReference = get(named("receiversReference")),
+                receiversDatabaseReference = get(named("receiversReference")),
+                usersDatabaseReference = get(named("usersReference")),
                 context = androidContext(),
                 coroutineDispatcher = get(named("Dispatchers.IO")),
+                auth = get(),
             )
         }
 
         single<FirebaseWriteDataDataSource> {
             FirebaseWriteDataSourceImpl(
-                databaseReference = get(named("receiversReference")),
-                coroutineDispatcher = get(named("Dispatchers.IO"))
+                receiversDatabaseReference = get(named("receiversReference")),
+                usersDatabaseReference = get(named("usersReference")),
+                coroutineDispatcher = get(named("Dispatchers.IO")),
             )
         }
 

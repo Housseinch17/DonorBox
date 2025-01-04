@@ -15,7 +15,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.donorbox.presentation.navigation.NavigationScreens
 
-
 // Extension function to check internet connectivity
 @Suppress("DEPRECATION")
 @SuppressLint("ObsoleteSdkInt")

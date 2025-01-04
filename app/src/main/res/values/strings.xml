@@ -14,6 +14,8 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="visibility">Visibility</string>
     <string name="email">Email</string>
+    <string name="name">Name</string>
+    <string name="family">Family</string>
     <string name="password">Password</string>
     <string name="dismiss">Dismiss</string>
     <string name="empty_email_password">Email and Password can\'t be empty</string>
