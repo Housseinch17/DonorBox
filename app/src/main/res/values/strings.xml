@@ -18,6 +18,7 @@
     <string name="family">Family</string>
     <string name="password">Password</string>
     <string name="dismiss">Dismiss</string>
+    <string name="send_money">Send Money</string>
     <string name="empty_email_password">Email and Password can\'t be empty</string>
     <string name="account_created">Account is created</string>
     <string name="loading">Loading</string>

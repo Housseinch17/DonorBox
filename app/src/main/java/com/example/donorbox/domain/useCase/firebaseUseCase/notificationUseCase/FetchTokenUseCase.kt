@@ -1,7 +1,7 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
-class FetchTokenUseCase(private val firebaseRepositoryImpl: FirebaseRepositoryImpl) {
-    suspend fun fetchToken(): String = firebaseRepositoryImpl.fetchToken()
+class FetchTokenUseCase(private val firebaseRepository: FirebaseRepository) {
+    suspend fun fetchToken(): String = firebaseRepository.fetchToken()
 }

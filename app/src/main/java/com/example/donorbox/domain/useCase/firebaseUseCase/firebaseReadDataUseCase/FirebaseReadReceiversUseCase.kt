@@ -1,10 +1,10 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 class FirebaseReadReceiversUseCase(
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository
 ) {
-    suspend fun readReceivers(): ReceiversResponse = firebaseRepositoryImpl.readReceivers()
+    suspend fun readReceivers(): ReceiversResponse = firebaseRepository.readReceivers()
 }

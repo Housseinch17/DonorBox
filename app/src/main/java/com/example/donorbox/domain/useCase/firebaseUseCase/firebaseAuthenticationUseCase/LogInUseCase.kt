@@ -1,10 +1,10 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 
 class LogInUseCase (
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository
 ) {
-    suspend fun logIn(email: String,password: String): AuthState = firebaseRepositoryImpl.logIn(email,password)
+    suspend fun logIn(email: String,password: String): AuthState = firebaseRepository.logIn(email,password)
 }

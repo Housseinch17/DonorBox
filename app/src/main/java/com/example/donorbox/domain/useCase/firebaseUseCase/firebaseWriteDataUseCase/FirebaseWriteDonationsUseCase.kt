@@ -1,10 +1,10 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
 class FirebaseWriteDonationsUseCase(
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository
 ) {
     suspend fun writeDonationsIntoFirebase(username: String, donation: String) =
-        firebaseRepositoryImpl.writeDonationsIntoFirebase(username, donation)
+        firebaseRepository.writeDonationsIntoFirebase(username, donation)
 }

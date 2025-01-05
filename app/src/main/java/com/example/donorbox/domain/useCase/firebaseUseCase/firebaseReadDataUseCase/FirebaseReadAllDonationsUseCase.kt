@@ -1,9 +1,9 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
 class FirebaseReadAllDonationsUseCase(
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository
 ) {
-    suspend fun readAllDonations(): List<String> = firebaseRepositoryImpl.readAllDonations()
+    suspend fun readAllDonations(): List<String> = firebaseRepository.readAllDonations()
 }

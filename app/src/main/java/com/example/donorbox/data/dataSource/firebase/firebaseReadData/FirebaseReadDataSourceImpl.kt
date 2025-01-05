@@ -24,7 +24,7 @@ class FirebaseReadDataSourceImpl(
     private val usersDatabaseReference: DatabaseReference,
     private val context: Context,
     private val coroutineDispatcher: CoroutineDispatcher,
-) : FirebaseReadDataDataSource {
+) : FirebaseReadDataSource {
     override suspend fun readReceivers(): ReceiversResponse = withContext(coroutineDispatcher) {
         suspendCoroutine { continuation ->
             val hasInternet = context.isInternetAvailable()
@@ -62,26 +62,6 @@ class FirebaseReadDataSourceImpl(
                 }
             } else {
                 continuation.resume(ReceiversResponse.Error("No internet connection!"))
-            }
-        }
-    }
-
-    override suspend fun getAllReceivers(): List<String> = withContext(coroutineDispatcher) {
-        suspendCoroutine { continuation ->
-            val hasInternet = context.isInternetAvailable()
-            if (hasInternet) {
-                try {
-                    receiversDatabaseReference.get().addOnSuccessListener { snapshot ->
-                        val receiversList = snapshot.children.mapNotNull {
-                            it.key
-                        }
-                        continuation.resume(receiversList)
-                    }
-                } catch (e: Exception) {
-                    continuation.resume(emptyList())
-                }
-            } else {
-                continuation.resume((emptyList()))
             }
         }
     }
@@ -134,6 +114,25 @@ class FirebaseReadDataSourceImpl(
                 })
             }else{
                 continuation.resume(emptyList())
+            }
+        }
+    }
+    private suspend fun getAllReceivers(): List<String> = withContext(coroutineDispatcher) {
+        suspendCoroutine { continuation ->
+            val hasInternet = context.isInternetAvailable()
+            if (hasInternet) {
+                try {
+                    receiversDatabaseReference.get().addOnSuccessListener { snapshot ->
+                        val receiversList = snapshot.children.mapNotNull {
+                            it.key
+                        }
+                        continuation.resume(receiversList)
+                    }
+                } catch (e: Exception) {
+                    continuation.resume(emptyList())
+                }
+            } else {
+                continuation.resume((emptyList()))
             }
         }
     }

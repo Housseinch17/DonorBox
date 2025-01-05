@@ -1,12 +1,12 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
-class VerifyPasswordUseCase(private val firebaseRepositoryImpl: FirebaseRepositoryImpl) {
+class VerifyPasswordUseCase(private val firebaseRepository: FirebaseRepository) {
     suspend fun verifyPassword(
         password: String,
         onVerified: () -> Unit,
         setError: (String) -> Unit
     ) =
-        firebaseRepositoryImpl.verifyPassword(password, onVerified, setError)
+        firebaseRepository.verifyPassword(password, onVerified, setError)
 }

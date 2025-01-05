@@ -10,7 +10,7 @@ class FirebaseWriteDataSourceImpl(
     private val receiversDatabaseReference: DatabaseReference,
     private val usersDatabaseReference: DatabaseReference,
     private val coroutineDispatcher: CoroutineDispatcher
-) : FirebaseWriteDataDataSource {
+) : FirebaseWriteDataSource {
     override suspend fun writeToken(username: String, token: String): Unit = withContext(coroutineDispatcher){
         val receiverRef = receiversDatabaseReference.child(username)
         receiverRef.child("token").setValue(token).addOnSuccessListener {

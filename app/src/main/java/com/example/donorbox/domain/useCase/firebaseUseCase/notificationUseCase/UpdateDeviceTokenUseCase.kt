@@ -1,9 +1,9 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSourceImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
 class UpdateDeviceTokenUseCase(
-    private val notificationDataSourceImpl: FirebaseNotificationDataSourceImpl
+    private val firebaseRepository: FirebaseRepository
 ) {
-    suspend fun updateDeviceToken(token: String = "") = notificationDataSourceImpl.updateDeviceToken(token)
+    suspend fun updateDeviceToken(token: String = "") = firebaseRepository.updateDeviceToken(token)
 }

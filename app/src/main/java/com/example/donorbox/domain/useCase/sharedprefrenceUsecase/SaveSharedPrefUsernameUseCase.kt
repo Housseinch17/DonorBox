@@ -1,9 +1,9 @@
 package com.example.donorbox.domain.useCase.sharedprefrenceUsecase
 
-import com.example.donorbox.data.dataSource.sharedpreference.SharedPreferencesRepositoryImpl
+import com.example.donorbox.domain.repository.SharedPreferencesRepository
 
 class SaveSharedPrefUsernameUseCase(
-    private val sharedPreferencesRepositoryImpl: SharedPreferencesRepositoryImpl
+    private val sharedPreferencesRepository: SharedPreferencesRepository
 ) {
-    suspend fun saveUsername(username: String?) = sharedPreferencesRepositoryImpl.saveUsername(username)
+    suspend fun saveUsername(username: String?) = sharedPreferencesRepository.saveUsername(username)
 }

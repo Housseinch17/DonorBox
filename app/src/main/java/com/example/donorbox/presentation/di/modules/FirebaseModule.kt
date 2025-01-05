@@ -5,9 +5,9 @@ import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.Fire
 import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSourceImpl
 import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSource
 import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSourceImpl
-import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataDataSource
+import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSource
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSourceImpl
-import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataDataSource
+import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSource
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
 import com.example.donorbox.domain.repository.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -38,47 +38,6 @@ object FirebaseModule {
             FirebaseDatabase.getInstance().getReference("users")
         }
 
-        single<FirebaseAuthenticationDataSourceImpl> {
-            FirebaseAuthenticationDataSourceImpl(
-                auth = get(),
-                coroutineDispatcher = get(named("Dispatchers.IO"))
-            )
-        }
-
-        single<FirebaseReadDataSourceImpl> {
-            FirebaseReadDataSourceImpl(
-                receiversDatabaseReference = get(named("receiversReference")),
-                usersDatabaseReference = get(named("usersReference")),
-                context = androidContext(),
-                coroutineDispatcher = get(named("Dispatchers.IO")),
-                auth = get(),
-            )
-        }
-
-        single<FirebaseWriteDataSourceImpl> {
-            FirebaseWriteDataSourceImpl(
-                receiversDatabaseReference = get(named("receiversReference")),
-                usersDatabaseReference = get(named("usersReference")),
-                coroutineDispatcher = get(named("Dispatchers.IO")),
-            )
-        }
-
-        single<FirebaseNotificationDataSourceImpl>{
-            FirebaseNotificationDataSourceImpl(
-                firebaseMessaging = get(),
-                coroutineDispatcher = get(named("Dispatchers.IO")),
-                firebaseAuthenticationDataSourceImpl = get(),
-                firebaseReadDataSourceImpl = get(),
-                firebaseWriteDataSourceImpl = get(),
-                fcmApi = get(),
-            )
-        }
-
-        single<FirebaseRepositoryImpl> {
-            FirebaseRepositoryImpl(get(), get(), get(),get())
-        }
-
-
         single<FirebaseAuthenticationDataSource> {
             FirebaseAuthenticationDataSourceImpl(
                 auth = get(),
@@ -86,7 +45,7 @@ object FirebaseModule {
             )
         }
 
-        single<FirebaseReadDataDataSource> {
+        single<FirebaseReadDataSource> {
             FirebaseReadDataSourceImpl(
                 receiversDatabaseReference = get(named("receiversReference")),
                 usersDatabaseReference = get(named("usersReference")),
@@ -96,7 +55,7 @@ object FirebaseModule {
             )
         }
 
-        single<FirebaseWriteDataDataSource> {
+        single<FirebaseWriteDataSource> {
             FirebaseWriteDataSourceImpl(
                 receiversDatabaseReference = get(named("receiversReference")),
                 usersDatabaseReference = get(named("usersReference")),
@@ -108,9 +67,9 @@ object FirebaseModule {
             FirebaseNotificationDataSourceImpl(
                 firebaseMessaging = get(),
                 coroutineDispatcher = get(named("Dispatchers.IO")),
-                firebaseAuthenticationDataSourceImpl = get(),
-                firebaseReadDataSourceImpl = get(),
-                firebaseWriteDataSourceImpl = get(),
+                auth = get(),
+                receiversDatabaseReference = get(named("receiversReference")),
+                context = androidContext(),
                 fcmApi = get(),
             )
         }

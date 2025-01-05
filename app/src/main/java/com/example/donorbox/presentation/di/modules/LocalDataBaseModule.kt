@@ -9,29 +9,16 @@ import org.koin.dsl.module
 
 object LocalDataBaseModule {
     val localDataBaseModule = module {
-        single<LocalDataBaseDataSourceImpl>{
+        single<LocalDataBaseDataSource>{
             LocalDataBaseDataSourceImpl(
                 myDonationsDAO = get(),
                 coroutineDispatcher = get(named("Dispatchers.IO"))
             )
         }
 
-        single<LocalDataBaseRepositoryImpl>{
+        single<LocalDataBaseRepository>{
             LocalDataBaseRepositoryImpl(
-                localDataBaseDataSourceImpl = get()
-            )
-        }
-
-        single<LocalDataBaseDataSource> {
-            LocalDataBaseDataSourceImpl(
-                myDonationsDAO = get(),
-                coroutineDispatcher = get(named("Dispatchers.IO"))
-            )
-        }
-
-        single<LocalDataBaseRepository> {
-            LocalDataBaseRepositoryImpl(
-                localDataBaseDataSourceImpl = get()
+                localDataBaseDataSource = get()
             )
         }
     }

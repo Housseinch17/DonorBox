@@ -1,9 +1,10 @@
 package com.example.donorbox.data.dataSource.firebase
 
-import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSourceImpl
-import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSourceImpl
-import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSourceImpl
-import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSourceImpl
+import android.util.Log
+import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.FirebaseAuthenticationDataSource
+import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSource
+import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSource
+import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSource
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.screens.home.FullName
@@ -13,69 +14,71 @@ import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 class FirebaseRepositoryImpl(
-    private val firebaseAuthenticationDataSourceImpl: FirebaseAuthenticationDataSourceImpl,
-    private val firebaseReadDataSourceImpl: FirebaseReadDataSourceImpl,
-    private val firebaseWriteDataSourceImpl: FirebaseWriteDataSourceImpl,
-    private val notificationDataSourceImpl: FirebaseNotificationDataSourceImpl
+    private val firebaseAuthenticationDataSource: FirebaseAuthenticationDataSource,
+    private val firebaseReadDataDataSource: FirebaseReadDataSource,
+    private val firebaseWriteDataSource: FirebaseWriteDataSource,
+    private val firebaseNotificationDataSource: FirebaseNotificationDataSource
 ) : FirebaseRepository {
     override suspend fun getCurrentUser(): String? {
-        return firebaseAuthenticationDataSourceImpl.getCurrentUser()
+        return firebaseAuthenticationDataSource.getCurrentUser()
     }
 
     override suspend fun fetchToken(): String {
-        return notificationDataSourceImpl.fetchToken()
+        return firebaseNotificationDataSource.fetchToken()
     }
 
     override suspend fun updateDeviceToken(token: String) {
-        notificationDataSourceImpl.updateDeviceToken(token)
+        firebaseNotificationDataSource.updateDeviceToken(token)
     }
 
     override suspend fun sendNotificationToToken(notificationMessage: NotificationMessage) {
-        notificationDataSourceImpl.sendNotificationToToken(notificationMessage)
+        Log.d("MyTag","sendNotification repositoryImpl")
+        firebaseNotificationDataSource.sendNotificationToToken(notificationMessage)
     }
 
     override suspend fun logIn(email: String, password: String): AuthState {
-        return firebaseAuthenticationDataSourceImpl.logIn(email, password)
+        return firebaseAuthenticationDataSource.logIn(email, password)
     }
 
     override suspend fun signUp(email: String, password: String): AccountStatus {
-        return firebaseAuthenticationDataSourceImpl.signUp(email, password)
+        return firebaseAuthenticationDataSource.signUp(email, password)
     }
 
     override  fun verifiedAccount(): Boolean {
-        return firebaseAuthenticationDataSourceImpl.verifiedAccount()
+        return firebaseAuthenticationDataSource.verifiedAccount()
     }
 
     override fun signOut() {
-        return firebaseAuthenticationDataSourceImpl.signOut()
+        return firebaseAuthenticationDataSource.signOut()
     }
 
     override suspend fun addUser(username: String, name: String, family: String) {
-        return firebaseWriteDataSourceImpl.addUsers(username,name,family)
+        return firebaseWriteDataSource.addUsers(username,name,family)
     }
 
     override suspend fun changePassword(email: String, newPassword: String): PasswordChangement {
-        return firebaseAuthenticationDataSourceImpl.changePassword(email, newPassword)
+        return firebaseAuthenticationDataSource.changePassword(email, newPassword)
     }
 
     override suspend fun resetPassword(email: String): PasswordChangement {
-        return firebaseAuthenticationDataSourceImpl.resetPassword(email)
+        return firebaseAuthenticationDataSource.resetPassword(email)
     }
 
     override suspend fun readReceivers(): ReceiversResponse {
-        return firebaseReadDataSourceImpl.readReceivers()
+        return firebaseReadDataDataSource.readReceivers()
     }
 
     override suspend fun readFullNameByUsername(): FullName {
-        return firebaseReadDataSourceImpl.readFullNameByUsername()
+        Log.d("MyTag","readFullNameByUsername firebaseRepositoryImpl")
+        return firebaseReadDataDataSource.readFullNameByUsername()
     }
 
     override suspend fun writeToken(username: String, token: String) {
-        return firebaseWriteDataSourceImpl.writeToken(username, token)
+        return firebaseWriteDataSource.writeToken(username, token)
     }
 
     override suspend fun writeDonationsIntoFirebase(username: String, donation: String) {
-        firebaseWriteDataSourceImpl.writeDonationsIntoFirebase(username,donation)
+        firebaseWriteDataSource.writeDonationsIntoFirebase(username,donation)
     }
 
     override suspend fun verifyPassword(
@@ -83,15 +86,12 @@ class FirebaseRepositoryImpl(
         onVerified: () -> Unit,
         setError: (String) -> Unit
     ) {
-        firebaseAuthenticationDataSourceImpl.verifyPassword(password, onVerified, setError)
+        firebaseAuthenticationDataSource.verifyPassword(password, onVerified, setError)
     }
 
-    override suspend fun getAllReceivers(): List<String> {
-        return firebaseReadDataSourceImpl.getAllReceivers()
-    }
 
     override suspend fun readAllDonations(): List<String> {
-        return firebaseReadDataSourceImpl.readAllDonations()
+        return firebaseReadDataDataSource.readAllDonations()
     }
 
 }

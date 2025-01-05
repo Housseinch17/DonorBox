@@ -16,19 +16,6 @@ object SharedPreferenceModule {
             androidContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         }
 
-        single<SharedPreferencesManagerImpl> {
-            SharedPreferencesManagerImpl(
-                sharedPreferences = get(),
-                coroutineDispatcher = get(named("Dispatchers.IO"))
-            )
-        }
-
-        single<SharedPreferencesRepositoryImpl> {
-            SharedPreferencesRepositoryImpl(
-                sharedPreferencesManagerImpl = get()
-            )
-        }
-
         single<SharedPreferencesManager> {
             SharedPreferencesManagerImpl(
                 sharedPreferences = get(),

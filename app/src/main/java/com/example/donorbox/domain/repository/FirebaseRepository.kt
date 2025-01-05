@@ -24,7 +24,6 @@ interface FirebaseRepository {
     suspend fun writeToken(username: String, token: String)
     suspend fun writeDonationsIntoFirebase(username: String, donation: String)
     suspend fun verifyPassword(password: String, onVerified: () -> Unit, setError: (String) -> Unit)
-    suspend fun getAllReceivers(): List<String>
     suspend fun readAllDonations(): List<String>
 
 }

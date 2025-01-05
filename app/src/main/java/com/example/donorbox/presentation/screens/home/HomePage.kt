@@ -2,7 +2,6 @@ package com.example.donorbox.presentation.screens.home
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,9 +29,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -638,14 +637,16 @@ fun ShowDialog(
             confirmButton = {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
+                        containerColor = BrightBlue,
+                        disabledContainerColor = Color.Red
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Send Money", color = Color.Black,
+                        text = stringResource(R.string.send_money), color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -654,11 +655,13 @@ fun ShowDialog(
             dismissButton = {
                 OutlinedButton(
                     onClick = onDismissButton,
+                    enabled = !isLoading,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color.Transparent,
-                        contentColor = BrightBlue
+                        contentColor = BrightBlue,
+                        disabledContainerColor = Color.Red
                     ),
                     border = BorderStroke(1.dp, BrightBlue)
                 ) {

@@ -1,11 +1,11 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 
 class ChangePasswordUseCase (
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository,
 ) {
     suspend fun changePassword(email: String, newPassword: String): PasswordChangement =
-        firebaseRepositoryImpl.changePassword(email, newPassword)
+        firebaseRepository.changePassword(email, newPassword)
 }

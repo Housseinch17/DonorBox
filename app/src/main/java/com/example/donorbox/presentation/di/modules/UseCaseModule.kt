@@ -8,7 +8,6 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticatio
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignOutUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseGetAllReceiversUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadAllDonationsUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
@@ -52,10 +51,6 @@ object UseCaseModule {
 
         single<VerifyPasswordUseCase>{
             VerifyPasswordUseCase(get())
-        }
-
-        single<FirebaseGetAllReceiversUseCase>{
-            FirebaseGetAllReceiversUseCase(get())
         }
 
         single<FirebaseReadAllDonationsUseCase>{

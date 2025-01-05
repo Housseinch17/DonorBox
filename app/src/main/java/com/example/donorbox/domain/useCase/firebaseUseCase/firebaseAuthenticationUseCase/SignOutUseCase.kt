@@ -1,9 +1,9 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase
 
-import com.example.donorbox.data.dataSource.firebase.FirebaseRepositoryImpl
+import com.example.donorbox.domain.repository.FirebaseRepository
 
 class SignOutUseCase (
-    private val firebaseRepositoryImpl: FirebaseRepositoryImpl
+private val firebaseRepository: FirebaseRepository
 ) {
-    suspend fun signOut() = firebaseRepositoryImpl.signOut()
+    suspend fun signOut() = firebaseRepository.signOut()
 }

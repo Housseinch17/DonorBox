@@ -50,6 +50,7 @@ class HomeViewModel(
     }
 
     private suspend fun readFullName() {
+        Log.d("MyTag","readFullName")
         val fullName = firebaseReadFullNameUseCase.readFullNameByUsername()
         _uiState.update { newState ->
             newState.copy(
@@ -59,6 +60,7 @@ class HomeViewModel(
     }
 
     private suspend fun sendNotification(notificationMessage: NotificationMessage) {
+        Log.d("MyTag","sendNotification")
         sendNotificationToTokenUseCase.sendNotificationToToken(
             notificationMessage = notificationMessage
         )
@@ -153,10 +155,6 @@ class HomeViewModel(
         } else {
             try {
                 updateLoader(true)
-
-                //save donation first
-                saveDonationsUseCase.saveDonations(donations)
-
                 //read full name of sender
                 readFullName()
 
@@ -178,6 +176,8 @@ class HomeViewModel(
                     homeUiState.receiverUsername,
                     "You have received $moneyToDonate\$ from ${homeUiState.senderFullName.currentName} ${homeUiState.senderFullName.currentFamily}"
                 )
+                //save donation
+                saveDonationsUseCase.saveDonations(donations)
 
                 updateMoneyToDonate("")
                 newPasswordValueChange("")
@@ -186,7 +186,9 @@ class HomeViewModel(
                 emitFlow("You're donations are succeed!")
                 hideDialog()
             } catch (e: Exception) {
+                Log.d("MyTag","sendMoney() error: ${e.message}")
                 emitFlow(e.message.toString())
+                updateLoader(false)
             }
         }
         updateLoader(false)
