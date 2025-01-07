@@ -51,12 +51,14 @@ class HomeViewModel(
 
     private suspend fun readFullName() {
         Log.d("MyTag","readFullName")
-        val fullName = firebaseReadFullNameUseCase.readFullNameByUsername()
+        val name = firebaseReadFullNameUseCase.readFullNameByUsername()
+        Log.d("MyTag","read $name")
         _uiState.update { newState ->
             newState.copy(
-                senderFullName = fullName
+                senderName = name
             )
         }
+        Log.d("MyTag", _uiState.value.senderName)
     }
 
     private suspend fun sendNotification(notificationMessage: NotificationMessage) {
@@ -144,7 +146,6 @@ class HomeViewModel(
     }
 
     suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
-        val homeUiState = _uiState.value
         _uiState.update { newState ->
             newState.copy(showText = false)
         }
@@ -158,6 +159,9 @@ class HomeViewModel(
                 //read full name of sender
                 readFullName()
 
+                val homeUiState = _uiState.value
+
+                Log.d("MyTag","HomeUistate ${homeUiState.senderName}")
                 //send notification
                 sendNotification(
                     notificationMessage = NotificationMessage(
@@ -165,7 +169,7 @@ class HomeViewModel(
                             token = homeUiState.receiverToken,
                             notification = Notification(
                                 title = "Received Money",
-                                body = "You have received $moneyToDonate$ from ${homeUiState.senderFullName.currentName} ${homeUiState.senderFullName.currentFamily}"
+                                body = "You have received $moneyToDonate$ from ${homeUiState.senderName}"
                             )
                         )
                     )
@@ -174,13 +178,14 @@ class HomeViewModel(
                 //post to receiver firebase
                 firebaseWriteDonationsUseCase.writeDonationsIntoFirebase(
                     homeUiState.receiverUsername,
-                    "You have received $moneyToDonate\$ from ${homeUiState.senderFullName.currentName} ${homeUiState.senderFullName.currentFamily}"
+                    "You have received $moneyToDonate\$ from ${homeUiState.senderName}"
                 )
                 //save donation
                 saveDonationsUseCase.saveDonations(donations)
 
                 updateMoneyToDonate("")
                 newPasswordValueChange("")
+
                 updateLoader(false)
 
                 emitFlow("You're donations are succeed!")

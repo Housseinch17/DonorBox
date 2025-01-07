@@ -18,15 +18,10 @@ data class HomeUiState(
     val showPassword: Boolean = false,
     val receiverToken: String = "",
     val receiverUsername: String = "",
-    val senderFullName: FullName = FullName(),
+    val senderName: String = "",
 
 )
 
-@Immutable
-data class FullName(
-    val currentName: String = "",
-    val currentFamily: String = ""
-)
 @Immutable
 data class ModalBottomSheetReceiver(
     val modalBottomSheetReceiver: Receiver = Receiver(),

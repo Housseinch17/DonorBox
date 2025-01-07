@@ -16,7 +16,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +38,6 @@ import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.TrailingIcon
 import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsPage(
     modifier: Modifier,
@@ -172,14 +170,7 @@ fun SettingsPage(
                             imageVector = currentPasswordImageVector,
                             onIconClick = currentPasswordOnIconClick
                         )
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Black.copy(alpha = 0.1f),
-                        focusedIndicatorColor = BrightBlue,
-                        unfocusedIndicatorColor = Color.Gray,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    )
+                    }
                 )
                 Spacer(modifier = Modifier.height(14.dp))
                 Text(
@@ -281,7 +272,6 @@ fun SettingsPage(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangePasswordField(
     newPasswordValue: String,
@@ -300,12 +290,5 @@ fun ChangePasswordField(
         trailingIcon = {
             TrailingIcon(imageVector = imageVector, onIconClick = onIconClick)
         },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Black.copy(alpha = 0.1f),
-            focusedIndicatorColor = BrightBlue,
-            unfocusedIndicatorColor = Color.Gray,
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
-        ),
     )
 }

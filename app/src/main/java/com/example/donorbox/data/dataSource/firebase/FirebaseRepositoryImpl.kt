@@ -7,7 +7,6 @@ import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseRe
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSource
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
-import com.example.donorbox.presentation.screens.home.FullName
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
@@ -52,8 +51,8 @@ class FirebaseRepositoryImpl(
         return firebaseAuthenticationDataSource.signOut()
     }
 
-    override suspend fun addUser(username: String, name: String, family: String) {
-        return firebaseWriteDataSource.addUsers(username,name,family)
+    override suspend fun addUser(username: String, name: String) {
+        return firebaseWriteDataSource.addUsers(username,name)
     }
 
     override suspend fun changePassword(email: String, newPassword: String): PasswordChangement {
@@ -68,7 +67,7 @@ class FirebaseRepositoryImpl(
         return firebaseReadDataDataSource.readReceivers()
     }
 
-    override suspend fun readFullNameByUsername(): FullName {
+    override suspend fun readFullNameByUsername(): String {
         Log.d("MyTag","readFullNameByUsername firebaseRepositoryImpl")
         return firebaseReadDataDataSource.readFullNameByUsername()
     }

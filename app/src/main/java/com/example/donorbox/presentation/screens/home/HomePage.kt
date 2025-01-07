@@ -42,8 +42,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -700,10 +700,9 @@ fun ShowDialog(
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        TextField(
+                        OutlinedTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
                                 .padding(top = 8.dp),
                             value = moneyToDonate,
                             onValueChange = {
@@ -742,14 +741,7 @@ fun ShowDialog(
                             onValueChange = newPasswordValueChange,
                             trailingIcon = {
                                 TrailingIcon(imageVector = imageVector, onIconClick = onIconClick)
-                            },
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.Black.copy(alpha = 0.1f),
-                                focusedIndicatorColor = BrightBlue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
-                            )
+                            }
                         )
                     }
                 }

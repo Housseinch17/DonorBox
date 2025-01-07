@@ -87,8 +87,6 @@ fun NavGraphBuilder.registerGraph(
                 onPasswordChange = { newPassword ->
                     logInViewModel.setPassword(newPassword)
                 },
-                "LogIn",
-                "Don't have an account, SignUp!",
                 logInEnabled = logInUiState.authState == AuthState.NotLoggedIn,
                 signUpEnabled = logInUiState.authState == AuthState.NotLoggedIn,
                 isLoading = logInUiState.isLoading,
@@ -173,7 +171,10 @@ fun NavGraphBuilder.registerGraph(
                 },
                 imageVector = signUpViewModel.getIconVisibility(),
                 onIconClick = signUpViewModel::setShowPassword,
+                confirmPasswordImageVector = signUpViewModel.getConfirmIconVisibility(),
+                onConfirmIconClick = signUpViewModel::setShowConfirmPassword,
                 showPassword = signUpUiState.showPassword,
+                confirmShowPassword = signUpUiState.showConfirmPassword,
                 passwordValue = signUpUiState.password,
                 onPasswordChange = { newPassword ->
                     signUpViewModel.setPassword(newPassword)
@@ -182,21 +183,26 @@ fun NavGraphBuilder.registerGraph(
                 accountTextButton = "Already have an account? Login!",
                 createAccountEnabled = signUpUiState.accountStatus == AccountStatus.NotCreated,
                 alreadyExistingEnabled = signUpUiState.alreadyHaveAccountButton && (signUpUiState.accountStatus == AccountStatus.NotCreated),
-                onCreateAccount = { name, family, email, password ->
-                    Log.d("MyTag","$name $family $email $password ")
-                    signUpViewModel.signUp(email = email, password = password, name = name, family = family)
+                onCreateAccount = { name, confirmPassword, email, password ->
+                    Log.d("MyTag", "$name $confirmPassword $email $password ")
+                    signUpViewModel.signUp(
+                        email = email,
+                        password = password,
+                        name = name,
+                        confirmPassword = confirmPassword
+                    )
                 },
                 onExistingAccount = {
                     navHostController.navigateUp()
                 },
                 nameValue = signUpUiState.name,
-                familyValue = signUpUiState.family,
-                onNameChange = { name->
+                confirmPasswordValue = signUpUiState.confirmPassword,
+                onNameChange = { name ->
                     signUpViewModel.setName(name)
                 },
-                onFamilyChange = { family->
-                    signUpViewModel.setFamily(family)
-                }
+                onConfirmPasswordChange = { confirmPassword ->
+                    signUpViewModel.setConfirmPassword(confirmPassword)
+                },
             )
         }
 

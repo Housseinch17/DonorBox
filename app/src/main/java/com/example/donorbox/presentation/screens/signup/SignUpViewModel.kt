@@ -59,19 +59,19 @@ class SignUpViewModel(
         }
     }
 
-    fun signUp(email: String, password: String, name: String, family: String) {
+    fun signUp(email: String, password: String, name: String, confirmPassword: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(accountStatus = AccountStatus.IsLoading)
             }
-            if (name.isEmpty() || family.isEmpty()) {
-                emitError("Please fill name & password")
+            if (name.isEmpty()) {
+                emitError("Please fill name")
                 _signupUiState.update { newState ->
                     newState.copy(accountStatus = AccountStatus.NotCreated)
                 }
             } else {
-                if (email.isEmpty() || password.isEmpty()) {
-                    emitError("Email and Password can't be empty")
+                if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                    emitError("All inputs should be filled!")
                     _signupUiState.update { newState ->
                         newState.copy(accountStatus = AccountStatus.NotCreated)
                     }
@@ -81,22 +81,29 @@ class SignUpViewModel(
                         newState.copy(accountStatus = AccountStatus.NotCreated)
                     }
                 } else {
-                    if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        val response = signUpUseCase.signUp(email, password)
-                        if (response is AccountStatus.Error) {
-                            emitError(response.error)
+                    if(password == confirmPassword){
+                        if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                            val response = signUpUseCase.signUp(email, password)
+                            if (response is AccountStatus.Error) {
+                                emitError(response.error)
+                                _signupUiState.update { newState ->
+                                    newState.copy(accountStatus = AccountStatus.NotCreated)
+                                }
+                            } else if (response is AccountStatus.IsCreated) {
+                                _signupUiState.update { newState ->
+                                    newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
+                                }
+                                emitError(response.message)
+                                addUserUseCase.addUser(username = email, name = name)
+                            }
+                        } else {
+                            emitError("Please use a valid email account!")
                             _signupUiState.update { newState ->
                                 newState.copy(accountStatus = AccountStatus.NotCreated)
                             }
-                        } else if (response is AccountStatus.IsCreated) {
-                            _signupUiState.update { newState ->
-                                newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
-                            }
-                            emitError(response.message)
-                            addUserUseCase.addUser(username = email, name = name, family = family)
                         }
-                    } else {
-                        emitError("Please use a valid email account!")
+                    }else{
+                        emitError("Password and Confirm password should be the same!")
                         _signupUiState.update { newState ->
                             newState.copy(accountStatus = AccountStatus.NotCreated)
                         }
@@ -124,10 +131,10 @@ class SignUpViewModel(
         }
     }
 
-    fun setFamily(family: String) {
+    fun setConfirmPassword(confirmPassword: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
-                newState.copy(family = family)
+                newState.copy(confirmPassword = confirmPassword)
             }
         }
     }
@@ -150,9 +157,28 @@ class SignUpViewModel(
         }
     }
 
+    fun setShowConfirmPassword() {
+        viewModelScope.launch {
+            _signupUiState.update { newState ->
+                newState.copy(
+                    showConfirmPassword = !newState.showConfirmPassword,
+                )
+            }
+        }
+    }
+
     fun getIconVisibility(): ImageVector {
         val showPassword = _signupUiState.value.showPassword
         return if (showPassword) {
+            Icons.Filled.Visibility
+        } else {
+            Icons.Filled.VisibilityOff
+        }
+    }
+
+    fun getConfirmIconVisibility(): ImageVector {
+        val confirmShowPassword = _signupUiState.value.showConfirmPassword
+        return if (confirmShowPassword) {
             Icons.Filled.Visibility
         } else {
             Icons.Filled.VisibilityOff

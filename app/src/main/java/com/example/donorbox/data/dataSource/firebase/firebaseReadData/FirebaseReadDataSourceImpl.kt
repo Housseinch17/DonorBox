@@ -3,7 +3,6 @@ package com.example.donorbox.data.dataSource.firebase.firebaseReadData
 import android.annotation.SuppressLint
 import android.content.Context
 import com.example.donorbox.data.model.Receiver
-import com.example.donorbox.presentation.screens.home.FullName
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.Constants.replaceUsername
 import com.example.donorbox.presentation.util.isInternetAvailable
@@ -66,7 +65,7 @@ class FirebaseReadDataSourceImpl(
         }
     }
 
-    override suspend fun readFullNameByUsername(): FullName =
+    override suspend fun readFullNameByUsername(): String =
         withContext(coroutineDispatcher) {
             val user = replaceUsername(auth.currentUser?.email) ?: ""
             suspendCoroutine { continuation ->
@@ -75,23 +74,20 @@ class FirebaseReadDataSourceImpl(
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             val name = snapshot.child("name").getValue(String::class.java)
-                            val family = snapshot.child("family").getValue(String::class.java)
-                            val fullName =
-                                FullName(currentName = name ?: "", currentFamily = family ?: "")
                             continuation.resume(
-                                fullName
+                                "$name"
                             )
                         }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        continuation.resume(FullName())
+                        continuation.resume("")
                     }
                 })
             }
         }
 
-    override suspend fun readAllDonations(): List<String> = withContext(coroutineDispatcher){
+    override suspend fun readAllDonations(): List<String> = withContext(coroutineDispatcher) {
         var newUsername = auth.currentUser?.email ?: ""
         newUsername = replaceUsername(newUsername)!!
         val receiversList = getAllReceivers()
@@ -105,18 +101,20 @@ class FirebaseReadDataSourceImpl(
                         val donationsMap = snapshot.getValue(object :
                             GenericTypeIndicator<Map<String, String>>() {})
                         // Extract values and convert to list
-                        val donationsList = donationsMap?.values?.toList()  ?: emptyList()
+                        val donationsList = donationsMap?.values?.toList() ?: emptyList()
                         continuation.resume(donationsList)
                     }
+
                     override fun onCancelled(error: DatabaseError) {
                         continuation.resume(emptyList())
                     }
                 })
-            }else{
+            } else {
                 continuation.resume(emptyList())
             }
         }
     }
+
     private suspend fun getAllReceivers(): List<String> = withContext(coroutineDispatcher) {
         suspendCoroutine { continuation ->
             val hasInternet = context.isInternetAvailable()

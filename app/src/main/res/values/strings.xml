@@ -2,11 +2,11 @@
     <string name="app_name">DonorBox</string>
     <string name="background_image">Background Image</string>
     <string name="welcome_back">Welcome Back</string>
-    <string name="login">LogIn</string>
+    <string name="signIn">Sign In</string>
     <string name="page">Page</string>
-    <string name="signup">SignUp</string>
+    <string name="signup">Sign Up</string>
     <string name="sign_out">SignOut</string>
-    <string name="reset_password">Reset Password</string>
+    <string name="reset_password">Forgot password?</string>
     <string name="change_password">Change Password</string>
     <string name="create_account">Create Account</string>
     <string name="new_password">New Password</string>
@@ -15,7 +15,6 @@
     <string name="visibility">Visibility</string>
     <string name="email">Email</string>
     <string name="name">Name</string>
-    <string name="family">Family</string>
     <string name="password">Password</string>
     <string name="dismiss">Dismiss</string>
     <string name="send_money">Send Money</string>
@@ -34,5 +33,5 @@
     <string name="are_you..._signOut">Are you sure that you want to SignOut from this account?</string>
     <string name="no_donations_yet">No donations yet!</string>
     <string name="amount_empty">Amount is empty</string>
-
+    <string name="dont_have_account">Don\'t have an account,</string>
 </resources>

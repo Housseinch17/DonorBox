@@ -23,25 +23,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachEmail
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -57,6 +55,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,8 +66,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.donorbox.R
+import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.BrightBlue
-import com.example.donorbox.presentation.theme.Orange
+import com.example.donorbox.presentation.theme.DescriptionTypography
+import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewGray
+import com.example.donorbox.presentation.theme.NewWhite
+import com.example.donorbox.presentation.theme.TitleTypography
 
 
 @Composable
@@ -77,7 +81,7 @@ fun ShimmerEffect(
     widthOfShadowBrush: Int = 500,
     angleOfAxisY: Float = 270f,
     durationMillis: Int = 1000,
-    color: Color = Color.White,
+    color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
 ) {
     val shimmerColors = listOf(
         color.copy(alpha = 0.3f),  // Light grey
@@ -118,9 +122,9 @@ fun ShimmerEffect(
 }
 
 @Composable
-fun SharedScreen(modifier: Modifier, content: @Composable () -> Unit) {
+fun SharedScreen(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) {
         Image(
             painter = painterResource(R.drawable.donate),
@@ -132,7 +136,14 @@ fun SharedScreen(modifier: Modifier, content: @Composable () -> Unit) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
+                        )
+                    )
+                )
         )
         content()
     }
@@ -153,19 +164,18 @@ fun ShowDialog(
         AlertDialog(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(25.dp))
-                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
-                .background(Color.White),
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface),
             onDismissRequest = {},
             confirmButton = {
                 Button(
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
+                        containerColor = NewBlue
                     )
                 ) {
                     Text(
-                        text = confirmText, color = Color.Black,
+                        text = confirmText, color = NewWhite,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -175,12 +185,12 @@ fun ShowDialog(
                     enabled = !isProgressBar,
                     onClick = onDismissButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
+                        containerColor = NewGray
                     )
                 ) {
                     Text(
                         stringResource(R.string.dismiss),
-                        color = Color.Black,
+                        color = NewWhite,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -189,7 +199,7 @@ fun ShowDialog(
             title = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(color = Orange)
+                    style = TitleTypography
                 )
             },
             text = {
@@ -205,7 +215,6 @@ fun TrailingIcon(imageVector: ImageVector, onIconClick: () -> Unit) {
         Icon(
             imageVector = imageVector,
             contentDescription = stringResource(R.string.visibility),
-            tint = Color.White
         )
     }
 }
@@ -215,28 +224,25 @@ fun AccountTextButton(
     modifier: Modifier, text: String, textButtonEnabled: Boolean, onSignUpClick: () -> Unit
 ) {
     TextButton(
-        modifier = modifier.clip(RoundedCornerShape(12.dp)),
+        modifier = modifier,
         onClick = onSignUpClick,
         enabled = textButtonEnabled,
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = Color.Green
-        )
     ) {
-        if (textButtonEnabled) {
-            Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        } else {
-            CircularProgressIndicator(
-                modifier = Modifier.size(30.dp), // Adjust size as needed
-                color = Color.White, // Set the color for the progress bar
-                strokeWidth = 2.dp
+        Text(
+            text, style = BodyTypography.copy(
+                color = if (textButtonEnabled) NewBlue else NewGray,
             )
-        }
+        )
     }
 }
 
 @Composable
 fun AccountButton(
-    modifier: Modifier, text: String,containerColor: Color = Orange, buttonEnabled: Boolean, onLogInClick: () -> Unit
+    modifier: Modifier,
+    text: String,
+    containerColor: Color = NewGray,
+    buttonEnabled: Boolean,
+    onLogInClick: () -> Unit
 ) {
     Button(
         modifier = modifier,
@@ -244,15 +250,15 @@ fun AccountButton(
         enabled = buttonEnabled,
         colors = ButtonDefaults.buttonColors(containerColor = containerColor)
     ) {
-        if (buttonEnabled) {
-            Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        } else {
-            CircularProgressIndicator(
-                modifier = Modifier.size(30.dp), // Adjust size as needed
-                color = Color.White, // Set the color for the progress bar
-                strokeWidth = 2.dp
+        Text(
+            modifier = Modifier.padding(vertical = 4.dp),
+            text = text,
+            style = BodyTypography.copy(
+                color = NewWhite,
+                lineHeight = 26.sp,
+                fontWeight = FontWeight.Bold
             )
-        }
+        )
     }
 }
 
@@ -270,7 +276,7 @@ fun EmailAndPassword(
     //that is in bottom right its like the enter button or something
     //it will perform the onDone function that we will implement in keyboardAction
     Column(modifier) {
-        EmailTextField(
+        TextFieldInput(
             modifier = modifier,
             label = stringResource(R.string.email),
             value = emailValue,
@@ -307,13 +313,7 @@ fun PasswordTextField(
     value: String,
     keyboardOptions: KeyboardOptions,
     visualTransformation: VisualTransformation, onValueChange: (String) -> Unit,
-    trailingIcon: @Composable () -> Unit,
-    colors: TextFieldColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = Orange,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Green
-    )
+    trailingIcon: @Composable () -> Unit
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -329,30 +329,47 @@ fun PasswordTextField(
         focusManager.clearFocus()
     }
 
-    OutlinedTextField(
-        maxLines = 1,
+    TextField(
         textStyle = TextStyle.Default.copy(
-            color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold
+            fontFamily = FontFamily.Default,
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Normal
         ),
-        colors = colors,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = NewBlue,
+            unfocusedIndicatorColor = NewBlue,
+            focusedTextColor = NewBlue,
+            unfocusedTextColor = NewGray,
+            focusedLeadingIconColor = NewBlue,
+            unfocusedLeadingIconColor = NewGray,
+            unfocusedLabelColor = NewGray,
+            focusedPlaceholderColor = NewBlue,
+            unfocusedPlaceholderColor = NewGray,
+            focusedTrailingIconColor = NewBlue,
+            unfocusedTrailingIconColor = NewGray
+        ),
         value = value,
         onValueChange = { newValue ->
             onValueChange(newValue)
         },
         singleLine = true,
         modifier = modifier,
-        label = {
-            Text(text = label, color = Color.White)
+        placeholder = {
+            Text(text = label)
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Filled.Lock, contentDescription = null, tint = Color.White
+                imageVector = Icons.Filled.Lock, contentDescription = null
             )
         },
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(
             onDone = {
                 keyboardController?.hide()
+
             }),
         visualTransformation = visualTransformation,
         trailingIcon = trailingIcon,
@@ -361,9 +378,10 @@ fun PasswordTextField(
 }
 
 @Composable
-fun EmailTextField(
+fun TextFieldInput(
     modifier: Modifier, label: String,
     value: String,
+    imageVector: ImageVector = Icons.Filled.Email,
     keyboardOptions: KeyboardOptions, onValueChange: (String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
@@ -381,16 +399,25 @@ fun EmailTextField(
     }
 
 
-    OutlinedTextField(
-        maxLines = 1,
+    TextField(
         textStyle = TextStyle.Default.copy(
-            color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold
+            fontFamily = FontFamily.Default,
+            fontSize = 16.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Normal
         ),
         colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Orange,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Green
+            focusedIndicatorColor = NewBlue,
+            unfocusedIndicatorColor = NewBlue,
+            focusedTextColor = NewBlue,
+            unfocusedTextColor = NewGray,
+            focusedLeadingIconColor = NewBlue,
+            unfocusedLeadingIconColor = NewGray,
+            unfocusedLabelColor = NewGray,
+            focusedPlaceholderColor = NewBlue,
+            unfocusedPlaceholderColor = NewGray
         ),
         value = value,
         onValueChange = { newValue ->
@@ -398,14 +425,13 @@ fun EmailTextField(
         },
         singleLine = true,
         modifier = modifier,
-        label = {
-            Text(text = label, color = Color.White)
+        placeholder = {
+            Text(text = label)
         },
         leadingIcon = {
             Icon(
-                imageVector = Icons.Filled.AttachEmail,
+                imageVector = imageVector,
                 contentDescription = null,
-                tint = Color.White
             )
         },
         keyboardOptions = keyboardOptions,
@@ -457,7 +483,7 @@ fun SettingsShowDialog(
             modifier = modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(25.dp))
-                .border(1.dp,Color.Blue, RoundedCornerShape(25.dp))
+                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
                 .background(Color.White),
             onDismissRequest = {},
             confirmButton = {
