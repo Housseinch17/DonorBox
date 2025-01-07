@@ -32,6 +32,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.donorbox.presentation.navigation.Navigation
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.theme.MatteBlack
+import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.Orange
 import com.example.donorbox.presentation.util.navigateSingleTopTo
 import org.koin.androidx.compose.koinViewModel
@@ -132,12 +134,12 @@ fun FloatingButtonBar(onDonationClick: () -> Unit) {
     FloatingActionButton(
         onClick = onDonationClick,
         shape = RoundedCornerShape(50.dp),
-        containerColor = Color.Green
+        containerColor = NewBlue
     ) {
         Icon(
             imageVector = Icons.Filled.Outbox,
             contentDescription = "Received Donations",
-            tint = Color.White
+            tint = NewWhite
         )
     }
 }

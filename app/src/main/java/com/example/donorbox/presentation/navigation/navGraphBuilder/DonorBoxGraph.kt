@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,6 +22,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import com.example.donorbox.R
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.AuthenticationViewModel
 import com.example.donorbox.presentation.ResetPage
@@ -178,6 +180,7 @@ fun NavGraphBuilder.donorBoxGraph(
 
             SettingsPage(
                 modifier = Modifier.fillMaxSize(),
+                textPage = stringResource(R.string.settings),
                 currentPasswordValue = settingsUiState.currentPasswordValue,
                 newPasswordValue = settingsUiState.newPasswordValue,
                 confirmPasswordValue = settingsUiState.confirmNewPasswordValue,

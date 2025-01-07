@@ -346,8 +346,7 @@ fun PasswordTextField(
             focusedLeadingIconColor = NewBlue,
             unfocusedLeadingIconColor = NewGray,
             unfocusedLabelColor = NewGray,
-            focusedPlaceholderColor = NewBlue,
-            unfocusedPlaceholderColor = NewGray,
+            focusedLabelColor = NewBlue,
             focusedTrailingIconColor = NewBlue,
             unfocusedTrailingIconColor = NewGray
         ),
@@ -357,8 +356,8 @@ fun PasswordTextField(
         },
         singleLine = true,
         modifier = modifier,
-        placeholder = {
-            Text(text = label)
+        label = {
+            Text(text = label, fontSize = 14.sp)
         },
         leadingIcon = {
             Icon(
@@ -482,19 +481,18 @@ fun SettingsShowDialog(
         AlertDialog(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(25.dp))
-                .border(1.dp, Color.Blue, RoundedCornerShape(25.dp))
-                .background(Color.White),
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface),
             onDismissRequest = {},
             confirmButton = {
                 Button(
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
+                        containerColor = NewBlue
                     )
                 ) {
                     Text(
-                        text = confirmText, color = Color.Black,
+                        text = confirmText, color = NewWhite,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -504,12 +502,12 @@ fun SettingsShowDialog(
                     enabled = !isProgressBar,
                     onClick = onDismissButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue
+                        containerColor = NewGray
                     )
                 ) {
                     Text(
                         stringResource(R.string.dismiss),
-                        color = Color.Black,
+                        color = NewWhite,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -518,7 +516,7 @@ fun SettingsShowDialog(
             title = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(color = Color.Green)
+                    style = TitleTypography
                 )
             },
             text = {

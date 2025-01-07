@@ -75,7 +75,7 @@ fun NavGraphBuilder.registerGraph(
             }
             LogInScreen(
                 modifier = Modifier.fillMaxSize(),
-                textPage = stringResource(R.string.welcome_back),
+                textPage = stringResource(R.string.hello_sign_in),
                 emailValue = logInUiState.emailValue,
                 onEmailChange = { newEmail ->
                     logInViewModel.setEmail(newEmail)
@@ -164,7 +164,7 @@ fun NavGraphBuilder.registerGraph(
 
             SignUpScreen(
                 Modifier.fillMaxSize(),
-                textPage = "SignUp Page",
+                textPage = stringResource(R.string.create_your_account),
                 emailValue = signUpUiState.email,
                 onEmailChange = { newEmail ->
                     signUpViewModel.setEmail(newEmail)

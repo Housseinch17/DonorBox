@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">DonorBox</string>
     <string name="background_image">Background Image</string>
-    <string name="welcome_back">Welcome Back</string>
+    <string name="hello_sign_in">Hello Sign In</string>
+    <string name="create_your_account">Create Your Account</string>
+    <string name="settings">Settings Page</string>
     <string name="signIn">Sign In</string>
     <string name="page">Page</string>
     <string name="signup">Sign Up</string>
-    <string name="sign_out">SignOut</string>
+    <string name="sign_out">Sign Out</string>
     <string name="reset_password">Forgot password?</string>
     <string name="change_password">Change Password</string>
     <string name="create_account">Create Account</string>

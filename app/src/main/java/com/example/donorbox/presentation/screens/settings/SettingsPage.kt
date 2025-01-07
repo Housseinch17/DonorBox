@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,9 @@ import androidx.compose.ui.unit.sp
 import com.example.donorbox.R
 import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.BrightBlue
+import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewGray
+import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.PasswordTextField
 import com.example.donorbox.presentation.util.SettingsShowDialog
@@ -41,6 +43,7 @@ import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 @Composable
 fun SettingsPage(
     modifier: Modifier,
+    textPage: String,
     currentPasswordValue: String,
     currentPasswordValueChange: (String) -> Unit,
     newPasswordValue: String,
@@ -88,6 +91,7 @@ fun SettingsPage(
                                     text = stringResource(R.string.are_you____reset),
                                     style = MaterialTheme.typography.titleMedium.copy(Color.Black)
                                 )
+
                             } else {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -96,7 +100,7 @@ fun SettingsPage(
                                     CircularProgressIndicator(
                                         modifier = Modifier
                                             .size(80.dp),
-                                        color = Color.Gray,
+                                        color = NewGray,
                                         strokeWidth = 2.dp
                                     )
                                 }
@@ -144,8 +148,8 @@ fun SettingsPage(
                         onDismissButton = signOutDismiss
                     )
                 }
-
             }
+
             Column(
                 modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -154,10 +158,10 @@ fun SettingsPage(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = stringResource(R.string.current_password),
-                    style = TitleTypography.copy(color = Color.White)
+                    text = textPage,
+                    style = TitleTypography,
                 )
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 PasswordTextField(
                     modifier = Modifier.fillMaxWidth(),
                     label = stringResource(R.string.current_password),
@@ -172,14 +176,7 @@ fun SettingsPage(
                         )
                     }
                 )
-                Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(R.string.new_password),
-                    style = TitleTypography.copy(color = Color.White)
-                )
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 ChangePasswordField(
                     newPasswordValue = newPasswordValue,
                     newPasswordValueChange = newPasswordValueChange,
@@ -203,14 +200,7 @@ fun SettingsPage(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.height(14.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(R.string.confirm_password),
-                    style = TitleTypography.copy(color = Color.White)
-                )
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 ChangePasswordField(
                     newPasswordValue = confirmPasswordValue,
                     newPasswordValueChange = confirmPasswordValueChange,
@@ -223,7 +213,7 @@ fun SettingsPage(
                 if (confirmShowText) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.your_password_must_be_at_least) + 6 + stringResource(
+                        text = stringResource(R.string.your_password_must_be_at_least)+ " 6 " + stringResource(
                             R.string.characters
                         ),
                         style = BodyTypography.copy(
@@ -234,14 +224,15 @@ fun SettingsPage(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 Button(onClick = {
                     onPasswordChange(
                         currentPasswordValue,
                         newPasswordValue,
                         confirmPasswordValue
                     )
-                }) {
+                },
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)) {
                     Text(text = stringResource(R.string.change_password))
                 }
                 Spacer(modifier = Modifier.height(30.dp))
@@ -250,10 +241,12 @@ fun SettingsPage(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = onResetPassword) {
+                    Button(onClick = onResetPassword,
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)
+                    ) {
                         Text(text = stringResource(R.string.reset_password))
                     }
-                    Button(onClick = onSignOut) {
+                    Button(onClick = onSignOut,                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)) {
                         Text(text = stringResource(R.string.sign_out))
                     }
                 }
