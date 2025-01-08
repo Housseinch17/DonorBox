@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation
+package com.example.donorbox.presentation.screens.authentication
 
 import android.annotation.SuppressLint
 import android.app.Application

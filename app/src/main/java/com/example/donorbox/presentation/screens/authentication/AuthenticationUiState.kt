@@ -1,4 +1,4 @@
-package com.example.donorbox.presentation
+package com.example.donorbox.presentation.screens.authentication
 
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 

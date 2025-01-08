@@ -1,10 +1,11 @@
 package com.example.donorbox.presentation.di.modules
 
-import com.example.donorbox.presentation.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.main.MainViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
+import com.example.donorbox.presentation.screens.profile.ProfileViewModel
 import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
@@ -75,6 +76,13 @@ object ViewModelModule {
         viewModel {
             ReceivedDonationsViewModel(
                 firebaseReadAllDonationsUseCase = get(),)
+        }
+
+        viewModel {
+            ProfileViewModel(
+                getCurrentUserUseCase = get(),
+                firebaseReadFullNameUseCase = get()
+            )
         }
 
     }

@@ -24,14 +24,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.donorbox.presentation.navigation.Navigation
 import com.example.donorbox.presentation.navigation.NavigationScreens
-import com.example.donorbox.presentation.theme.MatteBlack
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.Orange
@@ -74,7 +72,7 @@ fun MainPage(navController: NavHostController) {
             bottomBar = {
                 if (showBottomBar) {
                     androidx.compose.material.BottomAppBar(
-                        backgroundColor = MatteBlack,
+                        backgroundColor = NewBlue,
                         modifier = Modifier
                             .navigationBarsPadding()
                             .fillMaxWidth()
@@ -148,24 +146,28 @@ fun FloatingButtonBar(onDonationClick: () -> Unit) {
 @Composable
 fun BottomAppBar(
     onHomeClick: () -> Unit, onProfileClick: () -> Unit,
-    onMyDonationsClick: () -> Unit, onSettingsClick: () -> Unit
+    onMyDonationsClick: () -> Unit, onSettingsClick: () -> Unit,
 ) {
     BottomNavigation(
-        backgroundColor = MatteBlack,
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = NewBlue,
+        contentColor = NewWhite
     ) {
         BottomNavigationItem(
-            selectedContentColor = Orange,
             selected = true,
             onClick = onHomeClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home",
-                    tint = Color.White
+                    tint = NewWhite
                 )
-            }
+            },
+            selectedContentColor = Orange,
+            unselectedContentColor = NewWhite,
         )
         BottomNavigationItem(
+            unselectedContentColor = NewWhite,
             selectedContentColor = Orange,
             selected = false,
             onClick = onProfileClick,
@@ -173,12 +175,13 @@ fun BottomAppBar(
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Profile",
-                    tint = Color.White
+                    tint = NewWhite
                 )
             }
         )
 
         BottomNavigationItem(
+            unselectedContentColor = NewWhite,
             selectedContentColor = Orange,
             selected = false,
             onClick = onMyDonationsClick,
@@ -186,11 +189,12 @@ fun BottomAppBar(
                 Icon(
                     imageVector = Icons.Filled.ShoppingBag,
                     contentDescription = "My Orders",
-                    tint = Color.White
+                    tint = NewWhite
                 )
             }
         )
         BottomNavigationItem(
+            unselectedContentColor = NewWhite,
             selectedContentColor = Orange,
             selected = false,
             onClick = onSettingsClick,
@@ -198,7 +202,7 @@ fun BottomAppBar(
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = "Settings",
-                    tint = Color.White
+                    tint = NewWhite
                 )
             }
         )

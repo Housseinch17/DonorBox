@@ -5,13 +5,14 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.example.donorbox.presentation.AuthenticationViewModel
-import com.example.donorbox.presentation.SignOutResponse
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.authentication.SignOutResponse
 import com.example.donorbox.presentation.navigation.navGraphBuilder.donorBoxGraph
 import com.example.donorbox.presentation.navigation.navGraphBuilder.registerGraph
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement

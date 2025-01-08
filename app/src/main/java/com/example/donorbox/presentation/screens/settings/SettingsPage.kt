@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -151,106 +152,137 @@ fun SettingsPage(
             }
 
             Column(
-                modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                modifier = modifier.padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.SpaceAround
             ) {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier,
                     textAlign = TextAlign.Center,
                     text = textPage,
                     style = TitleTypography,
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                PasswordTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    label = stringResource(R.string.current_password),
-                    value = currentPasswordValue,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = getPasswordVisualTransformation(currentShowPassword),
-                    onValueChange = currentPasswordValueChange,
-                    trailingIcon = {
-                        TrailingIcon(
-                            imageVector = currentPasswordImageVector,
-                            onIconClick = currentPasswordOnIconClick
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                ChangePasswordField(
-                    newPasswordValue = newPasswordValue,
-                    newPasswordValueChange = newPasswordValueChange,
-                    label = stringResource(R.string.new_password),
-                    showPassword = newShowPassword,
-                    imageVector = newImageVector,
-                    onIconClick = newOnIconClick
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (showText) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.your_password_must_be_at_least) + 6 + stringResource(
-                            R.string.characters
-                        ),
-                        style = BodyTypography.copy(
-                            color = Color.Red, fontSize = 12.sp,
-                            fontWeight = FontWeight.Light
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-                ChangePasswordField(
-                    newPasswordValue = confirmPasswordValue,
-                    newPasswordValueChange = confirmPasswordValueChange,
-                    label = stringResource(R.string.confirm_password),
-                    showPassword = confirmShowPassword,
-                    imageVector = confirmImageVector,
-                    onIconClick = confirmOnIconClick
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (confirmShowText) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(R.string.your_password_must_be_at_least)+ " 6 " + stringResource(
-                            R.string.characters
-                        ),
-                        style = BodyTypography.copy(
-                            color = Color.Red, fontSize = 12.sp,
-                            fontWeight = FontWeight.Light
-                        ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-                Button(onClick = {
-                    onPasswordChange(
-                        currentPasswordValue,
-                        newPasswordValue,
-                        confirmPasswordValue
-                    )
-                },
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)) {
-                    Text(text = stringResource(R.string.change_password))
-                }
-                Spacer(modifier = Modifier.height(30.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Column(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Button(onClick = onResetPassword,
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)
+                    Column(
+                        modifier = Modifier.fillMaxHeight(0.4f),
+                        verticalArrangement = Arrangement.SpaceEvenly,
                     ) {
-                        Text(text = stringResource(R.string.reset_password))
+                        PasswordTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            label = stringResource(R.string.current_password),
+                            value = currentPasswordValue,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            visualTransformation = getPasswordVisualTransformation(
+                                currentShowPassword
+                            ),
+                            onValueChange = currentPasswordValueChange,
+                            trailingIcon = {
+                                TrailingIcon(
+                                    imageVector = currentPasswordImageVector,
+                                    onIconClick = currentPasswordOnIconClick
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        ChangePasswordField(
+                            newPasswordValue = newPasswordValue,
+                            newPasswordValueChange = newPasswordValueChange,
+                            label = stringResource(R.string.new_password),
+                            showPassword = newShowPassword,
+                            imageVector = newImageVector,
+                            onIconClick = newOnIconClick
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (showText) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.your_password_must_be_at_least) + 6 + stringResource(
+                                    R.string.characters
+                                ),
+                                style = BodyTypography.copy(
+                                    color = Color.Red, fontSize = 12.sp,
+                                    fontWeight = FontWeight.Light
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        ChangePasswordField(
+                            newPasswordValue = confirmPasswordValue,
+                            newPasswordValueChange = confirmPasswordValueChange,
+                            label = stringResource(R.string.confirm_password),
+                            showPassword = confirmShowPassword,
+                            imageVector = confirmImageVector,
+                            onIconClick = confirmOnIconClick
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (confirmShowText) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.your_password_must_be_at_least) + " 6 " + stringResource(
+                                    R.string.characters
+                                ),
+                                style = BodyTypography.copy(
+                                    color = Color.Red, fontSize = 12.sp,
+                                    fontWeight = FontWeight.Light
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
-                    Button(onClick = onSignOut,                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = NewBlue, contentColor = NewWhite)) {
-                        Text(text = stringResource(R.string.sign_out))
+                    Column(
+                        modifier = Modifier.fillMaxHeight(0.4f),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Button(
+                            onClick = {
+                                onPasswordChange(
+                                    currentPasswordValue,
+                                    newPasswordValue,
+                                    confirmPasswordValue
+                                )
+                            },
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = NewBlue,
+                                contentColor = NewWhite
+                            )
+                        ) {
+                            Text(text = stringResource(R.string.change_password))
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(
+                                onClick = onResetPassword,
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = NewBlue,
+                                    contentColor = NewWhite
+                                )
+                            ) {
+                                Text(text = stringResource(R.string.reset_password))
+                            }
+                            Button(
+                                onClick = onSignOut,
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = NewBlue,
+                                    contentColor = NewWhite
+                                )
+                            ) {
+                                Text(text = stringResource(R.string.sign_out))
+                            }
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(20.dp))
+
             }
             if (isLoading) {
                 CircularProgressIndicator(

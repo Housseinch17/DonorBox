@@ -2,18 +2,13 @@
 
 package com.example.donorbox.presentation.util
 
-import android.content.ClipboardManager
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -28,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
@@ -52,7 +46,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -67,8 +60,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.donorbox.R
 import com.example.donorbox.presentation.theme.BodyTypography
-import com.example.donorbox.presentation.theme.BrightBlue
-import com.example.donorbox.presentation.theme.DescriptionTypography
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
@@ -126,12 +117,6 @@ fun SharedScreen(modifier: Modifier = Modifier, content: @Composable () -> Unit)
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        Image(
-            painter = painterResource(R.drawable.donate),
-            contentDescription = stringResource(R.string.background_image),
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
         // Semi-transparent overlay
         Box(
             modifier = Modifier
@@ -139,8 +124,12 @@ fun SharedScreen(modifier: Modifier = Modifier, content: @Composable () -> Unit)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
+                            NewBlue.copy(alpha = 0.7f),
+                            NewBlue.copy(alpha = 0.5f),
+                            NewBlue.copy(alpha = 0.3f),
+                            NewWhite.copy(alpha = 0.3f),
+                            NewWhite.copy(alpha = 0.5f),
+                            NewWhite.copy(alpha = 0.7f)
                         )
                     )
                 )
@@ -525,21 +514,3 @@ fun SettingsShowDialog(
     }
 }
 
-@Composable
-fun CopyTextExample(text: String) {
-    val context = LocalContext.current
-    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-    IconButton(
-        modifier = Modifier,
-        onClick = {
-            val clip = android.content.ClipData.newPlainText("Copied Text", text)
-            clipboardManager.setPrimaryClip(clip)
-
-            // Optionally, show a toast as feedback
-            Toast.makeText(context, "Text copied", Toast.LENGTH_SHORT).show()
-        },
-    ) {
-        Icon(imageVector = Icons.Filled.ContentCopy, contentDescription = null)
-    }
-}

@@ -2,6 +2,9 @@ package com.example.donorbox.presentation.screens.home
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -32,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -52,9 +57,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -71,7 +78,10 @@ import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.theme.BrightBlue
-import com.example.donorbox.presentation.util.CopyTextExample
+import com.example.donorbox.presentation.theme.DescriptionTypography
+import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewGray
+import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.util.DonorBoxImage
 import com.example.donorbox.presentation.util.PasswordTextField
 import com.example.donorbox.presentation.util.SharedScreen
@@ -103,50 +113,54 @@ fun HomePage(
     imageVector: ImageVector,
     onIconClick: () -> Unit
 ) {
-        SharedScreen(modifier = modifier) {
-            Box(modifier = Modifier.fillMaxSize().padding(10.dp)){
-        when (response) {
-            is ReceiversResponse.Error -> {
-                Text(
-                    text = response.message,
-                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
-                )
-            }
+    SharedScreen(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp)
+        ) {
+            when (response) {
+                is ReceiversResponse.Error -> {
+                    Text(
+                        text = response.message,
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
+                    )
+                }
 
-            ReceiversResponse.IsLoading -> {
-                ShimmerReceiverList()
-            }
+                ReceiversResponse.IsLoading -> {
+                    ShimmerReceiverList()
+                }
 
-            is ReceiversResponse.Success -> {
-                HomeSuccess(
-                    receiverList = response.receivers,
-                    onReceiverClick = {
-                        onReceiverClick(it)
-                    },
-                    modalBottomSheetReceiver = modalBottomSheetReceiver,
-                    hideBottomSheetReceiver = { hideBottomSheetReceiver() },
-                    onCall = onCall,
-                    onOpenApp = onOpenApp,
-                    onOpenWhishApp = onOpenWhishApp,
-                    onOpenGoogleMap = onOpenGoogleMap,
-                    onSendButton = onSendButton,
-                    sendMoney = sendMoney,
-                    showDialog = showDialog,
-                    hideDialog = hideDialog,
-                    moneyToDonate = moneyToDonate,
-                    onMoneyUpdate = onMoneyUpdate,
-                    isLoading = isLoading,
-                    showText = showText,
-                    newPasswordValue = newPasswordValue,
-                    showPassword = showPassword,
-                    newPasswordValueChange = newPasswordValueChange,
-                    imageVector = imageVector,
-                    onIconClick = onIconClick,
-                )
+                is ReceiversResponse.Success -> {
+                    HomeSuccess(
+                        receiverList = response.receivers,
+                        onReceiverClick = {
+                            onReceiverClick(it)
+                        },
+                        modalBottomSheetReceiver = modalBottomSheetReceiver,
+                        hideBottomSheetReceiver = { hideBottomSheetReceiver() },
+                        onCall = onCall,
+                        onOpenApp = onOpenApp,
+                        onOpenWhishApp = onOpenWhishApp,
+                        onOpenGoogleMap = onOpenGoogleMap,
+                        onSendButton = onSendButton,
+                        sendMoney = sendMoney,
+                        showDialog = showDialog,
+                        hideDialog = hideDialog,
+                        moneyToDonate = moneyToDonate,
+                        onMoneyUpdate = onMoneyUpdate,
+                        isLoading = isLoading,
+                        showText = showText,
+                        newPasswordValue = newPasswordValue,
+                        showPassword = showPassword,
+                        newPasswordValueChange = newPasswordValueChange,
+                        imageVector = imageVector,
+                        onIconClick = onIconClick,
+                    )
+                }
             }
         }
     }
-}
 }
 
 @Composable
@@ -179,7 +193,7 @@ fun ShimmerReceiverComponent(modifier: Modifier) {
                     top.linkTo(parent.top)
                 }
                 .fillMaxWidth()
-                .height(150.dp)
+                .height(200.dp)
         )
 
         // Shimmer Image Placeholder
@@ -289,78 +303,102 @@ fun PartialBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { hideBottomSheetReceiver() },
             containerColor = MaterialTheme.colorScheme.background,
-            tonalElevation = 4.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-                    .verticalScroll(verticalScroll),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                DonorBoxImage(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    imageUrl = receiver.picUrl
+            tonalElevation = 4.dp,
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                    color = NewBlue
                 )
-                ModalBottomSheetItem(prefixText = "Name: ", text = receiver.name, copyText = false)
-                ModalBottomSheetItem(prefixText = "Bank Iban: ", text = receiver.bank)
-                ModalBottomSheetIntent(
-                    prefixText = "Phone number: ",
-                    text = receiver.phoneNumber
-                ) {
-                    ModalBottomSheetIconButton(
-                        imageVector = Icons.Filled.Call,
-                        color = MaterialTheme.colorScheme.primary,
-                    ) {
-                        onCall(receiver.phoneNumber)
-                    }
-                }
-                ModalBottomSheetIntent(prefixText = "Omt Account: ", text = receiver.omt) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.omt),
-                        color = MaterialTheme.colorScheme.secondary, onClick = onOpenApp
-                    )
-                }
-                ModalBottomSheetIntent(prefixText = "Whish Account: ", text = receiver.whish) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.whish),
-                        color = MaterialTheme.colorScheme.tertiary, onClick = onOpenWhishApp
-                    )
-                }
-                ModalBottomSheetIntent(
-                    prefixText = "Address: ",
-                    text = receiver.address.location
-                ) {
-                    ModalBottomSheetIconButton(
-                        imageVector = ImageVector.vectorResource(R.drawable.googlemap),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        onClick = {
-                            onOpenGoogleMap(
-                                receiver.address.latitude,
-                                receiver.address.longitude
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                NewBlue.copy(alpha = 0.7f),
+                                NewBlue.copy(alpha = 0.5f),
+                                NewBlue.copy(alpha = 0.3f),
+                                NewWhite.copy(alpha = 0.3f),
+                                NewWhite.copy(alpha = 0.5f),
+                                NewWhite.copy(alpha = 0.7f)
                             )
-                        }
+                        )
                     )
-                }
-                Button(
+            ) {
+                Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .align(Alignment.CenterHorizontally),
-                    onClick = {
-                        onSendButton(receiver.token,receiver.username)
-                        keyboardController?.hide()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .verticalScroll(verticalScroll),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = "Send Money",
-                        style = MaterialTheme.typography.titleMedium.copy(color = Color.White)
+                    DonorBoxImage(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        imageUrl = receiver.picUrl
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    ModalBottomSheetItem(prefixText = "Name", text = receiver.name)
+                    ModalBottomSheetItem(prefixText = "Bank", text = receiver.bank)
+                    ModalBottomSheetItem(
+                        prefixText = "Phone",
+                        text = receiver.phoneNumber
+                    ) {
+                        ModalBottomSheetIconButton(
+                            imageVector = Icons.Filled.Call,
+                            color = MaterialTheme.colorScheme.primary,
+                        ) {
+                            onCall(receiver.phoneNumber)
+                        }
+                    }
+                    ModalBottomSheetItem(prefixText = "Omt", text = receiver.omt) {
+                        ModalBottomSheetIconButton(
+                            imageVector = ImageVector.vectorResource(R.drawable.omt),
+                            color = MaterialTheme.colorScheme.secondary, onClick = onOpenApp
+                        )
+                    }
+                    ModalBottomSheetItem(prefixText = "Whish ", text = receiver.whish) {
+                        ModalBottomSheetIconButton(
+                            imageVector = ImageVector.vectorResource(R.drawable.whish),
+                            color = MaterialTheme.colorScheme.tertiary, onClick = onOpenWhishApp
+                        )
+                    }
+                    ModalBottomSheetItem(
+                        prefixText = "Address",
+                        text = receiver.address.location
+                    ) {
+                        ModalBottomSheetIconButton(
+                            imageVector = ImageVector.vectorResource(R.drawable.googlemap),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            onClick = {
+                                onOpenGoogleMap(
+                                    receiver.address.latitude,
+                                    receiver.address.longitude
+                                )
+                            }
+                        )
+                    }
+                    Button(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .align(Alignment.CenterHorizontally),
+                        onClick = {
+                            onSendButton(receiver.token, receiver.username)
+                            keyboardController?.hide()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)
+                    ) {
+                        Text(
+                            text = "Send Money",
+                            style = MaterialTheme.typography.titleMedium.copy(color = NewWhite)
+                        )
+                    }
                 }
             }
         }
@@ -396,61 +434,47 @@ fun ModalBottomSheetIconButton(
 }
 
 @Composable
-fun ModalBottomSheetIntent(
+fun ModalBottomSheetItem(
     prefixText: String,
     text: String,
     content: @Composable (() -> Unit)? = null
 ) {
-    val horizontalScrollState = rememberScrollState()
+    val context = LocalContext.current
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(horizontalScrollState),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ModalBottomSheetItem(prefixText, text)
-        //if content not null display it
-        content?.let {
-            it()
-        }
-    }
-}
-
-@Composable
-fun ModalBottomSheetItem(
-    prefixText: String,
-    text: String,
-    copyText: Boolean = true
-) {
-    Row(
-        modifier = Modifier,
+        modifier = Modifier.height(50.dp),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
-        Text(
-            modifier = Modifier,
-            text = prefixText,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = Color.Black, fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            ),
-        )
         Text(
             modifier = Modifier
-                .widthIn(max = 140.dp)
-                .padding(end = 2.dp)
+                .widthIn(80.dp)
                 .horizontalScroll(rememberScrollState()),
+            text = "$prefixText: ",
+            style = DescriptionTypography.copy(color = Color.Black, fontWeight = FontWeight.Bold),
+            maxLines = 1
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 2.dp)
+                .horizontalScroll(rememberScrollState())
+                .clickable {
+                    val clip = android.content.ClipData.newPlainText("Copied Text", text)
+                    clipboardManager.setPrimaryClip(clip)
+                    Toast
+                        .makeText(context, "$prefixText copied", Toast.LENGTH_SHORT)
+                        .show()
+                },
             text = text,
-            style = MaterialTheme.typography.titleMedium.copy(
-                color = BrightBlue, fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            ),
+            style = DescriptionTypography.copy(fontWeight = FontWeight.Bold),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        if (copyText) {
-            CopyTextExample(text)
+        Spacer(modifier = Modifier.width(10.dp))
+        content?.let {
+            it()
         }
     }
 }
@@ -512,7 +536,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
             .clickable {
                 onReceiverClick(receiver)
             },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = NewGray),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
     ) {
         Column(
@@ -528,50 +552,32 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
             ReceiverText(
                 text = "Name: ",
                 description = receiver.name,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 14.sp,
-                )
+                textStyle = DescriptionTypography
             )
             ReceiverText(
                 text = "Phone: ",
                 description = receiver.phoneNumber,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 14.sp,
-                )
+                textStyle = DescriptionTypography
             )
             ReceiverText(
                 text = "Address: ",
                 description = receiver.address.location,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 14.sp,
-                )
+                textStyle = DescriptionTypography
             )
             ReceiverText(
                 text = "Omt: ",
                 description = receiver.omt,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 12.sp
-                )
+                DescriptionTypography.copy(fontSize = 14.sp)
             )
             ReceiverText(
                 text = "Whish: ",
                 description = receiver.whish,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 12.sp
-                )
+                DescriptionTypography.copy(fontSize = 14.sp)
             )
             ReceiverText(
                 text = "Bank iban: ",
                 description = receiver.bank,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 12.sp
-                )
+                DescriptionTypography.copy(fontSize = 14.sp)
             )
         }
     }
@@ -584,10 +590,10 @@ fun ReceiverText(
     val horizontalScrollState = rememberScrollState()
     Row(
         Modifier.horizontalScroll(state = horizontalScrollState),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.Start
     ) {
         Text(
-            modifier = Modifier,
+            modifier = Modifier.widthIn(60.dp),
             text = text,
             maxLines = 1,
             style = textStyle.copy(lineHeight = 20.sp),
@@ -595,19 +601,18 @@ fun ReceiverText(
             textAlign = TextAlign.Start
         )
         Text(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(1f),
             text = description,
             maxLines = 1,
             style = textStyle.copy(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = NewWhite
             ),
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start,
         )
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -717,8 +722,8 @@ fun ShowDialog(
                                 containerColor = Color.Black.copy(alpha = 0.1f),
                                 focusedIndicatorColor = BrightBlue,
                                 unfocusedIndicatorColor = Color.Gray,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedTextColor = NewWhite,
+                                unfocusedTextColor = NewWhite
                             )
                         )
                         if (showText) {

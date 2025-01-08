@@ -2,20 +2,13 @@ package com.example.donorbox.presentation.navigation.navGraphBuilder
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -24,20 +17,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.R
 import com.example.donorbox.data.model.MyDonations
-import com.example.donorbox.presentation.AuthenticationViewModel
-import com.example.donorbox.presentation.ResetPage
 import com.example.donorbox.presentation.navigation.NavigationScreens
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
+import com.example.donorbox.presentation.screens.profile.ProfilePage
+import com.example.donorbox.presentation.screens.profile.ProfileViewModel
 import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsPage
 import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.settings.ShowPassword
 import com.example.donorbox.presentation.screens.settings.UpdatePassword
-import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
@@ -244,15 +238,14 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.ProfilePage> {
-            SharedScreen(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "Comming Soon", style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold, fontSize = 24.sp, color = Color.White
-                        )
-                    )
-                }
-            }
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
+            val profileViewModel = koinViewModel<ProfileViewModel>()
+            val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
+
+
+            ProfilePage(
+                profileUiState = profileUiState
+            )
         }
 
     }

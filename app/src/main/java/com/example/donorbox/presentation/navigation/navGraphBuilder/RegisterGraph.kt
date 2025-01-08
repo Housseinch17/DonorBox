@@ -19,8 +19,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.R
-import com.example.donorbox.presentation.AuthenticationViewModel
-import com.example.donorbox.presentation.ResetPage
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.login.LogInScreen
 import com.example.donorbox.presentation.screens.login.LogInViewModel

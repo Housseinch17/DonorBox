@@ -35,9 +35,9 @@ val Typography = Typography(
 
 val TitleTypography = TextStyle(
     fontFamily = FontFamily.Default,
-    fontSize = 24.sp,
+    fontSize = 22.sp,
     color = NewBlue,
-    lineHeight = 26.sp,
+    lineHeight = 24.sp,
     fontWeight = FontWeight.Bold
 )
 val BodyTypography = TextStyle(
@@ -49,8 +49,8 @@ val BodyTypography = TextStyle(
 )
 val DescriptionTypography = TextStyle(
     fontFamily = FontFamily.Default,
-    fontSize = 16.sp,
+    fontSize = 14.sp,
     color = NewBlue,
-    lineHeight = 18.sp,
+    lineHeight = 16.sp,
     fontWeight = FontWeight.Normal
 )
