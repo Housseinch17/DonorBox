@@ -47,42 +47,43 @@ fun MyDonationPage(
         refreshing = isRefreshing,
         onRefresh = onRefresh,
     )
-    SharedScreen(modifier = Modifier.fillMaxSize()){
+    SharedScreen(modifier = Modifier.fillMaxSize()) {
 
-    if (list.isEmpty() && !isRefreshing) {
-        Box(modifier = Modifier) {
-            Text(
-                modifier = Modifier.align(Alignment.Center),
-                text = stringResource(R.string.no_donations_yet), style = TitleTypography.copy(
-                    fontSize = 30.sp,
-                    color = BrightBlue,
-                )
-            )
-        }
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(pullRefreshState),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isLoading) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
-            } else {
-                MyDonationList(list)
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState),
+                contentAlignment = Alignment.Center
+            ) {
+                if (list.isEmpty() && !isRefreshing) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = stringResource(R.string.no_donations_yet),
+                        style = TitleTypography.copy(
+                            fontSize = 30.sp,
+                            color = BrightBlue,
+                        )
+                    )
+                } else {
+                    MyDonationList(list)
+                }
+                // Adding the PullRefreshIndicator
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             }
         }
     }
-        Box(modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter){
-            // Adding the PullRefreshIndicator
-            PullRefreshIndicator(
-                refreshing = isRefreshing,
-                state = pullRefreshState,
-                modifier = Modifier
-            )
-        }
-}
 }
 
 @Composable
