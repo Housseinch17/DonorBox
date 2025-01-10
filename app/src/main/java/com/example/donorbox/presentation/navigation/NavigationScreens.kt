@@ -10,18 +10,28 @@ sealed interface NavigationScreens {
 
     //Register Graph
     @Serializable
-    data object Register: NavigationScreens
+    data object RegisterGraph: NavigationScreens{
+        const val ROUTE = "RegisterGraph"
+    }
 
     //Register screens
     @Serializable
-    data object LogInPage: NavigationScreens{
-        const val ROUTE = "LogInPage"
-    }
+    data object LogInPage: NavigationScreens
 
     @Serializable
-    data object SignUpPage: NavigationScreens{
-        const val ROUTE = "SignUpPage"
+    data object SignUpPage: NavigationScreens
+
+
+    //DonorBox graph
+    @Serializable
+    data object DonorBoxGraph: NavigationScreens{
+        const val ROUTE = "DonorBoxGraph"
     }
+
+
+    //DonorBox screens
+    @Serializable
+    data object HomePage: NavigationScreens
 
     @Serializable
     data object MyDonationsPage: NavigationScreens
@@ -34,13 +44,5 @@ sealed interface NavigationScreens {
 
     @Serializable
     data object SettingsPage: NavigationScreens
-
-    //DonorBox graph
-    @Serializable
-    data object DonorBox: NavigationScreens
-
-    //DonorBox screens
-    @Serializable
-    data object HomePage: NavigationScreens
 
 }

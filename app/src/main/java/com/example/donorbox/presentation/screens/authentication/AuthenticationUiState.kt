@@ -1,5 +1,6 @@
 package com.example.donorbox.presentation.screens.authentication
 
+import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 
 data class AuthenticationUiState(
@@ -9,4 +10,5 @@ data class AuthenticationUiState(
     val resetShowDialog: Boolean = false,
     val resetPassword: PasswordChangement = PasswordChangement.InitialState,
     val resetEmailValue: String = "",
+    val currentScreen: NavigationScreens = NavigationScreens.HomePage,
     )

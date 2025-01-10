@@ -40,6 +40,7 @@ import com.example.donorbox.presentation.util.SharedScreen
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MyDonationPage(
+    modifier: Modifier,
     isLoading: Boolean, list: List<MyDonations>, isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
@@ -47,31 +48,32 @@ fun MyDonationPage(
         refreshing = isRefreshing,
         onRefresh = onRefresh,
     )
-    SharedScreen(modifier = Modifier.fillMaxSize()) {
-
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+    SharedScreen{
+        Box(
+            modifier = modifier
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState),
-                contentAlignment = Alignment.Center
-            ) {
+            } else {
                 if (list.isEmpty() && !isRefreshing) {
-                    Text(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = stringResource(R.string.no_donations_yet),
-                        style = TitleTypography.copy(
-                            fontSize = 30.sp,
-                            color = BrightBlue,
-                        )
-                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            Text(
+                                modifier = Modifier.align(Alignment.Center),
+                                text = stringResource(R.string.no_donations_yet),
+                                style = TitleTypography.copy(
+                                    fontSize = 30.sp,
+                                    color = BrightBlue,
+                                )
+                            )
+                        }
+                    }
                 } else {
                     MyDonationList(list)
                 }

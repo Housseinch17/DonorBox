@@ -24,6 +24,8 @@ val Yellow = Color(0xFFFFC106)
 val NewBlue = Color(0xFF179ade)
 val NewGray = Color(0xFFb7b7c1)
 val NewWhite = Color(0xFFfefdff)
+val ClickedIconColor1 = Color(0xFF0d6aa1)
+
 
 // Additional colors from XML
 val Purple200 = Color(0xFFBB86FC)

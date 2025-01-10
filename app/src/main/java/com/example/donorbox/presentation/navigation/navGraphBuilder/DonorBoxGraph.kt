@@ -3,12 +3,15 @@ package com.example.donorbox.presentation.navigation.navGraphBuilder
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -48,15 +51,13 @@ fun NavGraphBuilder.donorBoxGraph(
     signOutShowDialog: Boolean,
     signOutIsLoading: Boolean
 ) {
-    navigation<NavigationScreens.DonorBox>(
-        startDestination = NavigationScreens.HomePage
-    ) {
+    navigation<NavigationScreens.DonorBoxGraph>(startDestination = NavigationScreens.HomePage) {
         composable<NavigationScreens.HomePage> {
             val context = LocalContext.current
 
             Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBox)
+                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
             val homeViewModel =
                 koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
             val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -70,7 +71,7 @@ fun NavGraphBuilder.donorBoxGraph(
             }
 
             HomePage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp, start = 20.dp, end = 20.dp),
                 response = uiState.receiversResponse,
                 onReceiverClick = {
                     homeViewModel.updateModalBottomSheetReceiver(it)
@@ -80,7 +81,8 @@ fun NavGraphBuilder.donorBoxGraph(
                 hideBottomSheetReceiver = homeViewModel::hideBottomSheetReceiver,
                 onCall = { phoneNumber ->
                     context.callPhoneDirectly(phoneNumber) {
-                        Toast.makeText(context, "Permission not granted!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Permission not granted!", Toast.LENGTH_LONG)
+                            .show()
                     }
                 },
                 onOpenApp = {
@@ -97,6 +99,7 @@ fun NavGraphBuilder.donorBoxGraph(
                     homeViewModel.updateCurrentTokenAndUsername(receiverToken, receiverUsername)
                 },
                 sendMoney = { moneyToDonate, password ->
+                    homeViewModel.updateLoader(true)
                     scope.launch {
                         homeViewModel.verifyPassword(password = password,
                             onVerified = {
@@ -131,25 +134,25 @@ fun NavGraphBuilder.donorBoxGraph(
                 onIconClick = homeViewModel::setShowPassword
             )
         }
-
         composable<NavigationScreens.MyDonationsPage> {
             val myDonationsViewModel = koinViewModel<MyDonationsViewModel>()
             val myDonationsUiState by myDonationsViewModel.myDonationsUiState.collectAsStateWithLifecycle()
 
             MyDonationPage(
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 isLoading = myDonationsUiState.isLoading,
                 list = myDonationsUiState.list,
                 isRefreshing = myDonationsUiState.isRefreshing,
                 onRefresh = myDonationsViewModel::loadNewOrders
             )
         }
-
         composable<NavigationScreens.ReceivedDonationsPage> {
             Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val receivedDonationsViewModel = koinViewModel<ReceivedDonationsViewModel>()
             val receivedDonationsUiState by receivedDonationsViewModel.receivedDonationsUiState.collectAsStateWithLifecycle()
 
             ReceivedDonationsPage(
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 isLoading = receivedDonationsUiState.isLoading,
                 isRefreshing = receivedDonationsUiState.isRefreshing,
                 receivedDonationsList = receivedDonationsUiState.receivedDonationsList,
@@ -157,7 +160,6 @@ fun NavGraphBuilder.donorBoxGraph(
             )
 
         }
-
         composable<NavigationScreens.SettingsPage> {
             Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val context = LocalContext.current
@@ -173,19 +175,27 @@ fun NavGraphBuilder.donorBoxGraph(
             }
 
             SettingsPage(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 textPage = stringResource(R.string.settings),
                 currentPasswordValue = settingsUiState.currentPasswordValue,
                 newPasswordValue = settingsUiState.newPasswordValue,
                 confirmPasswordValue = settingsUiState.confirmNewPasswordValue,
                 currentPasswordValueChange = { currentPassword ->
-                    settingsViewModel.updatePassword(UpdatePassword.CurrentPassword(currentPassword))
+                    settingsViewModel.updatePassword(
+                        UpdatePassword.CurrentPassword(
+                            currentPassword
+                        )
+                    )
                 },
                 newPasswordValueChange = { newPassword ->
                     settingsViewModel.updatePassword(UpdatePassword.NewPassword(newPassword))
                 },
                 confirmPasswordValueChange = { confirmPassword ->
-                    settingsViewModel.updatePassword(UpdatePassword.ConfirmPassword(confirmPassword))
+                    settingsViewModel.updatePassword(
+                        UpdatePassword.ConfirmPassword(
+                            confirmPassword
+                        )
+                    )
                 },
                 currentPasswordImageVector = settingsViewModel.getIconVisibility(
                     settingsUiState.currentShowPassword
@@ -236,17 +246,15 @@ fun NavGraphBuilder.donorBoxGraph(
                 isLoading = settingsUiState.isLoading
             )
         }
-
         composable<NavigationScreens.ProfilePage> {
             Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val profileViewModel = koinViewModel<ProfileViewModel>()
             val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
 
-
             ProfilePage(
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 profileUiState = profileUiState
             )
         }
-
     }
 }

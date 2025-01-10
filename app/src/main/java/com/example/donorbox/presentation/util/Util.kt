@@ -2,6 +2,7 @@ package com.example.donorbox.presentation.util
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,6 +11,8 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -32,6 +35,22 @@ fun Context.isInternetAvailable(): Boolean {
         activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
+
+fun Activity.requestPhoneCallPermission() {
+    val hasPermission =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) ==
+                PackageManager.PERMISSION_GRANTED
+    if (!hasPermission) {
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.CALL_PHONE),
+            1
+        )
+        Log.d("Permissions", "CALL_PHONE permission not granted")
+    } else {
+        Log.d("Permissions", "CALL_PHONE permission already granted")
+    }
+}
+
 
 fun Context.callPhoneDirectly(
     phoneNumber: String,

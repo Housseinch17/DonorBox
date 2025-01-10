@@ -113,7 +113,7 @@ fun ShimmerEffect(
 }
 
 @Composable
-fun SharedScreen(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun SharedScreen(modifier: Modifier = Modifier.fillMaxSize(), content: @Composable () -> Unit) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {

@@ -12,6 +12,7 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticatio
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
+import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.util.isInternetAvailable
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,6 +54,13 @@ class AuthenticationViewModel(
         Log.d("ViewModelInitialization", "authentication destroyed")
     }
 
+    fun updateCurrentScreen(currentScreen: NavigationScreens){
+        viewModelScope.launch {
+            _authenticationUiState.update { newState->
+                newState.copy(currentScreen = currentScreen)
+            }
+        }
+    }
 
     private suspend fun updateTokenIntoFirebase(){
         updateDeviceTokenUseCase.updateDeviceToken()

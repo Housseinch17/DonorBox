@@ -6,5 +6,4 @@ import com.example.donorbox.presentation.navigation.NavigationScreens
 @Immutable
 data class MainUiState(
     val currentScreen: NavigationScreens = NavigationScreens.Loading,
-    val isLoading: Boolean = true
 )

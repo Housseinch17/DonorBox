@@ -3,10 +3,8 @@ package com.example.donorbox.presentation.screens.profile
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -24,13 +22,12 @@ import com.example.donorbox.presentation.util.SharedScreen
 
 @Composable
 fun ProfilePage(
+    modifier: Modifier,
     profileUiState: ProfileUiState
 ) {
-    SharedScreen {
+    SharedScreen{
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp),
+            modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
             if (profileUiState.isLoading) {

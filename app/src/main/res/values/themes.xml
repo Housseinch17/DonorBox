@@ -3,9 +3,8 @@
 
     <style name="Theme.DonorBox" parent="android:Theme.Material.Light.NoActionBar" >
         <item name="android:statusBarColor">@color/background</item>
-        <item name="android:windowSplashScreenBackground">@color/black</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-
+        <item name="android:windowSplashScreenBackground">@color/new_blue</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/donate_launcher_round</item>
     </style>
 
     <style name="Theme.Activity" parent="Theme.DonorBox">

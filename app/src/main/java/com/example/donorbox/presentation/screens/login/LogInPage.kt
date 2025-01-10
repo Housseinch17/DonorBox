@@ -68,12 +68,10 @@ fun LogInScreen(
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    SharedScreen(
-        modifier = modifier
-    ) {
+    SharedScreen{
         if (resetShowDialog) {
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier
             ) {
                 val horizontalScrollState = rememberScrollState()
                 ShowDialog(

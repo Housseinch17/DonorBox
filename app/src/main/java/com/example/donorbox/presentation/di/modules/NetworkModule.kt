@@ -10,10 +10,15 @@ import retrofit2.Retrofit
 
 object NetworkModule {
     val networkModule = module {
+
+        val json = Json {
+            ignoreUnknownKeys = true
+        }
+
         single {
             Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+                .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()
         }
 

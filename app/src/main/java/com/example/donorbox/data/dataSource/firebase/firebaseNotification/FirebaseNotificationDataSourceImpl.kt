@@ -52,7 +52,7 @@ class FirebaseNotificationDataSourceImpl(
 
     override suspend fun sendNotificationToToken(notificationMessage: NotificationMessage): Unit = withContext(coroutineDispatcher){
           try {
-              Log.d("MyTag","sendNotification notificaimpl")
+              Log.d("FCM","sendNotification notificaimpl")
               val response = fcmApi.sendNotification(notificationMessage)
               if (response.isSuccessful) {
                   Log.d("FCM", "Notification sent successfully")

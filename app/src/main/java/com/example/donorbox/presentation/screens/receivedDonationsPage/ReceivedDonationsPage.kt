@@ -38,6 +38,7 @@ import com.example.donorbox.presentation.util.SharedScreen
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReceivedDonationsPage(
+    modifier: Modifier,
     isLoading: Boolean, receivedDonationsList: List<String>, isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
@@ -45,39 +46,41 @@ fun ReceivedDonationsPage(
         refreshing = isRefreshing,
         onRefresh = onRefresh,
     )
-    SharedScreen(modifier = Modifier.fillMaxSize()){
-
-        if (receivedDonationsList.isEmpty() && !isRefreshing) {
-            Box(modifier = Modifier) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(R.string.no_donations_yet), style = TitleTypography.copy(
-                        fontSize = 30.sp,
-                    )
-                )
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullRefresh(pullRefreshState),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
+    SharedScreen{
+        Box(
+            modifier = modifier
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
+            } else {
+                if (receivedDonationsList.isEmpty() && !isRefreshing) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            Text(
+                                modifier = Modifier,
+                                text = stringResource(R.string.no_donations_yet),
+                                style = TitleTypography.copy(
+                                    fontSize = 30.sp,
+                                )
+                            )
+                        }
+                    }
                 } else {
                     ReceivedDonationsList(receivedDonationsList)
                 }
+                // Adding the PullRefreshIndicator
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             }
-        }
-        Box(modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter){
-            // Adding the PullRefreshIndicator
-            PullRefreshIndicator(
-                refreshing = isRefreshing,
-                state = pullRefreshState,
-                modifier = Modifier
-            )
         }
     }
 }

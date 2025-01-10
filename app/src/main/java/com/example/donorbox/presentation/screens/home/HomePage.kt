@@ -1,6 +1,5 @@
 package com.example.donorbox.presentation.screens.home
 
-//noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -113,11 +111,9 @@ fun HomePage(
     imageVector: ImageVector,
     onIconClick: () -> Unit
 ) {
-    SharedScreen(modifier = modifier) {
+SharedScreen{
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp)
+            modifier = modifier
         ) {
             when (response) {
                 is ReceiversResponse.Error -> {
@@ -646,12 +642,12 @@ fun ShowDialog(
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = BrightBlue,
-                        disabledContainerColor = Color.Red
+                        disabledContainerColor = NewGray
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.send_money), color = Color.Black,
+                        text = stringResource(R.string.send_money), color = NewWhite,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -666,7 +662,7 @@ fun ShowDialog(
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = BrightBlue,
-                        disabledContainerColor = Color.Red
+                        disabledContainerColor = NewGray
                     ),
                     border = BorderStroke(1.dp, BrightBlue)
                 ) {

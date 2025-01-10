@@ -1,11 +1,12 @@
 package com.example.donorbox.presentation.screens.main
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.BottomNavigation
@@ -13,6 +14,7 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 //noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.FabPosition
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Outbox
@@ -22,122 +24,175 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.donorbox.presentation.navigation.Navigation
 import com.example.donorbox.presentation.navigation.NavigationScreens
+import com.example.donorbox.presentation.navigation.navGraphBuilder.donorBoxGraph
+import com.example.donorbox.presentation.navigation.navGraphBuilder.registerGraph
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.authentication.SignOutResponse
+import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
+import com.example.donorbox.presentation.theme.ClickedIconColor1
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
-import com.example.donorbox.presentation.theme.Orange
+import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.navigateSingleTopTo
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MainPage(navController: NavHostController) {
-    //initialize viewmodel to check if already logged in via shared preferences
-    val mainViewModel = koinViewModel<MainViewModel>()
-    val status by mainViewModel.status.collectAsStateWithLifecycle()
+fun MainPage(navController: NavHostController, startDestination: NavigationScreens) {
+    Log.d("MyTag","Entered")
+    val currentBackStackEntry = navController.currentBackStackEntryAsState().value
+    val currentDestination = currentBackStackEntry?.destination
+    val currentGraph = currentDestination?.parent
+
+    val currentGraphRoute = checkCurrentGraphRoute(currentGraph?.route.toString())
+
+    val context = LocalContext.current
+
+    val authenticationViewModel = koinViewModel<AuthenticationViewModel>()
+    val authenticationUiState by authenticationViewModel.authenticationUiState.collectAsStateWithLifecycle()
+
+    val currentUsername = authenticationUiState.username
 
 
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    //get current screen
-    val currentScreenDestination = backStackEntry?.destination?.route
-    //get current screen route without (com.example.donorBox...)
-    val currentScreenRoute = getScreenName(currentScreenDestination)
-
-    //not hideBottomBar
-    val showBottomBar = !(hideBottomBar(currentScreenRoute)) && !status.isLoading
-
-    //here if the status is NavigationScreens.Loading it will show the background image set in the theme
-    if (status.currentScreen != NavigationScreens.Loading) {
-        //use material not material 3 to use docked
-        androidx.compose.material.Scaffold(
-            floatingActionButton = {
-                if (showBottomBar) {
-                    FloatingButtonBar(onDonationClick = {
-                            navController.navigateSingleTopTo(
-                                route = NavigationScreens.ReceivedDonationsPage,
-                                navController
-                            )
-                    })
+    LaunchedEffect(authenticationUiState.signOut) {
+        when (authenticationUiState.signOut) {
+            SignOutResponse.Success -> {
+                authenticationViewModel.resetSignOutState()
+                navController.navigate(NavigationScreens.LogInPage) {
+                    //popUpTo(0) here 0 means we will remove all the old stacks in BackStackEntry
+                    popUpTo(0) {
+                        inclusive = true
+                    }
                 }
-            },
-            //to show it docked
-            isFloatingActionButtonDocked = true,
-            floatingActionButtonPosition = FabPosition.Center,
-            bottomBar = {
-                if (showBottomBar) {
-                    androidx.compose.material.BottomAppBar(
-                        backgroundColor = NewBlue,
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        //will cut floating to show white background behind it
-                        cutoutShape = RoundedCornerShape(50),
-                        content = {
-                            BottomAppBar(
-                                onHomeClick = {
-                                        navController.navigateSingleTopTo(
-                                            route = NavigationScreens.HomePage,
-                                            navController
-                                        )
-                                },
-                                onMyDonationsClick = {
-                                    navController.navigateSingleTopTo(
-                                        route = NavigationScreens.MyDonationsPage,
-                                        navController
-                                    )
-                                },
-                                onSettingsClick = {
-                                    navController.navigateSingleTopTo(
-                                        route = NavigationScreens.SettingsPage,
-                                        navController
-                                    )
-                                },
-                                onProfileClick = {
-                                        navController.navigateSingleTopTo(
-                                            route = NavigationScreens.ProfilePage,
-                                            navController
-                                        )
-                                }
-                            )
-                        }
-                    )
-                }
+            }
+            else -> {}
+        }
+    }
 
-            },
-        ) { innerPadding ->
-            //we  use innerPadding because we added statusBarsPadding() and navigationBarsPadding()
-            // to topBar and bottomBar
-            //but here i removed topBar so i had to add statusBarsPadding() to show status bar color
-            Navigation(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .statusBarsPadding()
-                    .padding(innerPadding),
+    LaunchedEffect(authenticationViewModel.showMessage) {
+        authenticationViewModel.showMessage.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    androidx.compose.material.Scaffold(
+        floatingActionButton = {
+            if (currentGraphRoute != NavigationScreens.RegisterGraph.ROUTE) {
+                FloatingButtonBar(
+                    currentScreens = authenticationUiState.currentScreen,
+                    onDonationClick = {
+                        navController.navigateSingleTopTo(
+                            route = NavigationScreens.ReceivedDonationsPage,
+                            navController
+                        )
+                        authenticationViewModel.updateCurrentScreen(NavigationScreens.ReceivedDonationsPage)
+                    },
+                )
+            }
+        },
+        //to show it docked
+        isFloatingActionButtonDocked = true,
+        floatingActionButtonPosition = FabPosition.Center,
+        bottomBar = {
+            if (currentGraphRoute != NavigationScreens.RegisterGraph.ROUTE) {
+                androidx.compose.material.BottomAppBar(
+                    backgroundColor = NewBlue,
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    //will cut floating to show white background behind it
+                    cutoutShape = RoundedCornerShape(50),
+                    content = {
+                        BottomAppBar(
+                            currentScreens = authenticationUiState.currentScreen,
+                            onHomeClick = {
+                                navController.navigateSingleTopTo(
+                                    route = NavigationScreens.HomePage,
+                                    navController
+                                )
+                                authenticationViewModel.updateCurrentScreen(NavigationScreens.HomePage)
+                            },
+                            onMyDonationsClick = {
+                                navController.navigateSingleTopTo(
+                                    route = NavigationScreens.MyDonationsPage,
+                                    navController
+                                )
+                                authenticationViewModel.updateCurrentScreen(NavigationScreens.MyDonationsPage)
+                            },
+                            onSettingsClick = {
+                                navController.navigateSingleTopTo(
+                                    route = NavigationScreens.SettingsPage,
+                                    navController
+                                )
+                                authenticationViewModel.updateCurrentScreen(NavigationScreens.SettingsPage)
+                            },
+                            onProfileClick = {
+                                navController.navigateSingleTopTo(
+                                    route = NavigationScreens.ProfilePage,
+                                    navController
+                                )
+                                authenticationViewModel.updateCurrentScreen(NavigationScreens.ProfilePage)
+                            }
+                        )
+                    }
+                )
+            }
+        },
+    ) { innerPadding ->
+        SharedScreen {
+        NavHost(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            navController = navController,
+            startDestination = startDestination
+        ) {
+            registerGraph(
+                authenticationViewModel = authenticationViewModel,
                 navHostController = navController,
-                startDestination = status.currentScreen
+                onResetEmailValue = authenticationUiState.resetEmailValue,
+                resetShowDialog = authenticationUiState.resetShowDialog,
+                email = authenticationUiState.resetEmailValue,
+                resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
             )
+
+            donorBoxGraph(
+                navHostController = navController,
+                authenticationViewModel = authenticationViewModel,
+                username = currentUsername ?: "",
+                resetShowDialog = authenticationUiState.resetShowDialog,
+                resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
+                signOutShowDialog = authenticationUiState.signOutShowDialog,
+                signOutIsLoading = authenticationUiState.signOut == SignOutResponse.IsLoading,
+            )
+        }
         }
     }
 }
 
+
 @Composable
-fun FloatingButtonBar(onDonationClick: () -> Unit) {
+fun FloatingButtonBar(onDonationClick: () -> Unit, currentScreens: NavigationScreens) {
     FloatingActionButton(
         onClick = onDonationClick,
         shape = RoundedCornerShape(50.dp),
-        containerColor = NewBlue
+        containerColor = NewBlue,
+        contentColor = if (currentScreens == NavigationScreens.ReceivedDonationsPage) ClickedIconColor1 else NewWhite
     ) {
         Icon(
             imageVector = Icons.Filled.Outbox,
             contentDescription = "Received Donations",
-            tint = NewWhite
         )
     }
 }
@@ -147,77 +202,68 @@ fun FloatingButtonBar(onDonationClick: () -> Unit) {
 fun BottomAppBar(
     onHomeClick: () -> Unit, onProfileClick: () -> Unit,
     onMyDonationsClick: () -> Unit, onSettingsClick: () -> Unit,
+    currentScreens: NavigationScreens,
 ) {
     BottomNavigation(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = NewBlue,
-        contentColor = NewWhite
     ) {
         BottomNavigationItem(
-            selected = true,
+            selected = currentScreens == NavigationScreens.HomePage,
+            selectedContentColor = NewWhite,
+            unselectedContentColor = ClickedIconColor1,
             onClick = onHomeClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home",
-                    tint = NewWhite
+                    tint = if (currentScreens == NavigationScreens.HomePage) ClickedIconColor1 else NewWhite
                 )
             },
-            selectedContentColor = Orange,
-            unselectedContentColor = NewWhite,
         )
         BottomNavigationItem(
+            selected = currentScreens == NavigationScreens.ProfilePage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = Orange,
-            selected = false,
+            selectedContentColor = ClickedIconColor1,
             onClick = onProfileClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Profile",
-                    tint = NewWhite
+                    tint = if (currentScreens == NavigationScreens.ProfilePage) ClickedIconColor1 else NewWhite
                 )
             }
         )
 
         BottomNavigationItem(
+            selected = currentScreens == NavigationScreens.MyDonationsPage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = Orange,
-            selected = false,
+            selectedContentColor = ClickedIconColor1,
             onClick = onMyDonationsClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.ShoppingBag,
-                    contentDescription = "My Orders",
-                    tint = NewWhite
+                    contentDescription = "My Donations",
+                    tint = if (currentScreens == NavigationScreens.MyDonationsPage) ClickedIconColor1 else NewWhite
                 )
             }
         )
         BottomNavigationItem(
+            selected = currentScreens == NavigationScreens.SettingsPage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = Orange,
-            selected = false,
+            selectedContentColor = ClickedIconColor1,
             onClick = onSettingsClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = "Settings",
-                    tint = NewWhite
+                    tint = if (currentScreens == NavigationScreens.SettingsPage) ClickedIconColor1 else NewWhite
                 )
             }
         )
     }
 }
 
-
-private fun hideBottomBar(currentScreenRoute: String): Boolean {
-    //currentScreenRoute is LogInPage
-    //currentScreenRoute is SignUpPage
-    //currentScreenRoute is Empty
-    return currentScreenRoute == NavigationScreens.LogInPage.ROUTE || currentScreenRoute == NavigationScreens.SignUpPage.ROUTE || currentScreenRoute.isEmpty()
-}
-
-//instead of getting com.example.donorBox.LogInPage it will show LogInPage only
-private fun getScreenName(route: String?): String {
-    return route?.substringAfterLast('.') ?: ""
+private fun checkCurrentGraphRoute(route: String): String {
+    return route.substringAfterLast(".")
 }

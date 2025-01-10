@@ -49,6 +49,7 @@ class FirebaseWriteDataSourceImpl(
 
     override suspend fun writeDonationsIntoFirebase(username: String, donation: String): Unit =
         withContext(coroutineDispatcher) {
+            Log.d("MyTag", username)
             val newUsername = replaceUsername(username)
             Log.d("MyTag", "newUsername: $newUsername")
             if (newUsername!!.isNotEmpty()) {

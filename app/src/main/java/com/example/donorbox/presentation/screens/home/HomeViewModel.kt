@@ -121,7 +121,7 @@ class HomeViewModel(
         }
     }
 
-    private fun updateLoader(loaderVisibility: Boolean) {
+    fun updateLoader(loaderVisibility: Boolean) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(isLoading = loaderVisibility)
@@ -153,9 +153,9 @@ class HomeViewModel(
             _uiState.update { newState ->
                 newState.copy(showText = true)
             }
+            updateLoader(false)
         } else {
             try {
-                updateLoader(true)
                 //read full name of sender
                 readFullName()
 

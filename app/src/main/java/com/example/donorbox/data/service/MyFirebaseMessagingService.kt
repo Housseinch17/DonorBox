@@ -30,7 +30,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Log.d("MyTag", "onMessageReceived() received message")
+        Log.d("FCM", "onMessageReceived() received message")
 
         // Handle data payload or from notification data
         remoteMessage.data.let { data ->

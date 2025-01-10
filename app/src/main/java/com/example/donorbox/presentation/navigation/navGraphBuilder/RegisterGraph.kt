@@ -3,6 +3,8 @@ package com.example.donorbox.presentation.navigation.navGraphBuilder
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -40,7 +43,7 @@ fun NavGraphBuilder.registerGraph(
     email: String,
     resetIsLoading: Boolean,
 ){
-    navigation<NavigationScreens.Register>(
+    navigation<NavigationScreens.RegisterGraph>(
         startDestination = NavigationScreens.LogInPage
     ){
         composable<NavigationScreens.LogInPage> {
@@ -74,7 +77,7 @@ fun NavGraphBuilder.registerGraph(
                 }
             }
             LogInScreen(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 textPage = stringResource(R.string.hello_sign_in),
                 emailValue = logInUiState.emailValue,
                 onEmailChange = { newEmail ->
@@ -115,7 +118,6 @@ fun NavGraphBuilder.registerGraph(
                 onResetPassword = authenticationViewModel::resetResetShowDialog
             )
         }
-
 
         composable<NavigationScreens.SignUpPage> {
             Log.d("BackStack","${navHostController.currentBackStackEntry}")
@@ -163,7 +165,7 @@ fun NavGraphBuilder.registerGraph(
             }
 
             SignUpScreen(
-                Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp).padding(top = 20.dp),
                 textPage = stringResource(R.string.create_your_account),
                 emailValue = signUpUiState.email,
                 onEmailChange = { newEmail ->
@@ -205,6 +207,5 @@ fun NavGraphBuilder.registerGraph(
                 },
             )
         }
-
     }
 }
