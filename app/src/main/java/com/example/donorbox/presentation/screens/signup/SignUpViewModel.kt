@@ -2,10 +2,6 @@ package com.example.donorbox.presentation.screens.signup
 
 import android.util.Log
 import android.util.Patterns
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
@@ -20,6 +16,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+
+sealed interface SignUpAction{
+    data class SignUp(val name: String, val email: String, val password: String, val confirmPassword: String): SignUpAction
+    data class SetEmail(val emailValue: String): SignUpAction
+    data class SetName(val nameValue: String): SignUpAction
+    data class SetPassword(val passwordValue: String): SignUpAction
+    data class SetConfirmPassword(val confirmPasswordValue: String): SignUpAction
+    data object SetShowPassword: SignUpAction
+    data object SetShowConfirmPassword: SignUpAction
+}
 
 class SignUpViewModel(
     private val signUpUseCase: SignUpUseCase,
@@ -38,6 +45,23 @@ class SignUpViewModel(
     override fun onCleared() {
         super.onCleared()
         Log.d("ViewModelInitialization", "SignupViewModel destroyed")
+    }
+
+    fun onActionSignUp(signUpAction: SignUpAction){
+        when(signUpAction){
+            is SignUpAction.SetEmail -> setEmail(signUpAction.emailValue)
+            is SignUpAction.SetName -> setName(signUpAction.nameValue)
+            is SignUpAction.SetConfirmPassword -> setConfirmPassword(signUpAction.confirmPasswordValue)
+            is SignUpAction.SetPassword -> setPassword(signUpAction.passwordValue)
+            SignUpAction.SetShowConfirmPassword -> setShowConfirmPassword()
+            SignUpAction.SetShowPassword -> setShowPassword()
+            is SignUpAction.SignUp -> signUp(
+                name = signUpAction.name,
+                email = signUpAction.email,
+                password = signUpAction.password,
+                confirmPassword = signUpAction.confirmPassword
+            )
+        }
     }
 
     fun setAlreadyHaveAccountButton() {
@@ -59,7 +83,7 @@ class SignUpViewModel(
         }
     }
 
-    fun signUp(email: String, password: String, name: String, confirmPassword: String) {
+    private fun signUp(email: String, password: String, name: String, confirmPassword: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(accountStatus = AccountStatus.IsLoading)
@@ -115,7 +139,7 @@ class SignUpViewModel(
 
     }
 
-    fun setEmail(email: String) {
+    private fun setEmail(email: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(email = email)
@@ -123,7 +147,7 @@ class SignUpViewModel(
         }
     }
 
-    fun setName(name: String) {
+    private fun setName(name: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(name = name)
@@ -131,7 +155,7 @@ class SignUpViewModel(
         }
     }
 
-    fun setConfirmPassword(confirmPassword: String) {
+    private fun setConfirmPassword(confirmPassword: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(confirmPassword = confirmPassword)
@@ -139,7 +163,7 @@ class SignUpViewModel(
         }
     }
 
-    fun setPassword(password: String) {
+    private fun setPassword(password: String) {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(password = password)
@@ -147,7 +171,7 @@ class SignUpViewModel(
         }
     }
 
-    fun setShowPassword() {
+    private fun setShowPassword() {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(
@@ -157,7 +181,7 @@ class SignUpViewModel(
         }
     }
 
-    fun setShowConfirmPassword() {
+    private fun setShowConfirmPassword() {
         viewModelScope.launch {
             _signupUiState.update { newState ->
                 newState.copy(
@@ -167,21 +191,4 @@ class SignUpViewModel(
         }
     }
 
-    fun getIconVisibility(): ImageVector {
-        val showPassword = _signupUiState.value.showPassword
-        return if (showPassword) {
-            Icons.Filled.Visibility
-        } else {
-            Icons.Filled.VisibilityOff
-        }
-    }
-
-    fun getConfirmIconVisibility(): ImageVector {
-        val confirmShowPassword = _signupUiState.value.showConfirmPassword
-        return if (confirmShowPassword) {
-            Icons.Filled.Visibility
-        } else {
-            Icons.Filled.VisibilityOff
-        }
-    }
 }

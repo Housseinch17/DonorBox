@@ -37,12 +37,12 @@ fun NavGraphBuilder.registerGraph(
     authenticationViewModel: AuthenticationViewModel,
     authenticationUiState: AuthenticationUiState,
     navHostController: NavHostController,
-){
+) {
     navigation<NavigationScreens.RegisterGraph>(
         startDestination = NavigationScreens.LogInPage
-    ){
+    ) {
         composable<NavigationScreens.LogInPage> {
-            Log.d("BackStack","${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val context = LocalContext.current
             val logInViewModel = koinViewModel<LogInViewModel>()
             val logInUiState by logInViewModel.logInUiState.collectAsStateWithLifecycle()
@@ -70,7 +70,10 @@ fun NavGraphBuilder.registerGraph(
                 }
             }
             LogInScreen(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .padding(top = 20.dp),
                 textPage = stringResource(R.string.hello_sign_in),
                 logInUiState = logInUiState,
                 onActionLogIn = logInViewModel::onActionLogIn,
@@ -83,7 +86,7 @@ fun NavGraphBuilder.registerGraph(
         }
 
         composable<NavigationScreens.SignUpPage> {
-            Log.d("BackStack","${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
             val context = LocalContext.current
             val signUpViewModel = koinViewModel<SignUpViewModel>()
             val signUpUiState by signUpViewModel.signupUiState.collectAsStateWithLifecycle()
@@ -128,45 +131,16 @@ fun NavGraphBuilder.registerGraph(
             }
 
             SignUpScreen(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp).padding(top = 20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .padding(top = 20.dp)
+                    .padding(top = 20.dp),
                 textPage = stringResource(R.string.create_your_account),
-                emailValue = signUpUiState.email,
-                onEmailChange = { newEmail ->
-                    signUpViewModel.setEmail(newEmail)
-                },
-                imageVector = signUpViewModel.getIconVisibility(),
-                onIconClick = signUpViewModel::setShowPassword,
-                confirmPasswordImageVector = signUpViewModel.getConfirmIconVisibility(),
-                onConfirmIconClick = signUpViewModel::setShowConfirmPassword,
-                showPassword = signUpUiState.showPassword,
-                confirmShowPassword = signUpUiState.showConfirmPassword,
-                passwordValue = signUpUiState.password,
-                onPasswordChange = { newPassword ->
-                    signUpViewModel.setPassword(newPassword)
-                },
-                buttonText = "Create Account",
-                accountTextButton = "Already have an account? Login!",
-                createAccountEnabled = signUpUiState.accountStatus == AccountStatus.NotCreated,
-                alreadyExistingEnabled = signUpUiState.alreadyHaveAccountButton && (signUpUiState.accountStatus == AccountStatus.NotCreated),
-                onCreateAccount = { name, confirmPassword, email, password ->
-                    Log.d("MyTag", "$name $confirmPassword $email $password ")
-                    signUpViewModel.signUp(
-                        email = email,
-                        password = password,
-                        name = name,
-                        confirmPassword = confirmPassword
-                    )
-                },
+                signUpUiState = signUpUiState,
+                signUpAction = signUpViewModel::onActionSignUp,
                 onExistingAccount = {
                     navHostController.navigateUp()
-                },
-                nameValue = signUpUiState.name,
-                confirmPasswordValue = signUpUiState.confirmPassword,
-                onNameChange = { name ->
-                    signUpViewModel.setName(name)
-                },
-                onConfirmPasswordChange = { confirmPassword ->
-                    signUpViewModel.setConfirmPassword(confirmPassword)
                 },
             )
         }

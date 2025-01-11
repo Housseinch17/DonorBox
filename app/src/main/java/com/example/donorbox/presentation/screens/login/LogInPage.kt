@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.donorbox.R
+import com.example.donorbox.presentation.screens.authentication.AuthenticationAction
 import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
-import com.example.donorbox.presentation.screens.authentication.OnActionAuthentication
 import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
@@ -54,7 +54,7 @@ fun LogInScreen(
     logInUiState: LogInUiState,
     authenticationUiState: AuthenticationUiState,
     onActionLogIn: (LogInAction) -> Unit,
-    onActionAuthentication: (OnActionAuthentication) -> Unit,
+    onActionAuthentication: (AuthenticationAction) -> Unit,
     onSignUpClick: () -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
@@ -83,7 +83,7 @@ fun LogInScreen(
                                     value = authenticationUiState.resetEmailValue,
                                     onValueChange = { emailValue ->
                                         onActionAuthentication(
-                                            OnActionAuthentication.OnResetEmailChange(
+                                            AuthenticationAction.OnResetEmailChange(
                                                 emailValue
                                             )
                                         )
@@ -115,14 +115,14 @@ fun LogInScreen(
                     confirmText = stringResource(R.string.reset_password),
                     confirmButton = {
                         onActionAuthentication(
-                            OnActionAuthentication.ResetPassword(
+                            AuthenticationAction.ResetPassword(
                                 emailValue = authenticationUiState.resetEmailValue,
                                 resetPage = ResetPage.LogInPage
                             )
                         )
                     },
                     onDismissButton = {
-                        onActionAuthentication(OnActionAuthentication.ResetDismiss)
+                        onActionAuthentication(AuthenticationAction.ResetDismiss)
                     }
                 )
             }
@@ -186,7 +186,7 @@ fun LogInScreen(
                                 text = stringResource(R.string.reset_password),
                                 textButtonEnabled = logInUiState.authState == AuthState.NotLoggedIn,
                                 onSignUpClick = {
-                                    onActionAuthentication(OnActionAuthentication.OnResetPassword)
+                                    onActionAuthentication(AuthenticationAction.OnResetPassword)
                                 }
                             )
                         }

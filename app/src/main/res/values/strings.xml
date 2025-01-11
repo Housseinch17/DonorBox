@@ -4,6 +4,7 @@
     <string name="background_image">Background Image</string>
     <string name="hello_sign_in">Hello Sign In</string>
     <string name="create_your_account">Create Your Account</string>
+    <string name="already_have_account">Already have an account? Login!</string>
     <string name="settings">Settings Page</string>
     <string name="signIn">Sign In</string>
     <string name="page">Page</string>

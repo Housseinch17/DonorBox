@@ -35,15 +35,15 @@ sealed interface ResetPage {
     data object SettingsPage : ResetPage
 }
 
-sealed interface OnActionAuthentication{
-    data class OnResetEmailChange(val emailValue: String): OnActionAuthentication
-    data class ResetPassword(val emailValue: String, val resetPage: ResetPage): OnActionAuthentication
-    data object ResetDismiss: OnActionAuthentication
-    data object OnResetPassword: OnActionAuthentication
-    data object ResetSignOutState: OnActionAuthentication
-    data object ResetShowDialog: OnActionAuthentication
-    data object ResetHideDialog: OnActionAuthentication
-    data object SignOut: OnActionAuthentication
+sealed interface AuthenticationAction{
+    data class OnResetEmailChange(val emailValue: String): AuthenticationAction
+    data class ResetPassword(val emailValue: String, val resetPage: ResetPage): AuthenticationAction
+    data object ResetDismiss: AuthenticationAction
+    data object OnResetPassword: AuthenticationAction
+    data object ResetSignOutState: AuthenticationAction
+    data object ResetShowDialog: AuthenticationAction
+    data object ResetHideDialog: AuthenticationAction
+    data object SignOut: AuthenticationAction
 
 }
 
@@ -79,16 +79,16 @@ class AuthenticationViewModel(
     }
 
 
-    fun onActionAuthentication(onActionAuthentication: OnActionAuthentication){
-        when(onActionAuthentication){
-            OnActionAuthentication.ResetDismiss -> resetResetHideDialog()
-            is OnActionAuthentication.OnResetEmailChange -> onResetEmailValue(onActionAuthentication.emailValue)
-            OnActionAuthentication.OnResetPassword -> resetResetShowDialog()
-            is OnActionAuthentication.ResetPassword -> resetPassword(email = onActionAuthentication.emailValue, resetPage = onActionAuthentication.resetPage)
-            OnActionAuthentication.ResetSignOutState -> resetSignOutState()
-            OnActionAuthentication.ResetShowDialog -> resetShowDialog()
-            OnActionAuthentication.ResetHideDialog -> resetHideDialog()
-            OnActionAuthentication.SignOut -> signOut()
+    fun onActionAuthentication(authenticationAction: AuthenticationAction){
+        when(authenticationAction){
+            AuthenticationAction.ResetDismiss -> resetResetHideDialog()
+            is AuthenticationAction.OnResetEmailChange -> onResetEmailValue(authenticationAction.emailValue)
+            AuthenticationAction.OnResetPassword -> resetResetShowDialog()
+            is AuthenticationAction.ResetPassword -> resetPassword(email = authenticationAction.emailValue, resetPage = authenticationAction.resetPage)
+            AuthenticationAction.ResetSignOutState -> resetSignOutState()
+            AuthenticationAction.ResetShowDialog -> resetShowDialog()
+            AuthenticationAction.ResetHideDialog -> resetHideDialog()
+            AuthenticationAction.SignOut -> signOut()
         }
     }
 
