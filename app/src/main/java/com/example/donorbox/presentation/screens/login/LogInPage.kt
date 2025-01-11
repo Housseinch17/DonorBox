@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,12 +26,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.donorbox.R
+import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
+import com.example.donorbox.presentation.screens.authentication.OnActionAuthentication
+import com.example.donorbox.presentation.screens.authentication.ResetPage
+import com.example.donorbox.presentation.sealedInterfaces.AuthState
+import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.AccountButton
@@ -44,32 +51,17 @@ import com.example.donorbox.presentation.util.TrailingIcon
 fun LogInScreen(
     modifier: Modifier,
     textPage: String,
-    emailValue: String,
-    onEmailChange: (String) -> Unit,
-    imageVector: ImageVector,
-    onIconClick: () -> Unit,
-    showPassword: Boolean,
-    passwordValue: String,
-    onPasswordChange: (String) -> Unit,
-    logInEnabled: Boolean,
-    signUpEnabled: Boolean,
-    isLoading: Boolean,
-    onLogInClick: (email: String, password: String) -> Unit,
+    logInUiState: LogInUiState,
+    authenticationUiState: AuthenticationUiState,
+    onActionLogIn: (LogInAction) -> Unit,
+    onActionAuthentication: (OnActionAuthentication) -> Unit,
     onSignUpClick: () -> Unit,
-    onResetEmailValue: String,
-    onResetEmailChange: (String) -> Unit,
-    resetShowDialog: Boolean,
-    resetPassword: () -> Unit,
-    resetDismiss: () -> Unit,
-    resetIsLoading: Boolean,
-    resetPasswordEnabled: Boolean,
-    onResetPassword: () -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    SharedScreen{
-        if (resetShowDialog) {
+    SharedScreen {
+        if (authenticationUiState.resetShowDialog) {
             Box(
                 modifier = modifier
             ) {
@@ -78,9 +70,9 @@ fun LogInScreen(
                     modifier = Modifier,
                     showDialog = true,
                     title = stringResource(R.string.reset_password),
-                    isProgressBar = resetIsLoading,
+                    isProgressBar = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
                     description = {
-                        if (!resetIsLoading) {
+                        if (authenticationUiState.resetPassword != PasswordChangement.IsLoading) {
                             Column {
                                 Text(
                                     text = stringResource(R.string.are_you____reset),
@@ -88,11 +80,17 @@ fun LogInScreen(
                                 )
                                 Spacer(Modifier.height(16.dp))
                                 TextField(
-                                    value = onResetEmailValue,
-                                    onValueChange = {
-                                        onResetEmailChange(it)
+                                    value = authenticationUiState.resetEmailValue,
+                                    onValueChange = { emailValue ->
+                                        onActionAuthentication(
+                                            OnActionAuthentication.OnResetEmailChange(
+                                                emailValue
+                                            )
+                                        )
                                     },
-                                    modifier = Modifier.fillMaxWidth().horizontalScroll(horizontalScrollState),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(horizontalScrollState),
                                     singleLine = true,
                                     placeholder = {
                                         Text(text = stringResource(R.string.reset_password_email))
@@ -115,8 +113,17 @@ fun LogInScreen(
                         }
                     },
                     confirmText = stringResource(R.string.reset_password),
-                    confirmButton = resetPassword,
-                    onDismissButton = resetDismiss
+                    confirmButton = {
+                        onActionAuthentication(
+                            OnActionAuthentication.ResetPassword(
+                                emailValue = authenticationUiState.resetEmailValue,
+                                resetPage = ResetPage.LogInPage
+                            )
+                        )
+                    },
+                    onDismissButton = {
+                        onActionAuthentication(OnActionAuthentication.ResetDismiss)
+                    }
                 )
             }
         }
@@ -127,8 +134,7 @@ fun LogInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (isLoading) {
-
+            if (logInUiState.isLoading) {
                 // Shimmer for textPage
                 LoadingShimmer()
 
@@ -151,13 +157,22 @@ fun LogInScreen(
                     ) {
                         EmailAndPassword(
                             Modifier.fillMaxWidth(),
-                            emailValue = emailValue,
-                            onEmailChange = onEmailChange,
-                            showPassword = showPassword,
-                            passwordValue = passwordValue,
-                            onPasswordChange = onPasswordChange
+                            emailValue = logInUiState.emailValue,
+                            onEmailChange = { emailValue ->
+                                onActionLogIn(LogInAction.SetEmail(emailValue))
+                            },
+                            showPassword = logInUiState.showPassword,
+                            passwordValue = logInUiState.passwordValue,
+                            onPasswordChange = { passwordValue ->
+                                onActionLogIn(LogInAction.OnPasswordChange(passwordValue))
+                            }
                         ) {
-                            TrailingIcon(imageVector, onIconClick = onIconClick)
+                            TrailingIcon(
+                                imageVector = if (logInUiState.showPassword) Icons.Filled.Visibility else {
+                                    Icons.Filled.VisibilityOff
+                                },
+                                onIconClick = { onActionLogIn(LogInAction.SetShowPassword) }
+                            )
                         }
                         Spacer(Modifier.height(24.dp))
                         Box(
@@ -169,8 +184,10 @@ fun LogInScreen(
                             AccountTextButton(
                                 modifier = Modifier,
                                 text = stringResource(R.string.reset_password),
-                                textButtonEnabled = resetPasswordEnabled,
-                                onSignUpClick = onResetPassword
+                                textButtonEnabled = logInUiState.authState == AuthState.NotLoggedIn,
+                                onSignUpClick = {
+                                    onActionAuthentication(OnActionAuthentication.OnResetPassword)
+                                }
                             )
                         }
 
@@ -181,16 +198,21 @@ fun LogInScreen(
                                 .clip(RoundedCornerShape(12.dp)),
                             containerColor = NewBlue,
                             text = stringResource(R.string.signIn),
-                            buttonEnabled = logInEnabled
+                            buttonEnabled = logInUiState.authState == AuthState.NotLoggedIn
                         ) {
                             keyboardController?.hide()
-                            onLogInClick(emailValue, passwordValue)
+                            onActionLogIn(
+                                LogInAction.OnLogIn(
+                                    logInUiState.emailValue,
+                                    logInUiState.passwordValue
+                                )
+                            )
                         }
                         Spacer(Modifier.height(24.dp))
                         AccountTextButton(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(R.string.dont_have_account) + stringResource(R.string.signup),
-                            textButtonEnabled = signUpEnabled,
+                            textButtonEnabled = logInUiState.authState == AuthState.NotLoggedIn,
                             onSignUpClick = onSignUpClick
                         )
                     }

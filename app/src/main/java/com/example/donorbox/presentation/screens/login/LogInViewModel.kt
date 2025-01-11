@@ -1,10 +1,6 @@
 package com.example.donorbox.presentation.screens.login
 
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
@@ -20,6 +16,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+
+sealed interface LogInAction{
+    data class SetEmail(val email: String): LogInAction
+    data class OnPasswordChange(val passwordValue: String): LogInAction
+    data class OnLogIn(val emailValue: String, val passwordValue: String): LogInAction
+    data object SetShowPassword: LogInAction
+}
+
 
 class LogInViewModel(
     private val logInUseCase: LogInUseCase,
@@ -43,6 +48,15 @@ class LogInViewModel(
         Log.d("ViewModelInitialization","LoginViewModel destroyed")
     }
 
+    fun onActionLogIn(logInAction: LogInAction){
+        when(logInAction){
+            is LogInAction.SetEmail -> setEmail(email = logInAction.email)
+            LogInAction.SetShowPassword -> setShowPassword()
+            is LogInAction.OnPasswordChange -> setPassword(password = logInAction.passwordValue)
+            is LogInAction.OnLogIn -> logIn(email = logInAction.emailValue, password = logInAction.passwordValue)
+        }
+    }
+
     private fun showLoader(){
         viewModelScope.launch {
             _logInUiState.update { newState->
@@ -62,7 +76,7 @@ class LogInViewModel(
     }
 
 
-    fun logIn(email: String, password: String) {
+    private fun logIn(email: String, password: String) {
         viewModelScope.launch {
             _logInUiState.update { newState ->
                 newState.copy(authState = AuthState.Loading)
@@ -100,7 +114,7 @@ class LogInViewModel(
     }
 
 
-    fun setEmail(email: String) {
+    private fun setEmail(email: String) {
         viewModelScope.launch {
             _logInUiState.update { newState ->
                 newState.copy(emailValue = email)
@@ -108,7 +122,7 @@ class LogInViewModel(
         }
     }
 
-    fun setPassword(password: String) {
+    private fun setPassword(password: String) {
         viewModelScope.launch {
             _logInUiState.update { newState ->
                 newState.copy(passwordValue = password)
@@ -116,7 +130,7 @@ class LogInViewModel(
         }
     }
 
-    fun setShowPassword() {
+    private fun setShowPassword() {
         viewModelScope.launch {
             _logInUiState.update { newState ->
                 newState.copy(
@@ -126,12 +140,4 @@ class LogInViewModel(
         }
     }
 
-    fun getIconVisibility(): ImageVector {
-        val showPassword = _logInUiState.value.showPassword
-        return if (showPassword) {
-            Icons.Filled.Visibility
-        } else {
-            Icons.Filled.VisibilityOff
-        }
-    }
 }

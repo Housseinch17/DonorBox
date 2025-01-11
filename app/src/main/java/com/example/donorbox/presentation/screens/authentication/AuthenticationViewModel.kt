@@ -23,6 +23,30 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface SignOutResponse {
+    data object IsLoading : SignOutResponse
+    data object InitialState : SignOutResponse
+    data object Success : SignOutResponse
+    data object Error : SignOutResponse
+}
+
+sealed interface ResetPage {
+    data object LogInPage : ResetPage
+    data object SettingsPage : ResetPage
+}
+
+sealed interface OnActionAuthentication{
+    data class OnResetEmailChange(val emailValue: String): OnActionAuthentication
+    data class ResetPassword(val emailValue: String, val resetPage: ResetPage): OnActionAuthentication
+    data object ResetDismiss: OnActionAuthentication
+    data object OnResetPassword: OnActionAuthentication
+    data object ResetSignOutState: OnActionAuthentication
+    data object ResetShowDialog: OnActionAuthentication
+    data object ResetHideDialog: OnActionAuthentication
+    data object SignOut: OnActionAuthentication
+
+}
+
 class AuthenticationViewModel(
     application: Application,
     private val signOutUseCase: SignOutUseCase,
@@ -54,6 +78,21 @@ class AuthenticationViewModel(
         Log.d("ViewModelInitialization", "authentication destroyed")
     }
 
+
+    fun onActionAuthentication(onActionAuthentication: OnActionAuthentication){
+        when(onActionAuthentication){
+            OnActionAuthentication.ResetDismiss -> resetResetHideDialog()
+            is OnActionAuthentication.OnResetEmailChange -> onResetEmailValue(onActionAuthentication.emailValue)
+            OnActionAuthentication.OnResetPassword -> resetResetShowDialog()
+            is OnActionAuthentication.ResetPassword -> resetPassword(email = onActionAuthentication.emailValue, resetPage = onActionAuthentication.resetPage)
+            OnActionAuthentication.ResetSignOutState -> resetSignOutState()
+            OnActionAuthentication.ResetShowDialog -> resetShowDialog()
+            OnActionAuthentication.ResetHideDialog -> resetHideDialog()
+            OnActionAuthentication.SignOut -> signOut()
+        }
+    }
+
+
     fun updateCurrentScreen(currentScreen: NavigationScreens){
         viewModelScope.launch {
             _authenticationUiState.update { newState->
@@ -80,6 +119,72 @@ class AuthenticationViewModel(
             newState.copy(username = currentUsername)
         }
     }
+
+    fun resetResetHideDialog() {
+        viewModelScope.launch {
+            _authenticationUiState.update { newState ->
+                newState.copy(resetShowDialog = false)
+            }
+        }
+    }
+
+    private fun onResetEmailValue(email: String) {
+        viewModelScope.launch {
+            _authenticationUiState.update { newState ->
+                newState.copy(resetEmailValue = email)
+            }
+        }
+    }
+
+    fun resetResetShowDialog() {
+        viewModelScope.launch {
+            _authenticationUiState.update { newState ->
+                newState.copy(resetShowDialog = true)
+            }
+        }
+    }
+
+    fun resetPassword(email: String = "", resetPage: ResetPage) {
+        viewModelScope.launch {
+            if ((resetPage is ResetPage.LogInPage && Patterns.EMAIL_ADDRESS.matcher(email)
+                    .matches()) || resetPage is ResetPage.SettingsPage
+            ) {
+                _authenticationUiState.update { newState ->
+                    newState.copy(resetPassword = PasswordChangement.IsLoading)
+                }
+
+                val resetPassword: PasswordChangement = when (resetPage) {
+                    ResetPage.LogInPage -> resetPasswordUseCase.resetPassword(email)
+                    ResetPage.SettingsPage -> resetPasswordUseCase.resetPassword(
+                        getCurrentUserUseCase.getCurrentUser()!!
+                    )
+                }
+                _authenticationUiState.update { newState ->
+                    newState.copy(
+                        resetPassword = resetPassword,
+                        resetShowDialog = false
+                    )
+                }
+                when (resetPassword) {
+                    is PasswordChangement.Error -> emitMessage(resetPassword.errorMessage)
+                    is PasswordChangement.Success -> {
+                        emitMessage(resetPassword.successMessage)
+                        _authenticationUiState.update { newState ->
+                            newState.copy(resetEmailValue = "")
+                        }
+                    }
+
+                    else -> {
+                        emitMessage("Check if email exists!")
+                    }
+                }
+                Log.d("MyTag","resetPassword() ${_authenticationUiState.value.resetPassword}" )
+            } else {
+                emitMessage("Email not valid")
+            }
+        }
+    }
+
 
     //reset state while signing out
     fun resetSignOutState() {
@@ -135,80 +240,6 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetResetShowDialog() {
-        viewModelScope.launch {
-            _authenticationUiState.update { newState ->
-                newState.copy(resetShowDialog = true)
-            }
-        }
-    }
 
-    fun resetResetHideDialog() {
-        viewModelScope.launch {
-            _authenticationUiState.update { newState ->
-                newState.copy(resetShowDialog = false)
-            }
-        }
-    }
 
-    fun onResetEmailValue(email: String) {
-        viewModelScope.launch {
-            _authenticationUiState.update { newState ->
-                newState.copy(resetEmailValue = email)
-            }
-        }
-    }
-
-    fun resetPassword(email: String = "", resetPage: ResetPage) {
-        viewModelScope.launch {
-            if ((resetPage is ResetPage.LogInPage && Patterns.EMAIL_ADDRESS.matcher(email)
-                    .matches()) || resetPage is ResetPage.SettingsPage
-            ) {
-                _authenticationUiState.update { newState ->
-                    newState.copy(resetPassword = PasswordChangement.IsLoading)
-                }
-
-                val resetPassword: PasswordChangement = when (resetPage) {
-                    ResetPage.LogInPage -> resetPasswordUseCase.resetPassword(email)
-                    ResetPage.SettingsPage -> resetPasswordUseCase.resetPassword(
-                        getCurrentUserUseCase.getCurrentUser()!!
-                    )
-                }
-                _authenticationUiState.update { newState ->
-                    newState.copy(
-                        resetPassword = resetPassword,
-                        resetShowDialog = false
-                    )
-                }
-                when (resetPassword) {
-                    is PasswordChangement.Error -> emitMessage(resetPassword.errorMessage)
-                    is PasswordChangement.Success -> {
-                        emitMessage(resetPassword.successMessage)
-                        _authenticationUiState.update { newState ->
-                            newState.copy(resetEmailValue = "")
-                        }
-                    }
-
-                    else -> {
-                        emitMessage("Check if email exists!")
-                    }
-                }
-                Log.d("MyTag","resetPassword() ${_authenticationUiState.value.resetPassword}" )
-            } else {
-                emitMessage("Email not valid")
-            }
-        }
-    }
-}
-
-sealed interface SignOutResponse {
-    data object IsLoading : SignOutResponse
-    data object InitialState : SignOutResponse
-    data object Success : SignOutResponse
-    data object Error : SignOutResponse
-}
-
-sealed interface ResetPage {
-    data object LogInPage : ResetPage
-    data object SettingsPage : ResetPage
 }

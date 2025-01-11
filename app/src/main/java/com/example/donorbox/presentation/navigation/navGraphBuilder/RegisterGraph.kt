@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -22,26 +21,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.R
-import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
-import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.navigation.NavigationScreens
+import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
+import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.login.LogInScreen
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.signup.SignUpScreen
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
 import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 
 fun NavGraphBuilder.registerGraph(
     authenticationViewModel: AuthenticationViewModel,
+    authenticationUiState: AuthenticationUiState,
     navHostController: NavHostController,
-    onResetEmailValue: String,
-    resetShowDialog: Boolean,
-    email: String,
-    resetIsLoading: Boolean,
 ){
     navigation<NavigationScreens.RegisterGraph>(
         startDestination = NavigationScreens.LogInPage
@@ -51,8 +46,6 @@ fun NavGraphBuilder.registerGraph(
             val context = LocalContext.current
             val logInViewModel = koinViewModel<LogInViewModel>()
             val logInUiState by logInViewModel.logInUiState.collectAsStateWithLifecycle()
-
-            val scope = rememberCoroutineScope()
 
             LaunchedEffect(logInViewModel.sharedFlow) {
                 logInViewModel.sharedFlow.collect { message ->
@@ -79,43 +72,13 @@ fun NavGraphBuilder.registerGraph(
             LogInScreen(
                 modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
                 textPage = stringResource(R.string.hello_sign_in),
-                emailValue = logInUiState.emailValue,
-                onEmailChange = { newEmail ->
-                    logInViewModel.setEmail(newEmail)
-                },
-                imageVector = logInViewModel.getIconVisibility(),
-                onIconClick = logInViewModel::setShowPassword,
-                showPassword = logInUiState.showPassword,
-                passwordValue = logInUiState.passwordValue,
-                onPasswordChange = { newPassword ->
-                    logInViewModel.setPassword(newPassword)
-                },
-                logInEnabled = logInUiState.authState == AuthState.NotLoggedIn,
-                signUpEnabled = logInUiState.authState == AuthState.NotLoggedIn,
-                isLoading = logInUiState.isLoading,
-                onLogInClick = { email, password ->
-                    scope.launch {
-                        logInViewModel.logIn(email, password)
-                    }
-                },
+                logInUiState = logInUiState,
+                onActionLogIn = logInViewModel::onActionLogIn,
+                onActionAuthentication = authenticationViewModel::onActionAuthentication,
+                authenticationUiState = authenticationUiState,
                 onSignUpClick = {
                     navHostController.navigate(NavigationScreens.SignUpPage)
                 },
-                onResetEmailValue = onResetEmailValue,
-                onResetEmailChange = { newEmail ->
-                    authenticationViewModel.onResetEmailValue(newEmail)
-                },
-                resetShowDialog = resetShowDialog,
-                resetPassword = {
-                    authenticationViewModel.resetPassword(
-                        email = email,
-                        resetPage = ResetPage.LogInPage
-                    )
-                },
-                resetDismiss = authenticationViewModel::resetResetHideDialog,
-                resetIsLoading = resetIsLoading,
-                resetPasswordEnabled = logInUiState.authState == AuthState.NotLoggedIn,
-                onResetPassword = authenticationViewModel::resetResetShowDialog
             )
         }
 

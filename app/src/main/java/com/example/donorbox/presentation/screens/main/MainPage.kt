@@ -160,11 +160,8 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
         ) {
             registerGraph(
                 authenticationViewModel = authenticationViewModel,
+                authenticationUiState = authenticationUiState,
                 navHostController = navController,
-                onResetEmailValue = authenticationUiState.resetEmailValue,
-                resetShowDialog = authenticationUiState.resetShowDialog,
-                email = authenticationUiState.resetEmailValue,
-                resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
             )
 
             donorBoxGraph(
