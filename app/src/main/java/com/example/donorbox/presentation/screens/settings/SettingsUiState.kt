@@ -1,7 +1,7 @@
 package com.example.donorbox.presentation.screens.settings
 
 import androidx.compose.runtime.Immutable
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 
 @Immutable
 data class SettingsUiState(

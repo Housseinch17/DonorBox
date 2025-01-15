@@ -158,6 +158,7 @@ fun ShowDialog(
             onDismissRequest = {},
             confirmButton = {
                 Button(
+                    enabled = !isProgressBar,
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = NewBlue
@@ -475,6 +476,7 @@ fun SettingsShowDialog(
             onDismissRequest = {},
             confirmButton = {
                 Button(
+                    enabled = !isProgressBar,
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = NewBlue

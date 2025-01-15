@@ -33,9 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.example.donorbox.R
 import com.example.donorbox.presentation.screens.authentication.AuthenticationAction
 import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 import com.example.donorbox.presentation.screens.authentication.ResetPage
-import com.example.donorbox.presentation.sealedInterfaces.AuthState
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography

@@ -16,7 +16,6 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCa
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDonationsUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
-import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
@@ -27,6 +26,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+sealed interface ReceiversResponse {
+    data class Success(val receivers:  List<Receiver>): ReceiversResponse
+    data object IsLoading: ReceiversResponse
+    data class Error(val message: String): ReceiversResponse
+}
 
 sealed interface HomeAction {
     data class OnReceiverClick(val receiver: Receiver) : HomeAction

@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface ReceivedDonationsAction{
+    data object LoadNewOrders: ReceivedDonationsAction
+}
+
 class ReceivedDonationsViewModel(
     private val firebaseReadAllDonationsUseCase: FirebaseReadAllDonationsUseCase
 ) : ViewModel() {
@@ -23,6 +27,12 @@ class ReceivedDonationsViewModel(
         Log.d("ViewModelInitialization", "ReceivedDonationsViewModel created")
         viewModelScope.launch {
             readAllDonations()
+        }
+    }
+
+    fun onActionReceivedDonations(receivedDonationsAction: ReceivedDonationsAction){
+        when(receivedDonationsAction){
+            ReceivedDonationsAction.LoadNewOrders -> loadNewOrders()
         }
     }
 
@@ -40,7 +50,7 @@ class ReceivedDonationsViewModel(
         }
     }
 
-    fun loadNewOrders() {
+    private fun loadNewOrders() {
         viewModelScope.launch {
             _receivedDonationsUiState.update { newState ->
                 newState.copy(isRefreshing = true)

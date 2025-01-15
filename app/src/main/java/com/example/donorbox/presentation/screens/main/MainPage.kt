@@ -38,7 +38,6 @@ import com.example.donorbox.presentation.navigation.navGraphBuilder.donorBoxGrap
 import com.example.donorbox.presentation.navigation.navGraphBuilder.registerGraph
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.authentication.SignOutResponse
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.theme.ClickedIconColor
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
@@ -60,8 +59,6 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
 
     val authenticationViewModel = koinViewModel<AuthenticationViewModel>()
     val authenticationUiState by authenticationViewModel.authenticationUiState.collectAsStateWithLifecycle()
-
-    val currentUsername = authenticationUiState.username
 
 
     LaunchedEffect(authenticationUiState.signOut) {
@@ -167,12 +164,8 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
 
                 donorBoxGraph(
                     navHostController = navController,
+                    authenticationUiState = authenticationUiState,
                     authenticationViewModel = authenticationViewModel,
-                    username = currentUsername ?: "",
-                    resetShowDialog = authenticationUiState.resetShowDialog,
-                    resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
-                    signOutShowDialog = authenticationUiState.signOutShowDialog,
-                    signOutIsLoading = authenticationUiState.signOut == SignOutResponse.IsLoading,
                 )
             }
         }

@@ -39,12 +39,12 @@ import com.example.donorbox.presentation.util.SharedScreen
 @Composable
 fun ReceivedDonationsPage(
     modifier: Modifier,
-    isLoading: Boolean, receivedDonationsList: List<String>, isRefreshing: Boolean,
-    onRefresh: () -> Unit
+    receivedDonationsUiState: ReceivedDonationsUiState,
+    onActionReceivedDonationsAction: (ReceivedDonationsAction) -> Unit,
 ) {
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = onRefresh,
+        refreshing = receivedDonationsUiState.isRefreshing,
+        onRefresh = { onActionReceivedDonationsAction(ReceivedDonationsAction.LoadNewOrders) },
     )
     SharedScreen{
         Box(
@@ -52,10 +52,10 @@ fun ReceivedDonationsPage(
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.Center
         ) {
-            if (isLoading) {
+            if (receivedDonationsUiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
             } else {
-                if (receivedDonationsList.isEmpty() && !isRefreshing) {
+                if (receivedDonationsUiState.receivedDonationsList.isEmpty() && !receivedDonationsUiState.isRefreshing) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
@@ -72,11 +72,11 @@ fun ReceivedDonationsPage(
                         }
                     }
                 } else {
-                    ReceivedDonationsList(receivedDonationsList)
+                    ReceivedDonationsList(receivedDonationsUiState.receivedDonationsList)
                 }
                 // Adding the PullRefreshIndicator
                 PullRefreshIndicator(
-                    refreshing = isRefreshing,
+                    refreshing = receivedDonationsUiState.isRefreshing,
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )

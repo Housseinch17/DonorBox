@@ -1,7 +1,6 @@
 package com.example.donorbox.presentation.screens.login
 
 import androidx.compose.runtime.Immutable
-import com.example.donorbox.presentation.sealedInterfaces.AuthState
 
 @Immutable
 data class LogInUiState(

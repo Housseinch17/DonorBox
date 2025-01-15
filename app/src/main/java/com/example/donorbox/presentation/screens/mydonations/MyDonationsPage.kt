@@ -31,7 +31,6 @@ import com.example.donorbox.R
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.theme.BodyTypography
 import com.example.donorbox.presentation.theme.NewBlue
-import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography
@@ -41,12 +40,12 @@ import com.example.donorbox.presentation.util.SharedScreen
 @Composable
 fun MyDonationPage(
     modifier: Modifier,
-    isLoading: Boolean, list: List<MyDonations>, isRefreshing: Boolean,
-    onRefresh: () -> Unit
+    myDonationsUiState: MyDonationsUiState,
+    onActionMyDonations: (MyDonationAction) -> Unit,
 ) {
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = isRefreshing,
-        onRefresh = onRefresh,
+        refreshing = myDonationsUiState.isRefreshing,
+        onRefresh = { onActionMyDonations(MyDonationAction.OnRefresh) },
     )
     SharedScreen{
         Box(
@@ -54,10 +53,10 @@ fun MyDonationPage(
                 .pullRefresh(pullRefreshState),
             contentAlignment = Alignment.Center
         ) {
-            if (isLoading) {
+            if (myDonationsUiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(200.dp), color = NewGray)
             } else {
-                if (list.isEmpty() && !isRefreshing) {
+                if (myDonationsUiState.list.isEmpty() && !myDonationsUiState.isRefreshing) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
@@ -75,11 +74,11 @@ fun MyDonationPage(
                         }
                     }
                 } else {
-                    MyDonationList(list)
+                    MyDonationList(myDonationsUiState.list)
                 }
                 // Adding the PullRefreshIndicator
                 PullRefreshIndicator(
-                    refreshing = isRefreshing,
+                    refreshing = myDonationsUiState.isRefreshing,
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter)
                 )

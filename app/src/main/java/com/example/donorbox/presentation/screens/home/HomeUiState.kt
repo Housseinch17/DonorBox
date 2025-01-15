@@ -3,7 +3,6 @@ package com.example.donorbox.presentation.screens.home
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.example.donorbox.data.model.Receiver
-import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 
 @Stable

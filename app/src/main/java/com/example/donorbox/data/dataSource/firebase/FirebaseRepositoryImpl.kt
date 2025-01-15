@@ -7,10 +7,10 @@ import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseRe
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSource
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
+import com.example.donorbox.presentation.screens.home.ReceiversResponse
+import com.example.donorbox.presentation.screens.login.AuthState
 import com.example.donorbox.presentation.screens.signup.AccountStatus
-import com.example.donorbox.presentation.sealedInterfaces.AuthState
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
-import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 
 class FirebaseRepositoryImpl(
     private val firebaseAuthenticationDataSource: FirebaseAuthenticationDataSource,

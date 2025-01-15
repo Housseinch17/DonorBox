@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -20,8 +19,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.R
 import com.example.donorbox.presentation.navigation.NavigationScreens
+import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
-import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
@@ -32,22 +31,18 @@ import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedD
 import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
-import com.example.donorbox.presentation.screens.settings.ShowPassword
-import com.example.donorbox.presentation.screens.settings.UpdatePassword
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 fun NavGraphBuilder.donorBoxGraph(
     navHostController: NavHostController,
+    authenticationUiState: AuthenticationUiState,
     authenticationViewModel: AuthenticationViewModel,
-    username: String,
-    resetShowDialog: Boolean,
-    resetIsLoading: Boolean,
-    signOutShowDialog: Boolean,
-    signOutIsLoading: Boolean
 ) {
-    val modifier: Modifier = Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 10.dp)
+    val modifier: Modifier = Modifier
+        .fillMaxSize()
+        .statusBarsPadding()
+        .padding(horizontal = 10.dp)
 
     navigation<NavigationScreens.DonorBoxGraph>(startDestination = NavigationScreens.HomePage) {
         composable<NavigationScreens.HomePage> {
@@ -78,10 +73,8 @@ fun NavGraphBuilder.donorBoxGraph(
 
             MyDonationPage(
                 modifier = modifier,
-                isLoading = myDonationsUiState.isLoading,
-                list = myDonationsUiState.list,
-                isRefreshing = myDonationsUiState.isRefreshing,
-                onRefresh = myDonationsViewModel::loadNewOrders
+                myDonationsUiState = myDonationsUiState,
+                onActionMyDonations = myDonationsViewModel::onActionMyDonations,
             )
         }
         composable<NavigationScreens.ReceivedDonationsPage> {
@@ -91,10 +84,8 @@ fun NavGraphBuilder.donorBoxGraph(
 
             ReceivedDonationsPage(
                 modifier = modifier,
-                isLoading = receivedDonationsUiState.isLoading,
-                isRefreshing = receivedDonationsUiState.isRefreshing,
-                receivedDonationsList = receivedDonationsUiState.receivedDonationsList,
-                onRefresh = receivedDonationsViewModel::loadNewOrders
+                receivedDonationsUiState = receivedDonationsUiState,
+                onActionReceivedDonationsAction = receivedDonationsViewModel::onActionReceivedDonations,
             )
 
         }
@@ -104,7 +95,6 @@ fun NavGraphBuilder.donorBoxGraph(
             val settingsViewModel = koinViewModel<SettingsViewModel>()
             val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
 
-            val scope = rememberCoroutineScope()
 
             LaunchedEffect(settingsViewModel.emitValue) {
                 settingsViewModel.emitValue.collectLatest { message ->
@@ -114,74 +104,11 @@ fun NavGraphBuilder.donorBoxGraph(
 
             SettingsPage(
                 modifier = modifier,
+                settingsUiState = settingsUiState,
+                onActionSettings = settingsViewModel::onActionSettings,
+                authenticationUiState = authenticationUiState,
+                onActionAuthentication = authenticationViewModel::onActionAuthentication,
                 textPage = stringResource(R.string.settings),
-                currentPasswordValue = settingsUiState.currentPasswordValue,
-                newPasswordValue = settingsUiState.newPasswordValue,
-                confirmPasswordValue = settingsUiState.confirmNewPasswordValue,
-                currentPasswordValueChange = { currentPassword ->
-                    settingsViewModel.updatePassword(
-                        UpdatePassword.CurrentPassword(
-                            currentPassword
-                        )
-                    )
-                },
-                newPasswordValueChange = { newPassword ->
-                    settingsViewModel.updatePassword(UpdatePassword.NewPassword(newPassword))
-                },
-                confirmPasswordValueChange = { confirmPassword ->
-                    settingsViewModel.updatePassword(
-                        UpdatePassword.ConfirmPassword(
-                            confirmPassword
-                        )
-                    )
-                },
-                currentPasswordImageVector = settingsViewModel.getIconVisibility(
-                    settingsUiState.currentShowPassword
-                ),
-                newImageVector = settingsViewModel.getIconVisibility(
-                    settingsUiState.newShowPassword
-                ),
-                confirmImageVector = settingsViewModel.getIconVisibility(settingsUiState.confirmShowPassword),
-                currentPasswordOnIconClick = { settingsViewModel.showPassword(ShowPassword.CurrentPassword) },
-                newOnIconClick = { settingsViewModel.showPassword(ShowPassword.NewPassword) },
-                confirmOnIconClick = { settingsViewModel.showPassword(ShowPassword.ConfirmPassword) },
-                currentShowPassword = settingsUiState.currentShowPassword,
-                newShowPassword = settingsUiState.newShowPassword,
-                confirmShowPassword = settingsUiState.confirmShowPassword,
-                showText = settingsUiState.showText,
-                confirmShowText = settingsUiState.confirmShowText,
-                onPasswordChange = { currentPassword, newPassword, confirmPassword ->
-                    scope.launch {
-                        settingsViewModel.verifyPassword(currentPassword,
-                            onVerified = {
-                                settingsViewModel.changePassword(
-                                    email = username,
-                                    newPassword = newPassword,
-                                    confirmNewPassword = confirmPassword
-                                )
-                            },
-                            setError = { error ->
-                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-                            })
-                    }
-
-                },
-                resetShowDialog = resetShowDialog,
-                resetPassword = {
-                    authenticationViewModel.resetPassword(
-                        email = "",
-                        resetPage = ResetPage.SettingsPage
-                    )
-                },
-                resetDismiss = authenticationViewModel::resetResetHideDialog,
-                resetIsLoading = resetIsLoading,
-                onResetPassword = authenticationViewModel::resetResetShowDialog,
-                onSignOut = authenticationViewModel::resetShowDialog,
-                signOutShowDialog = signOutShowDialog,
-                signOutConfirm = authenticationViewModel::signOut,
-                signOutDismiss = authenticationViewModel::resetHideDialog,
-                signOutIsLoading = signOutIsLoading,
-                isLoading = settingsUiState.isLoading
             )
         }
         composable<NavigationScreens.ProfilePage> {

@@ -13,7 +13,6 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.U
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
 import com.example.donorbox.presentation.navigation.NavigationScreens
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.util.isInternetAvailable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +21,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+sealed interface PasswordChangement {
+    data class Success(val successMessage: String) : PasswordChangement
+    data class Error(val errorMessage: String) : PasswordChangement
+    data object InitialState : PasswordChangement
+    data object IsLoading : PasswordChangement
+}
 
 sealed interface SignOutResponse {
     data object IsLoading : SignOutResponse
@@ -120,7 +126,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetResetHideDialog() {
+    private fun resetResetHideDialog() {
         viewModelScope.launch {
             _authenticationUiState.update { newState ->
                 newState.copy(resetShowDialog = false)
@@ -136,7 +142,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetResetShowDialog() {
+    private fun resetResetShowDialog() {
         viewModelScope.launch {
             _authenticationUiState.update { newState ->
                 newState.copy(resetShowDialog = true)
@@ -144,7 +150,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetPassword(email: String = "", resetPage: ResetPage) {
+    private fun resetPassword(email: String = "", resetPage: ResetPage) {
         viewModelScope.launch {
             if ((resetPage is ResetPage.LogInPage && Patterns.EMAIL_ADDRESS.matcher(email)
                     .matches()) || resetPage is ResetPage.SettingsPage
@@ -195,7 +201,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetShowDialog() {
+    private fun resetShowDialog() {
         viewModelScope.launch {
             _authenticationUiState.update { newState ->
                 newState.copy(signOutShowDialog = true)
@@ -203,7 +209,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun resetHideDialog() {
+    private fun resetHideDialog() {
         viewModelScope.launch {
             _authenticationUiState.update { newState ->
                 newState.copy(signOutShowDialog = false)
@@ -211,7 +217,7 @@ class AuthenticationViewModel(
         }
     }
 
-    fun signOut() {
+    private fun signOut() {
         viewModelScope.launch {
             _authenticationUiState.update { newState ->
                 newState.copy(signOut = SignOutResponse.IsLoading)

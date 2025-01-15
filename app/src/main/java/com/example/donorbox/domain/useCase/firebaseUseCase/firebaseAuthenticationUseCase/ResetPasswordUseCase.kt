@@ -2,7 +2,7 @@ package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticati
 
 
 import com.example.donorbox.domain.repository.FirebaseRepository
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 
 class ResetPasswordUseCase (
 private val firebaseRepository: FirebaseRepository

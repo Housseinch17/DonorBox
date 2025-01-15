@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,8 +32,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.donorbox.R
+import com.example.donorbox.presentation.screens.authentication.AuthenticationAction
+import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
+import com.example.donorbox.presentation.screens.authentication.ResetPage
+import com.example.donorbox.presentation.screens.authentication.SignOutResponse
 import com.example.donorbox.presentation.theme.BodyTypography
-import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
@@ -43,40 +51,15 @@ import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 @Composable
 fun SettingsPage(
     modifier: Modifier,
+    settingsUiState: SettingsUiState,
+    onActionSettings: (SettingsAction) -> Unit,
+    authenticationUiState: AuthenticationUiState,
+    onActionAuthentication: (AuthenticationAction) -> Unit,
     textPage: String,
-    currentPasswordValue: String,
-    currentPasswordValueChange: (String) -> Unit,
-    newPasswordValue: String,
-    newPasswordValueChange: (String) -> Unit,
-    confirmPasswordValue: String,
-    confirmPasswordValueChange: (String) -> Unit,
-    currentPasswordImageVector: ImageVector,
-    currentPasswordOnIconClick: () -> Unit,
-    newImageVector: ImageVector,
-    newOnIconClick: () -> Unit,
-    confirmImageVector: ImageVector,
-    confirmOnIconClick: () -> Unit,
-    currentShowPassword: Boolean,
-    newShowPassword: Boolean,
-    confirmShowPassword: Boolean,
-    showText: Boolean,
-    confirmShowText: Boolean,
-    onSignOut: () -> Unit,
-    onPasswordChange: (currentPassword: String, newPassword: String, confirmPassword: String) -> Unit,
-    onResetPassword: () -> Unit,
-    resetShowDialog: Boolean,
-    resetPassword: () -> Unit,
-    resetDismiss: () -> Unit,
-    resetIsLoading: Boolean,
-    signOutShowDialog: Boolean,
-    signOutConfirm: () -> Unit,
-    signOutDismiss: () -> Unit,
-    signOutIsLoading: Boolean,
-    isLoading: Boolean,
 ) {
-    SharedScreen{
+    SharedScreen {
         Box(modifier = modifier) {
-            if (resetShowDialog) {
+            if (authenticationUiState.resetShowDialog) {
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -84,9 +67,9 @@ fun SettingsPage(
                         modifier = Modifier,
                         showDialog = true,
                         title = stringResource(R.string.reset_password),
-                        isProgressBar = resetIsLoading,
+                        isProgressBar = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
                         description = {
-                            if (!resetIsLoading) {
+                            if (authenticationUiState.resetPassword != PasswordChangement.IsLoading) {
                                 Text(
                                     text = stringResource(R.string.are_you____reset),
                                     style = MaterialTheme.typography.titleMedium.copy(Color.Black)
@@ -108,11 +91,20 @@ fun SettingsPage(
                             }
                         },
                         confirmText = stringResource(R.string.reset_password),
-                        confirmButton = resetPassword,
-                        onDismissButton = resetDismiss
+                        confirmButton = {
+                            onActionAuthentication(
+                                AuthenticationAction.ResetPassword(
+                                    emailValue = "",
+                                    resetPage = ResetPage.SettingsPage
+                                )
+                            )
+                        },
+                        onDismissButton = {
+                            onActionAuthentication(AuthenticationAction.ResetDismiss)
+                        }
                     )
                 }
-            } else if (signOutShowDialog) {
+            } else if (authenticationUiState.signOutShowDialog) {
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -120,10 +112,10 @@ fun SettingsPage(
                         modifier = Modifier,
                         showDialog = true,
                         title = stringResource(R.string.sign_out),
-                        isProgressBar = signOutIsLoading,
+                        isProgressBar = authenticationUiState.signOut == SignOutResponse.IsLoading,
                         description =
                         {
-                            if (!signOutIsLoading) {
+                            if (authenticationUiState.signOut != SignOutResponse.IsLoading) {
                                 Text(
                                     text = stringResource(R.string.are_you____signOut),
                                     style = MaterialTheme.typography.titleMedium.copy(Color.Black)
@@ -144,8 +136,12 @@ fun SettingsPage(
                             }
                         },
                         confirmText = stringResource(R.string.sign_out),
-                        confirmButton = signOutConfirm,
-                        onDismissButton = signOutDismiss
+                        confirmButton = {
+                            onActionAuthentication(AuthenticationAction.SignOut)
+                        },
+                        onDismissButton = {
+                            onActionAuthentication(AuthenticationAction.ResetHideDialog)
+                        }
                     )
                 }
             }
@@ -173,33 +169,61 @@ fun SettingsPage(
                         PasswordTextField(
                             modifier = Modifier.fillMaxWidth(),
                             label = stringResource(R.string.current_password),
-                            value = currentPasswordValue,
+                            value = settingsUiState.currentPasswordValue,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             visualTransformation = getPasswordVisualTransformation(
-                                currentShowPassword
+                                settingsUiState.currentShowPassword
                             ),
-                            onValueChange = currentPasswordValueChange,
+                            onValueChange = { currentPassword ->
+                                onActionSettings(
+                                    SettingsAction.UpdatePassword(
+                                        UpdatePassword.CurrentPassword(
+                                            currentPassword
+                                        )
+                                    )
+                                )
+                            },
                             trailingIcon = {
                                 TrailingIcon(
-                                    imageVector = currentPasswordImageVector,
-                                    onIconClick = currentPasswordOnIconClick
+                                    imageVector = if (settingsUiState.currentShowPassword) {
+                                        Icons.Filled.Visibility
+                                    } else {
+                                        Icons.Filled.VisibilityOff
+                                    },
+                                    onIconClick = {
+                                        onActionSettings(SettingsAction.ShowPassword(ShowPassword.CurrentPassword))
+                                    }
                                 )
                             }
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         ChangePasswordField(
-                            newPasswordValue = newPasswordValue,
-                            newPasswordValueChange = newPasswordValueChange,
+                            newPasswordValue = settingsUiState.newPasswordValue,
+                            newPasswordValueChange = { newPassword ->
+                                onActionSettings(
+                                    SettingsAction.UpdatePassword(
+                                        UpdatePassword.NewPassword(
+                                            newPassword
+                                        )
+                                    )
+                                )
+                            },
                             label = stringResource(R.string.new_password),
-                            showPassword = newShowPassword,
-                            imageVector = newImageVector,
-                            onIconClick = newOnIconClick
+                            showPassword = settingsUiState.newShowPassword,
+                            imageVector = if (settingsUiState.newShowPassword) {
+                                Icons.Filled.Visibility
+                            } else {
+                                Icons.Filled.VisibilityOff
+                            },
+                            onIconClick = {
+                                onActionSettings(SettingsAction.ShowPassword(ShowPassword.NewPassword))
+                            }
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        if (showText) {
+                        if (settingsUiState.showText) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.your_password_must_be_at_least) + 6 + stringResource(
+                                text = stringResource(R.string.your_password_must_be_at_least) + " 6 "+ stringResource(
                                     R.string.characters
                                 ),
                                 style = BodyTypography.copy(
@@ -212,15 +236,29 @@ fun SettingsPage(
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         ChangePasswordField(
-                            newPasswordValue = confirmPasswordValue,
-                            newPasswordValueChange = confirmPasswordValueChange,
+                            newPasswordValue = settingsUiState.confirmNewPasswordValue,
+                            newPasswordValueChange = { confirmPassword ->
+                                onActionSettings(
+                                    SettingsAction.UpdatePassword(
+                                        UpdatePassword.ConfirmPassword(
+                                            confirmPassword
+                                        )
+                                    )
+                                )
+                            },
                             label = stringResource(R.string.confirm_password),
-                            showPassword = confirmShowPassword,
-                            imageVector = confirmImageVector,
-                            onIconClick = confirmOnIconClick
+                            showPassword = settingsUiState.confirmShowPassword,
+                            imageVector = if (settingsUiState.confirmShowPassword) {
+                                Icons.Filled.Visibility
+                            } else {
+                                Icons.Filled.VisibilityOff
+                            },
+                            onIconClick = {
+                                onActionSettings(SettingsAction.ShowPassword(ShowPassword.ConfirmPassword))
+                            }
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        if (confirmShowText) {
+                        if (settingsUiState.confirmShowText) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(R.string.your_password_must_be_at_least) + " 6 " + stringResource(
@@ -242,13 +280,17 @@ fun SettingsPage(
                     ) {
                         Button(
                             onClick = {
-                                onPasswordChange(
-                                    currentPasswordValue,
-                                    newPasswordValue,
-                                    confirmPasswordValue
+                                onActionSettings(
+                                    SettingsAction.OnPasswordChange(
+                                        username = authenticationUiState.username!!,
+                                        currentPassword = settingsUiState.currentPasswordValue,
+                                        newPassword = settingsUiState.newPasswordValue,
+                                        confirmPassword = settingsUiState.confirmNewPasswordValue
+                                    )
                                 )
                             },
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            enabled = !settingsUiState.isLoading,
+                            colors = ButtonDefaults.buttonColors(
                                 containerColor = NewBlue,
                                 contentColor = NewWhite
                             )
@@ -261,8 +303,11 @@ fun SettingsPage(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Button(
-                                onClick = onResetPassword,
-                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                onClick = {
+                                    onActionAuthentication(AuthenticationAction.OnResetPassword)
+                                },
+                                enabled = !settingsUiState.isLoading,
+                                colors = ButtonDefaults.buttonColors(
                                     containerColor = NewBlue,
                                     contentColor = NewWhite
                                 )
@@ -270,8 +315,11 @@ fun SettingsPage(
                                 Text(text = stringResource(R.string.reset_password))
                             }
                             Button(
-                                onClick = onSignOut,
-                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                onClick = {
+                                    onActionAuthentication(AuthenticationAction.ResetShowDialog)
+                                },
+                                enabled = !settingsUiState.isLoading,
+                                colors = ButtonDefaults.buttonColors(
                                     containerColor = NewBlue,
                                     contentColor = NewWhite
                                 )
@@ -283,7 +331,7 @@ fun SettingsPage(
                 }
 
             }
-            if (isLoading) {
+            if (settingsUiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(200.dp)

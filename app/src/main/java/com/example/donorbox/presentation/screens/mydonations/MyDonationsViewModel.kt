@@ -11,6 +11,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface MyDonationAction{
+    data object OnRefresh: MyDonationAction
+}
+
+
 class MyDonationsViewModel(
     private val getAllDonationsUseCase: GetAllDonationsUseCase
 ): ViewModel() {
@@ -23,6 +28,12 @@ class MyDonationsViewModel(
         viewModelScope.launch {
             Log.d("ViewModelInitialization","MyDonationsViewModel created")
             getAllDonations()
+        }
+    }
+
+    fun onActionMyDonations(myDonationAction: MyDonationAction){
+        when(myDonationAction){
+            MyDonationAction.OnRefresh -> loadNewOrders()
         }
     }
 
@@ -40,7 +51,7 @@ class MyDonationsViewModel(
         Log.d("MyTag", "getAllDonations() finished")
     }
 
-    fun loadNewOrders() {
+   private fun loadNewOrders() {
         viewModelScope.launch {
             _myDonationsUiState.update { newState ->
                 newState.copy(isRefreshing = true)

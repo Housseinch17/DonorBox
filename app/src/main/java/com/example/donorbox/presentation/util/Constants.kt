@@ -13,7 +13,7 @@ object Constants {
         return username?.replace("@", "*")?.replace(".", "_")
     }
 
-    private val firebaseMessagingScope = "https://www.googleapis.com/auth/firebase.messaging"
+    private const val FIREBASE_MESSAGING_SERVICE = "https://www.googleapis.com/auth/firebase.messaging"
 
     fun getAccessToken(): String?{
         try{
@@ -33,7 +33,7 @@ object Constants {
 
             val stream = ByteArrayInputStream(jsonString.toByteArray(StandardCharsets.UTF_8))
             val googleCredentials = GoogleCredentials.fromStream(stream)
-                .createScoped(arrayListOf(firebaseMessagingScope))
+                .createScoped(arrayListOf(FIREBASE_MESSAGING_SERVICE))
 
             googleCredentials.refresh()
 

@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.donorbox.presentation.screens.login.AuthState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -29,7 +30,6 @@ import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.signup.AccountStatus
 import com.example.donorbox.presentation.screens.signup.SignUpScreen
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
-import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import org.koin.androidx.compose.koinViewModel
 
 

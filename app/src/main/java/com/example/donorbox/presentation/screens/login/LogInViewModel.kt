@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.LogInUseCase
 import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
-import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface AuthState {
+    data object LoggedIn : AuthState
+    data object NotLoggedIn : AuthState
+    data object Loading : AuthState
+    data class Error(val message: String) : AuthState
+}
 
 sealed interface LogInAction{
     data class SetEmail(val email: String): LogInAction

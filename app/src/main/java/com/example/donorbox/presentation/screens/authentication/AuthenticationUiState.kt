@@ -1,7 +1,6 @@
 package com.example.donorbox.presentation.screens.authentication
 
 import com.example.donorbox.presentation.navigation.NavigationScreens
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 
 data class AuthenticationUiState(
     val signOut: SignOutResponse = SignOutResponse.InitialState,

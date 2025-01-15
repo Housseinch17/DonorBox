@@ -78,7 +78,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
-import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
 import com.example.donorbox.presentation.theme.DescriptionTypography
 import com.example.donorbox.presentation.theme.MutedDarkBlue
 import com.example.donorbox.presentation.theme.NewBlue
@@ -730,7 +729,7 @@ fun ShowDialog(
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .size(48.dp),
-                            color = Color.Red,
+                            color = NewGray,
                             strokeWidth = 4.dp
                         )
                     }

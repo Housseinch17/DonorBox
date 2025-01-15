@@ -1,15 +1,11 @@
 package com.example.donorbox.presentation.screens.settings
 
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ChangePasswordUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
-import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
+import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +15,25 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+
+sealed interface UpdatePassword {
+    data class CurrentPassword(val currentPasswordValue: String): UpdatePassword
+    data class NewPassword(val newPasswordValue: String): UpdatePassword
+    data class ConfirmPassword(val confirmPasswordValue: String): UpdatePassword
+}
+
+sealed interface ShowPassword{
+    data object CurrentPassword: ShowPassword
+    data object NewPassword: ShowPassword
+    data object ConfirmPassword: ShowPassword
+}
+
+sealed interface SettingsAction{
+    data class UpdatePassword(val updatePassword: com.example.donorbox.presentation.screens.settings.UpdatePassword?): SettingsAction
+    data class ShowPassword(val showPassword: com.example.donorbox.presentation.screens.settings.ShowPassword): SettingsAction
+    data class OnPasswordChange(val username: String, val currentPassword: String, val newPassword: String, val confirmPassword: String): SettingsAction
+}
 
 class SettingsViewModel (
     private val changePasswordUseCase: ChangePasswordUseCase,
@@ -40,7 +55,35 @@ class SettingsViewModel (
         Log.d("ViewModelInitialization", "SettingsViewModel destroyed")
     }
 
-    fun updatePassword(updatePassword: UpdatePassword){
+    fun onActionSettings(settingsAction: SettingsAction){
+        when(settingsAction){
+            is SettingsAction.ShowPassword -> showPassword(
+                showPassword = settingsAction.showPassword
+            )
+            is SettingsAction.UpdatePassword -> updatePassword(
+                updatePassword = settingsAction.updatePassword
+            )
+            is SettingsAction.OnPasswordChange -> {
+                viewModelScope.launch {
+                    verifyPassword(
+                        password = settingsAction.currentPassword,
+                        onVerified = {
+                            changePassword(
+                                email = settingsAction.username,
+                                newPassword = settingsAction.newPassword,
+                                confirmNewPassword = settingsAction.confirmPassword
+                            )
+                        },
+                        setError = { error->
+                            emitValue(error)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updatePassword(updatePassword: UpdatePassword?){
         when(updatePassword){
             is UpdatePassword.ConfirmPassword -> {
                 viewModelScope.launch {
@@ -63,10 +106,14 @@ class SettingsViewModel (
                     }
                 }
             }
+
+            null -> {
+
+            }
         }
     }
     
-    fun showPassword(showPassword: ShowPassword){
+    fun showPassword(showPassword: ShowPassword?){
         when(showPassword){
             ShowPassword.ConfirmPassword -> {
                 viewModelScope.launch {
@@ -93,6 +140,9 @@ class SettingsViewModel (
                     }
                 }
             }
+
+            null -> {
+            }
         }
     }
 
@@ -102,7 +152,7 @@ class SettingsViewModel (
         }
     }
 
-    suspend fun verifyPassword(
+    private suspend fun verifyPassword(
         password: String,
         onVerified: () -> Unit,
         setError: (String) -> Unit,
@@ -114,7 +164,7 @@ class SettingsViewModel (
         }
     }
 
-    fun changePassword(email: String, newPassword: String, confirmNewPassword: String) {
+    private fun changePassword(email: String, newPassword: String, confirmNewPassword: String) {
         viewModelScope.launch {
             _settingsUiState.update { newState ->
                 newState.copy(
@@ -162,23 +212,5 @@ class SettingsViewModel (
         }
     }
 
-    fun getIconVisibility(showPassword: Boolean): ImageVector {
-        return if (showPassword) {
-            Icons.Filled.Visibility
-        } else {
-            Icons.Filled.VisibilityOff
-        }
-    }
 }
 
-sealed interface UpdatePassword {
-    data class CurrentPassword(val currentPasswordValue: String): UpdatePassword
-    data class NewPassword(val newPasswordValue: String): UpdatePassword
-    data class ConfirmPassword(val confirmPasswordValue: String): UpdatePassword
-}
-
-sealed interface ShowPassword{
-    data object CurrentPassword: ShowPassword
-    data object NewPassword: ShowPassword
-    data object ConfirmPassword: ShowPassword 
-}

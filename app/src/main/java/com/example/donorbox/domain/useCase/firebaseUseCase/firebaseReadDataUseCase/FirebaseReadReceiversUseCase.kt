@@ -1,7 +1,7 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase
 
 import com.example.donorbox.domain.repository.FirebaseRepository
-import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
+import com.example.donorbox.presentation.screens.home.ReceiversResponse
 
 class FirebaseReadReceiversUseCase(
 private val firebaseRepository: FirebaseRepository
