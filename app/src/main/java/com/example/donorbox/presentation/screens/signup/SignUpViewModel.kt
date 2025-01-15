@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseAddUserUseCase
-import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface AccountStatus {
+    data class IsCreated(val message: String) : AccountStatus
+    data object NotCreated : AccountStatus
+    data object IsLoading : AccountStatus
+    data class Error(val error: String) : AccountStatus
+}
 
 sealed interface SignUpAction{
     data class SignUp(val name: String, val email: String, val password: String, val confirmPassword: String): SignUpAction

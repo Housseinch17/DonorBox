@@ -1,6 +1,7 @@
 package com.example.donorbox.presentation.screens.home
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
@@ -23,9 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +33,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -60,12 +62,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -75,8 +79,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
-import com.example.donorbox.presentation.theme.BrightBlue
 import com.example.donorbox.presentation.theme.DescriptionTypography
+import com.example.donorbox.presentation.theme.MutedDarkBlue
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
@@ -90,35 +94,18 @@ import com.example.donorbox.presentation.util.getPasswordVisualTransformation
 @Composable
 fun HomePage(
     modifier: Modifier,
-    response: ReceiversResponse,
-    onReceiverClick: (Receiver) -> Unit,
-    modalBottomSheetReceiver: ModalBottomSheetReceiver, hideBottomSheetReceiver: () -> Unit,
-    onCall: (String) -> Unit,
-    onOpenApp: () -> Unit,
-    onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit,
-    onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
-    sendMoney: (moneyToDonate: String, password: String) -> Unit,
-    showDialog: Boolean,
-    hideDialog: () -> Unit,
-    moneyToDonate: String,
-    onMoneyUpdate: (String) -> Unit,
-    isLoading: Boolean,
-    showText: Boolean,
-    newPasswordValue: String,
-    showPassword: Boolean,
-    newPasswordValueChange: (String) -> Unit,
-    imageVector: ImageVector,
-    onIconClick: () -> Unit
+    homeUiState: HomeUiState,
+    onActionHomeAction: (HomeAction) -> Unit,
 ) {
-SharedScreen{
+    val context = LocalContext.current
+    SharedScreen {
         Box(
             modifier = modifier
         ) {
-            when (response) {
+            when (homeUiState.receiversResponse) {
                 is ReceiversResponse.Error -> {
                     Text(
-                        text = response.message,
+                        text = homeUiState.receiversResponse.message,
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
                     )
                 }
@@ -129,29 +116,77 @@ SharedScreen{
 
                 is ReceiversResponse.Success -> {
                     HomeSuccess(
-                        receiverList = response.receivers,
-                        onReceiverClick = {
-                            onReceiverClick(it)
+                        receiverList = homeUiState.receiversResponse.receivers,
+                        onReceiverClick = { receiver ->
+                            onActionHomeAction(HomeAction.OnReceiverClick(receiver))
                         },
-                        modalBottomSheetReceiver = modalBottomSheetReceiver,
-                        hideBottomSheetReceiver = { hideBottomSheetReceiver() },
-                        onCall = onCall,
-                        onOpenApp = onOpenApp,
-                        onOpenWhishApp = onOpenWhishApp,
-                        onOpenGoogleMap = onOpenGoogleMap,
-                        onSendButton = onSendButton,
-                        sendMoney = sendMoney,
-                        showDialog = showDialog,
-                        hideDialog = hideDialog,
-                        moneyToDonate = moneyToDonate,
-                        onMoneyUpdate = onMoneyUpdate,
-                        isLoading = isLoading,
-                        showText = showText,
-                        newPasswordValue = newPasswordValue,
-                        showPassword = showPassword,
-                        newPasswordValueChange = newPasswordValueChange,
-                        imageVector = imageVector,
-                        onIconClick = onIconClick,
+                        modalBottomSheetReceiver = homeUiState.modalBottomSheetReceiver,
+                        hideBottomSheetReceiver = { onActionHomeAction(HomeAction.HideBottomSheetReceiver) },
+                        onCall = { phoneNumber->
+                            onActionHomeAction(HomeAction.OnCall(context = context, phoneNumber = phoneNumber))
+                        },
+                        onOpenApp = {
+                            onActionHomeAction(HomeAction.OnOpenOmtApp(
+                                context = context
+                            ))
+                        },
+                        onOpenWhishApp = {
+                            onActionHomeAction(HomeAction.OnOpenWhishApp(
+                                context = context
+                            ))
+                        },
+                        onOpenGoogleMap = { latitude,longitude->
+                            onActionHomeAction(HomeAction.OnOpenGoogleMap(
+                                context = context,
+                                latitude = latitude,
+                                longitude = longitude
+                            ))
+                        },
+                        onSendButton = { receiverToken, receiverUsername ->
+                            onActionHomeAction(
+                                HomeAction.OnSendButton(
+                                    receiverToken = receiverToken,
+                                    receiverUsername = receiverUsername
+                                )
+                            )
+                        },
+                        sendMoney = { moneyToDonate, password->
+                            onActionHomeAction(HomeAction.SendMoney(
+                                moneyToDonate = moneyToDonate,
+                                password = password,
+                            ))
+                        },
+                        showDialog = homeUiState.dialogVisibility,
+                        hideDialog = {
+                            onActionHomeAction(HomeAction.HideDialog)
+                        },
+                        moneyToDonate = homeUiState.moneyToDonate,
+                        onMoneyUpdate = { moneyValue ->
+                            onActionHomeAction(
+                                HomeAction.OnMoneyUpdate(
+                                    moneyValue = moneyValue
+                                )
+                            )
+                        },
+                        isLoading = homeUiState.isLoading,
+                        showText = homeUiState.showText,
+                        newPasswordValue = homeUiState.newPasswordValue,
+                        showPassword = homeUiState.showPassword,
+                        newPasswordValueChange = { newPasswordValueChange ->
+                            onActionHomeAction(
+                                HomeAction.NewPasswordValueChange(
+                                    newPasswordValueChange = newPasswordValueChange
+                                )
+                            )
+                        },
+                        imageVector = if (homeUiState.showPassword) {
+                            Icons.Filled.Visibility
+                        } else {
+                            Icons.Filled.VisibilityOff
+                        },
+                        onIconClick = {
+                            onActionHomeAction(HomeAction.OnIconClick)
+                        },
                     )
                 }
             }
@@ -161,16 +196,13 @@ SharedScreen{
 
 @Composable
 fun ShimmerReceiverList() {
-    val imageTopPadding: Dp = 40.dp
-    LazyVerticalGrid(
+    val imageTopPadding: Dp = 50.dp
+    LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(imageTopPadding + 20.dp),
         contentPadding = PaddingValues(top = imageTopPadding, bottom = 20.dp)
     ) {
         items(6) { // Display a fixed number of shimmer items
-            Spacer(modifier = Modifier.height(imageTopPadding))
             ShimmerReceiverComponent(modifier = Modifier.fillMaxWidth())
         }
     }
@@ -189,16 +221,15 @@ fun ShimmerReceiverComponent(modifier: Modifier) {
                     top.linkTo(parent.top)
                 }
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(120.dp)
         )
 
         // Shimmer Image Placeholder
         ShimmerEffect(
             modifier = Modifier
-                .padding(10.dp)
-                .width(100.dp)
-                .height(80.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .padding(top = 10.dp, bottom = 20.dp)
+                .size(100.dp)
+                .clip(shape = CircleShape)
                 .constrainAs(image) {
                     top.linkTo(card.top)
                     bottom.linkTo(card.top)
@@ -217,7 +248,7 @@ fun HomeSuccess(
     onCall: (String) -> Unit,
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit,
+    onOpenGoogleMap: (latitude: Double, longitude: Double) -> Unit,
     onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
     sendMoney: (moneyToDonate: String, password: String) -> Unit,
     showDialog: Boolean,
@@ -248,8 +279,8 @@ fun HomeSuccess(
             imageVector = imageVector,
             onIconClick = onIconClick,
         )
-
         Column(
+            modifier = Modifier,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             ReceiverList(receiverList, onReceiverClick)
@@ -275,7 +306,7 @@ fun PartialBottomSheet(
     onCall: (String) -> Unit,
     onOpenApp: () -> Unit,
     onOpenWhishApp: () -> Unit,
-    onOpenGoogleMap: (Double, Double) -> Unit,
+    onOpenGoogleMap: (latitude: Double, longitude: Double) -> Unit,
     onSendButton: (receiverToken: String, receiverUsername: String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
@@ -388,7 +419,7 @@ fun PartialBottomSheet(
                             onSendButton(receiver.token, receiver.username)
                             keyboardController?.hide()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrightBlue)
+                        colors = ButtonDefaults.buttonColors(containerColor = NewBlue)
                     ) {
                         Text(
                             text = "Send Money",
@@ -440,14 +471,14 @@ fun ModalBottomSheetItem(
     Row(
         modifier = Modifier.height(50.dp),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             modifier = Modifier
                 .widthIn(80.dp)
                 .horizontalScroll(rememberScrollState()),
             text = "$prefixText: ",
-            style = DescriptionTypography.copy(color = Color.Black, fontWeight = FontWeight.Bold),
+            style = DescriptionTypography.copy(color = MutedDarkBlue, fontWeight = FontWeight.Bold),
             maxLines = 1
         )
         Spacer(modifier = Modifier.width(4.dp))
@@ -457,7 +488,7 @@ fun ModalBottomSheetItem(
                 .padding(end = 2.dp)
                 .horizontalScroll(rememberScrollState())
                 .clickable {
-                    val clip = android.content.ClipData.newPlainText("Copied Text", text)
+                    val clip = ClipData.newPlainText("Copied Text", text)
                     clipboardManager.setPrimaryClip(clip)
                     Toast
                         .makeText(context, "$prefixText copied", Toast.LENGTH_SHORT)
@@ -480,16 +511,13 @@ fun ReceiverList(
     receiverList: List<Receiver>,
     onReceiverClick: (Receiver) -> Unit
 ) {
-    val imageTopPadding: Dp = 40.dp
-    LazyVerticalGrid(
+    val imageTopPadding: Dp = 60.dp
+    LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(imageTopPadding + 20.dp),
         contentPadding = PaddingValues(top = imageTopPadding, bottom = 20.dp)
     ) {
         items(receiverList) { receiver ->
-            Spacer(modifier = Modifier.height(imageTopPadding))
             ReceiverComponent(modifier = Modifier.fillMaxWidth(), receiver = receiver) {
                 onReceiverClick(receiver)
             }
@@ -509,10 +537,9 @@ fun ReceiverComponent(modifier: Modifier, receiver: Receiver, onReceiverClick: (
         )
         DonorBoxImage(
             modifier = Modifier
-                .padding(10.dp)
-                .width(100.dp)
-                .height(80.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .padding(top = 10.dp, bottom = 20.dp)
+                .size(100.dp)
+                .clip(shape = CircleShape)
                 .constrainAs(image) {
                     top.linkTo(card.top)
                     bottom.linkTo(card.top)
@@ -526,14 +553,16 @@ fun ReceiverComponent(modifier: Modifier, receiver: Receiver, onReceiverClick: (
 
 @Composable
 fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Receiver) -> Unit) {
+    //max text width
+    val maxLabelWidth = calculateTextWidth()
     Card(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onReceiverClick(receiver)
             },
-        colors = CardDefaults.cardColors(containerColor = NewGray),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
+        colors = CardDefaults.cardColors(containerColor =  MutedDarkBlue),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
     ) {
         Column(
             modifier = Modifier
@@ -543,45 +572,51 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
                     start = 8.dp, end = 8.dp
                 ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             ReceiverText(
                 text = "Name: ",
                 description = receiver.name,
-                textStyle = DescriptionTypography
+                textStyle = DescriptionTypography,
+                maxLabelWidth = maxLabelWidth
             )
             ReceiverText(
                 text = "Phone: ",
                 description = receiver.phoneNumber,
-                textStyle = DescriptionTypography
+                textStyle = DescriptionTypography,
+                maxLabelWidth = maxLabelWidth
             )
             ReceiverText(
                 text = "Address: ",
                 description = receiver.address.location,
-                textStyle = DescriptionTypography
+                textStyle = DescriptionTypography,
+                maxLabelWidth = maxLabelWidth
             )
-            ReceiverText(
-                text = "Omt: ",
-                description = receiver.omt,
-                DescriptionTypography.copy(fontSize = 14.sp)
-            )
-            ReceiverText(
-                text = "Whish: ",
-                description = receiver.whish,
-                DescriptionTypography.copy(fontSize = 14.sp)
-            )
-            ReceiverText(
-                text = "Bank iban: ",
-                description = receiver.bank,
-                DescriptionTypography.copy(fontSize = 14.sp)
-            )
+//            ReceiverText(
+//                text = "Omt: ",
+//                description = receiver.omt,
+//                DescriptionTypography,
+//                maxLabelWidth = maxLabelWidth
+//            )
+//            ReceiverText(
+//                text = "Whish: ",
+//                description = receiver.whish,
+//                DescriptionTypography,
+//                maxLabelWidth = maxLabelWidth
+//            )
+//            ReceiverText(
+//                text = "Bank iban: ",
+//                description = receiver.bank,
+//                DescriptionTypography,
+//                maxLabelWidth = maxLabelWidth
+//            )
         }
     }
 }
 
 @Composable
 fun ReceiverText(
-    text: String, description: String, textStyle: TextStyle,
+    text: String, description: String, textStyle: TextStyle, maxLabelWidth: Dp
 ) {
     val horizontalScrollState = rememberScrollState()
     Row(
@@ -589,7 +624,7 @@ fun ReceiverText(
         horizontalArrangement = Arrangement.Start
     ) {
         Text(
-            modifier = Modifier.widthIn(60.dp),
+            modifier = Modifier.width(maxLabelWidth),
             text = text,
             maxLines = 1,
             style = textStyle.copy(lineHeight = 20.sp),
@@ -597,7 +632,7 @@ fun ReceiverText(
             textAlign = TextAlign.Start
         )
         Text(
-            modifier = Modifier.fillMaxWidth(1f),
+            modifier = Modifier,
             text = description,
             maxLines = 1,
             style = textStyle.copy(
@@ -632,7 +667,7 @@ fun ShowDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .border(1.dp, BrightBlue, RoundedCornerShape(20.dp)),
+                .border(1.dp, NewBlue, RoundedCornerShape(20.dp)),
             containerColor = Color.Black.copy(alpha = 0.85f),
             onDismissRequest = {},
             confirmButton = {
@@ -641,7 +676,7 @@ fun ShowDialog(
                     enabled = !isLoading,
                     onClick = confirmButton,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrightBlue,
+                        containerColor = NewBlue,
                         disabledContainerColor = NewGray
                     ),
                     shape = RoundedCornerShape(12.dp)
@@ -661,10 +696,10 @@ fun ShowDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = Color.Transparent,
-                        contentColor = BrightBlue,
+                        contentColor = NewBlue,
                         disabledContainerColor = NewGray
                     ),
-                    border = BorderStroke(1.dp, BrightBlue)
+                    border = BorderStroke(1.dp, NewBlue)
                 ) {
                     Text(
                         text = stringResource(R.string.dismiss),
@@ -679,7 +714,7 @@ fun ShowDialog(
                     textAlign = TextAlign.Center,
                     text = "Donate money \n",
                     style = MaterialTheme.typography.titleLarge.copy(
-                        color = BrightBlue,
+                        color = NewBlue,
                         fontWeight = FontWeight.Bold,
                     )
                 )
@@ -716,7 +751,7 @@ fun ShowDialog(
                             singleLine = true,
                             colors = TextFieldDefaults.textFieldColors(
                                 containerColor = Color.Black.copy(alpha = 0.1f),
-                                focusedIndicatorColor = BrightBlue,
+                                focusedIndicatorColor = NewBlue,
                                 unfocusedIndicatorColor = Color.Gray,
                                 focusedTextColor = NewWhite,
                                 unfocusedTextColor = NewWhite
@@ -748,4 +783,23 @@ fun ShowDialog(
                 }
             })
     }
+}
+
+@Composable
+private fun calculateTextWidth(): Dp {
+    // List of all "text" values
+    val texts = listOf("Name: ", "Phone: ", "Address: ", "Omt: ", "Whish: ", "Bank iban: ")
+
+    // Create a TextMeasurer
+    val textMeasurer = rememberTextMeasurer()
+    // Calculate the maximum width of all texts
+    val maxWidthPx = texts.maxOf { text ->
+        val layoutResult = textMeasurer.measure(
+            text = text,
+            style = DescriptionTypography
+        )
+        layoutResult.size.width.toFloat()
+    }
+    // Convert the width in pixels to Dp
+    return with(LocalDensity.current) { maxWidthPx.toDp() }
 }

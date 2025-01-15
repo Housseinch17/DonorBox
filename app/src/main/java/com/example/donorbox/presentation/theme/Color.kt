@@ -22,10 +22,10 @@ val Yellow = Color(0xFFFFC106)
 
 
 val NewBlue = Color(0xFF179ade)
-val NewGray = Color(0xFFb7b7c1)
 val NewWhite = Color(0xFFfefdff)
-val ClickedIconColor1 = Color(0xFF0d6aa1)
-
+val NewGray = Color(0xFFb7b7c1)
+val ClickedIconColor = Color(0xFF0d6aa1)
+val MutedDarkBlue = Color(0xFF0F2A44)
 
 // Additional colors from XML
 val Purple200 = Color(0xFFBB86FC)
@@ -40,7 +40,6 @@ val Gray = Color(0xFF8D8D8D)
 val DarkBrown = Color(0xFF34190E)
 val LightOrange = Color(0xFFE6C59E)
 val LightYellow = Color(0xFFF2E8DB)
-val BrightBlue = Color(0xFF007BFF)
 val LightBlue = Color(0xFFADD8E6)
 val SkyBlue = Color(0xFF87CEEB)
 val DeepBlue = Color(0xFF003366)

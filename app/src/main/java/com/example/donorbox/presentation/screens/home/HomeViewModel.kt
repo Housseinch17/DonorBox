@@ -1,10 +1,8 @@
 package com.example.donorbox.presentation.screens.home
 
+import android.content.Context
 import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.graphics.vector.ImageVector
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.data.model.MyDonations
@@ -19,6 +17,9 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseC
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
 import com.example.donorbox.presentation.sealedInterfaces.ReceiversResponse
+import com.example.donorbox.presentation.util.callPhoneDirectly
+import com.example.donorbox.presentation.util.openApp
+import com.example.donorbox.presentation.util.openGoogleMap
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,6 +27,22 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+sealed interface HomeAction {
+    data class OnReceiverClick(val receiver: Receiver) : HomeAction
+    data class OnOpenGoogleMap(val context: Context, val latitude: Double, val longitude: Double) : HomeAction
+    data class OnSendButton(val receiverToken: String, val receiverUsername: String) : HomeAction
+    data class SendMoney(val moneyToDonate: String, val password: String) : HomeAction
+    data class OnMoneyUpdate(val moneyValue: String) : HomeAction
+    data class NewPasswordValueChange(val newPasswordValueChange: String) : HomeAction
+    data class OnCall(val context: Context, val phoneNumber: String) : HomeAction
+    data class OnOpenOmtApp(val context: Context) : HomeAction
+    data class OnOpenWhishApp(val context: Context) : HomeAction
+    data object HideBottomSheetReceiver : HomeAction
+    data object HideDialog : HomeAction
+    data object OnIconClick : HomeAction
+}
+
 
 class HomeViewModel(
     private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase,
@@ -49,10 +66,84 @@ class HomeViewModel(
         }
     }
 
+
+    fun onActionHome(homeAction: HomeAction) {
+        when (homeAction) {
+            HomeAction.HideBottomSheetReceiver -> hideBottomSheetReceiver()
+            HomeAction.HideDialog -> hideDialog()
+            is HomeAction.NewPasswordValueChange -> newPasswordValueChange(
+                newPassword = homeAction.newPasswordValueChange
+            )
+
+            is HomeAction.OnCall -> {
+                homeAction.context.callPhoneDirectly(homeAction.phoneNumber) {
+                    Toast.makeText(homeAction.context, "Permission not granted!", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            HomeAction.OnIconClick -> setShowPassword()
+            is HomeAction.OnMoneyUpdate -> updateMoneyToDonate(
+                moneyToDonate = homeAction.moneyValue
+            )
+            is HomeAction.OnOpenGoogleMap -> {
+                homeAction.context.openGoogleMap(
+                    latitude = homeAction.latitude,
+                    longitude = homeAction.longitude
+                )
+            }
+
+            is HomeAction.OnOpenOmtApp -> {
+                homeAction.context.openApp(packageName = "com.tedmob.omt")
+            }
+
+            is HomeAction.OnOpenWhishApp -> {
+                homeAction.context.openApp(packageName = "money.whish.android")
+            }
+
+            is HomeAction.OnReceiverClick -> {
+                updateModalBottomSheetReceiver(modalBottomSheetReceiver = homeAction.receiver)
+                showBottomSheetReceiver()
+            }
+
+            is HomeAction.OnSendButton -> {
+                showDialog()
+                updateCurrentTokenAndUsername(
+                    token = homeAction.receiverToken,
+                    username = homeAction.receiverUsername
+                )
+            }
+
+            is HomeAction.SendMoney -> {
+                updateLoader(true)
+                viewModelScope.launch {
+                    verifyPassword(
+                        moneyToDonate = homeAction.moneyToDonate,
+                        password = homeAction.password,
+                        onVerified = {
+                            viewModelScope.launch {
+                                sendMoney(
+                                    moneyToDonate = homeAction.moneyToDonate,
+                                    donations = MyDonations(
+                                        myDonations = "Donated ${homeAction.moneyToDonate}$  to: ${_uiState.value.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
+                                    )
+                                )
+                            }
+                        },
+                        setError = { error ->
+                            emitFlow(error)
+                            updateLoader(false)
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     private suspend fun readFullName() {
-        Log.d("MyTag","readFullName")
+        Log.d("MyTag", "readFullName")
         val name = firebaseReadFullNameUseCase.readFullNameByUsername()
-        Log.d("MyTag","read $name")
+        Log.d("MyTag", "read $name")
         _uiState.update { newState ->
             newState.copy(
                 senderName = name
@@ -62,13 +153,13 @@ class HomeViewModel(
     }
 
     private suspend fun sendNotification(notificationMessage: NotificationMessage) {
-        Log.d("MyTag","sendNotification")
+        Log.d("MyTag", "sendNotification")
         sendNotificationToTokenUseCase.sendNotificationToToken(
             notificationMessage = notificationMessage
         )
     }
 
-    fun updateCurrentTokenAndUsername(token: String, username: String) {
+    private fun updateCurrentTokenAndUsername(token: String, username: String) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(receiverToken = token, receiverUsername = username)
@@ -82,7 +173,8 @@ class HomeViewModel(
         }
     }
 
-    suspend fun verifyPassword(
+    private suspend fun verifyPassword(
+        moneyToDonate: String,
         password: String,
         onVerified: () -> Unit,
         setError: (String) -> Unit,
@@ -90,12 +182,17 @@ class HomeViewModel(
         if (password.isEmpty()) {
             updateLoader(false)
             emitFlow("Password is Empty")
-        } else {
+        } else if(moneyToDonate.isEmpty()){
+            _uiState.update { newState ->
+                newState.copy(showText = true)
+            }
+            updateLoader(false)
+        }else {
             verifyPasswordUseCase.verifyPassword(password, onVerified, setError)
         }
     }
 
-    fun newPasswordValueChange(newPassword: String) {
+    private fun newPasswordValueChange(newPassword: String) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(newPasswordValue = newPassword)
@@ -103,7 +200,7 @@ class HomeViewModel(
         }
     }
 
-    fun setShowPassword() {
+    private fun setShowPassword() {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(
@@ -113,7 +210,7 @@ class HomeViewModel(
         }
     }
 
-    fun showDialog() {
+    private fun showDialog() {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(dialogVisibility = true)
@@ -121,7 +218,7 @@ class HomeViewModel(
         }
     }
 
-    fun updateLoader(loaderVisibility: Boolean) {
+    private fun updateLoader(loaderVisibility: Boolean) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(isLoading = loaderVisibility)
@@ -129,7 +226,7 @@ class HomeViewModel(
         }
     }
 
-    fun hideDialog() {
+    private fun hideDialog() {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(dialogVisibility = false)
@@ -137,7 +234,7 @@ class HomeViewModel(
         }
     }
 
-    fun updateMoneyToDonate(moneyToDonate: String) {
+    private fun updateMoneyToDonate(moneyToDonate: String) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(moneyToDonate = moneyToDonate)
@@ -145,7 +242,7 @@ class HomeViewModel(
         }
     }
 
-    suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
+    private suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
         _uiState.update { newState ->
             newState.copy(showText = false)
         }
@@ -155,13 +252,14 @@ class HomeViewModel(
             }
             updateLoader(false)
         } else {
+            Log.d("MyTag","1")
             try {
                 //read full name of sender
                 readFullName()
 
                 val homeUiState = _uiState.value
 
-                Log.d("MyTag","HomeUistate ${homeUiState.senderName}")
+                Log.d("MyTag", "HomeUiState ${homeUiState.senderName}")
                 //send notification
                 sendNotification(
                     notificationMessage = NotificationMessage(
@@ -191,7 +289,7 @@ class HomeViewModel(
                 emitFlow("You're donations are succeed!")
                 hideDialog()
             } catch (e: Exception) {
-                Log.d("MyTag","sendMoney() error: ${e.message}")
+                Log.d("MyTag", "sendMoney() error: ${e.message}")
                 emitFlow(e.message.toString())
                 updateLoader(false)
             }
@@ -223,7 +321,7 @@ class HomeViewModel(
         }
     }
 
-    fun showBottomSheetReceiver() {
+    private fun showBottomSheetReceiver() {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(
@@ -235,7 +333,7 @@ class HomeViewModel(
         }
     }
 
-    fun hideBottomSheetReceiver() {
+    private fun hideBottomSheetReceiver() {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(
@@ -248,7 +346,7 @@ class HomeViewModel(
     }
 
     //update ModalBottomSheetReceiver
-    fun updateModalBottomSheetReceiver(modalBottomSheetReceiver: Receiver) {
+    private fun updateModalBottomSheetReceiver(modalBottomSheetReceiver: Receiver) {
         viewModelScope.launch {
             _uiState.update { newState ->
                 newState.copy(
@@ -257,14 +355,6 @@ class HomeViewModel(
                     )
                 )
             }
-        }
-    }
-
-    fun getIconVisibility(showPassword: Boolean): ImageVector {
-        return if (showPassword) {
-            Icons.Filled.Visibility
-        } else {
-            Icons.Filled.VisibilityOff
         }
     }
 

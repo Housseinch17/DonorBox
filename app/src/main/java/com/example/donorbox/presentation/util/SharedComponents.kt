@@ -115,7 +115,7 @@ fun ShimmerEffect(
 @Composable
 fun SharedScreen(modifier: Modifier = Modifier.fillMaxSize(), content: @Composable () -> Unit) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
     ) {
         // Semi-transparent overlay
         Box(

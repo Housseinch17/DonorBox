@@ -26,9 +26,9 @@ import com.example.donorbox.presentation.screens.authentication.AuthenticationUi
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.login.LogInScreen
 import com.example.donorbox.presentation.screens.login.LogInViewModel
+import com.example.donorbox.presentation.screens.signup.AccountStatus
 import com.example.donorbox.presentation.screens.signup.SignUpScreen
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
-import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import org.koin.androidx.compose.koinViewModel
 

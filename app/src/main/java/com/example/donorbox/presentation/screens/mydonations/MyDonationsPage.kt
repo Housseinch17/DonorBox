@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.example.donorbox.R
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.theme.BodyTypography
-import com.example.donorbox.presentation.theme.BrightBlue
+import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
@@ -69,7 +69,7 @@ fun MyDonationPage(
                                 text = stringResource(R.string.no_donations_yet),
                                 style = TitleTypography.copy(
                                     fontSize = 30.sp,
-                                    color = BrightBlue,
+                                    color = NewBlue,
                                 )
                             )
                         }
@@ -92,15 +92,14 @@ fun MyDonationPage(
 fun MyDonationList(list: List<MyDonations>) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
         contentPadding = PaddingValues(bottom = 20.dp)
     ) {
         items(list) { item ->
-            MyDonationItem(item.myDonations)
             Spacer(modifier = Modifier.height(20.dp))
+            MyDonationItem(item.myDonations)
         }
     }
 }

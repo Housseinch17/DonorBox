@@ -2,7 +2,7 @@ package com.example.donorbox.data.dataSource.firebase.firebaseAuthentication
 
 import android.annotation.SuppressLint
 import android.util.Log
-import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
+import com.example.donorbox.presentation.screens.signup.AccountStatus
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.google.firebase.auth.EmailAuthProvider

@@ -39,7 +39,7 @@ import com.example.donorbox.presentation.navigation.navGraphBuilder.registerGrap
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.authentication.SignOutResponse
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
-import com.example.donorbox.presentation.theme.ClickedIconColor1
+import com.example.donorbox.presentation.theme.ClickedIconColor
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.util.SharedScreen
@@ -49,7 +49,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainPage(navController: NavHostController, startDestination: NavigationScreens) {
-    Log.d("MyTag","Entered")
+    Log.d("MyTag", "Entered")
     val currentBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentDestination = currentBackStackEntry?.destination
     val currentGraph = currentDestination?.parent
@@ -75,6 +75,7 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
                     }
                 }
             }
+
             else -> {}
         }
     }
@@ -150,42 +151,42 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
             }
         },
     ) { innerPadding ->
-        SharedScreen {
-        NavHost(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            navController = navController,
-            startDestination = startDestination
-        ) {
-            registerGraph(
-                authenticationViewModel = authenticationViewModel,
-                authenticationUiState = authenticationUiState,
-                navHostController = navController,
-            )
+        SharedScreen(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
+            NavHost(
+                modifier = Modifier.fillMaxSize().padding(bottom = 30.dp),
+                navController = navController,
+                startDestination = startDestination
+            ) {
+                registerGraph(
+                    authenticationViewModel = authenticationViewModel,
+                    authenticationUiState = authenticationUiState,
+                    navHostController = navController,
+                )
 
-            donorBoxGraph(
-                navHostController = navController,
-                authenticationViewModel = authenticationViewModel,
-                username = currentUsername ?: "",
-                resetShowDialog = authenticationUiState.resetShowDialog,
-                resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
-                signOutShowDialog = authenticationUiState.signOutShowDialog,
-                signOutIsLoading = authenticationUiState.signOut == SignOutResponse.IsLoading,
-            )
-        }
+                donorBoxGraph(
+                    navHostController = navController,
+                    authenticationViewModel = authenticationViewModel,
+                    username = currentUsername ?: "",
+                    resetShowDialog = authenticationUiState.resetShowDialog,
+                    resetIsLoading = authenticationUiState.resetPassword == PasswordChangement.IsLoading,
+                    signOutShowDialog = authenticationUiState.signOutShowDialog,
+                    signOutIsLoading = authenticationUiState.signOut == SignOutResponse.IsLoading,
+                )
+            }
         }
     }
 }
 
-
 @Composable
 fun FloatingButtonBar(onDonationClick: () -> Unit, currentScreens: NavigationScreens) {
     FloatingActionButton(
+        modifier = Modifier.padding(top = 10.dp),
         onClick = onDonationClick,
         shape = RoundedCornerShape(50.dp),
         containerColor = NewBlue,
-        contentColor = if (currentScreens == NavigationScreens.ReceivedDonationsPage) ClickedIconColor1 else NewWhite
+        contentColor = if (currentScreens == NavigationScreens.ReceivedDonationsPage) ClickedIconColor else NewWhite
     ) {
         Icon(
             imageVector = Icons.Filled.Outbox,
@@ -208,26 +209,26 @@ fun BottomAppBar(
         BottomNavigationItem(
             selected = currentScreens == NavigationScreens.HomePage,
             selectedContentColor = NewWhite,
-            unselectedContentColor = ClickedIconColor1,
+            unselectedContentColor = ClickedIconColor,
             onClick = onHomeClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Home",
-                    tint = if (currentScreens == NavigationScreens.HomePage) ClickedIconColor1 else NewWhite
+                    tint = if (currentScreens == NavigationScreens.HomePage) ClickedIconColor else NewWhite
                 )
             },
         )
         BottomNavigationItem(
             selected = currentScreens == NavigationScreens.ProfilePage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = ClickedIconColor1,
+            selectedContentColor = ClickedIconColor,
             onClick = onProfileClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Profile",
-                    tint = if (currentScreens == NavigationScreens.ProfilePage) ClickedIconColor1 else NewWhite
+                    tint = if (currentScreens == NavigationScreens.ProfilePage) ClickedIconColor else NewWhite
                 )
             }
         )
@@ -235,26 +236,26 @@ fun BottomAppBar(
         BottomNavigationItem(
             selected = currentScreens == NavigationScreens.MyDonationsPage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = ClickedIconColor1,
+            selectedContentColor = ClickedIconColor,
             onClick = onMyDonationsClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.ShoppingBag,
                     contentDescription = "My Donations",
-                    tint = if (currentScreens == NavigationScreens.MyDonationsPage) ClickedIconColor1 else NewWhite
+                    tint = if (currentScreens == NavigationScreens.MyDonationsPage) ClickedIconColor else NewWhite
                 )
             }
         )
         BottomNavigationItem(
             selected = currentScreens == NavigationScreens.SettingsPage,
             unselectedContentColor = NewWhite,
-            selectedContentColor = ClickedIconColor1,
+            selectedContentColor = ClickedIconColor,
             onClick = onSettingsClick,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Settings,
                     contentDescription = "Settings",
-                    tint = if (currentScreens == NavigationScreens.SettingsPage) ClickedIconColor1 else NewWhite
+                    tint = if (currentScreens == NavigationScreens.SettingsPage) ClickedIconColor else NewWhite
                 )
             }
         )

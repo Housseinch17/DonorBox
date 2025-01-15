@@ -37,6 +37,7 @@ import com.example.donorbox.presentation.screens.authentication.ResetPage
 import com.example.donorbox.presentation.sealedInterfaces.AuthState
 import com.example.donorbox.presentation.sealedInterfaces.PasswordChangement
 import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.AccountButton
 import com.example.donorbox.presentation.util.AccountTextButton
@@ -149,7 +150,7 @@ fun LogInScreen(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         text = textPage,
-                        style = TitleTypography,
+                        style = TitleTypography.copy(color = NewWhite),
                     )
                     Column(
                         modifier = Modifier,

@@ -22,8 +22,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.donorbox.R
-import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
 import com.example.donorbox.presentation.theme.NewBlue
+import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.AccountButton
 import com.example.donorbox.presentation.util.AccountTextButton
@@ -55,7 +55,7 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 text = textPage,
-                style = TitleTypography,
+                style = TitleTypography.copy(color = NewWhite),
             )
             Spacer(Modifier.height(16.dp))
             TextFieldInput(

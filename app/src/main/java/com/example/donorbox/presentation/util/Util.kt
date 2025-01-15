@@ -11,7 +11,6 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavGraph.Companion.findStartDestination

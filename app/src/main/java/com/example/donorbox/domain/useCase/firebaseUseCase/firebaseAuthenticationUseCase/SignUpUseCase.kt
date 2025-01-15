@@ -1,7 +1,7 @@
 package com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase
 
 import com.example.donorbox.domain.repository.FirebaseRepository
-import com.example.donorbox.presentation.sealedInterfaces.AccountStatus
+import com.example.donorbox.presentation.screens.signup.AccountStatus
 
 class SignUpUseCase (
 private val firebaseRepository: FirebaseRepository

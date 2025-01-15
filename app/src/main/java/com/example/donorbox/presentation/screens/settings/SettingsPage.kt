@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.donorbox.R
 import com.example.donorbox.presentation.theme.BodyTypography
-import com.example.donorbox.presentation.theme.BrightBlue
+import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
@@ -159,7 +159,7 @@ fun SettingsPage(
                     modifier = Modifier,
                     textAlign = TextAlign.Center,
                     text = textPage,
-                    style = TitleTypography,
+                    style = TitleTypography.copy(color = NewWhite),
                 )
                 Column(
                     modifier = Modifier,
@@ -288,7 +288,7 @@ fun SettingsPage(
                     modifier = Modifier
                         .size(200.dp)
                         .align(Alignment.Center),
-                    color = BrightBlue,
+                    color = NewBlue,
                     strokeWidth = 2.dp,
                 )
             }

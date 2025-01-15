@@ -19,7 +19,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.donorbox.R
-import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
 import com.example.donorbox.presentation.screens.authentication.ResetPage
@@ -35,9 +34,6 @@ import com.example.donorbox.presentation.screens.settings.SettingsPage
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.settings.ShowPassword
 import com.example.donorbox.presentation.screens.settings.UpdatePassword
-import com.example.donorbox.presentation.util.callPhoneDirectly
-import com.example.donorbox.presentation.util.openApp
-import com.example.donorbox.presentation.util.openGoogleMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -51,6 +47,8 @@ fun NavGraphBuilder.donorBoxGraph(
     signOutShowDialog: Boolean,
     signOutIsLoading: Boolean
 ) {
+    val modifier: Modifier = Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 10.dp)
+
     navigation<NavigationScreens.DonorBoxGraph>(startDestination = NavigationScreens.HomePage) {
         composable<NavigationScreens.HomePage> {
             val context = LocalContext.current
@@ -60,9 +58,7 @@ fun NavGraphBuilder.donorBoxGraph(
                 navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
             val homeViewModel =
                 koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
-            val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
-
-            val scope = rememberCoroutineScope()
+            val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(homeViewModel.sharedFlow) {
                 homeViewModel.sharedFlow.collect { message ->
@@ -71,67 +67,9 @@ fun NavGraphBuilder.donorBoxGraph(
             }
 
             HomePage(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp, start = 20.dp, end = 20.dp),
-                response = uiState.receiversResponse,
-                onReceiverClick = {
-                    homeViewModel.updateModalBottomSheetReceiver(it)
-                    homeViewModel.showBottomSheetReceiver()
-                },
-                modalBottomSheetReceiver = uiState.modalBottomSheetReceiver,
-                hideBottomSheetReceiver = homeViewModel::hideBottomSheetReceiver,
-                onCall = { phoneNumber ->
-                    context.callPhoneDirectly(phoneNumber) {
-                        Toast.makeText(context, "Permission not granted!", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                },
-                onOpenApp = {
-                    context.openApp(packageName = "com.tedmob.omt")
-                },
-                onOpenWhishApp = {
-                    context.openApp(packageName = "money.whish.android")
-                },
-                onOpenGoogleMap = { latitude, longitude ->
-                    context.openGoogleMap(latitude, longitude)
-                },
-                onSendButton = { receiverToken, receiverUsername ->
-                    homeViewModel.showDialog()
-                    homeViewModel.updateCurrentTokenAndUsername(receiverToken, receiverUsername)
-                },
-                sendMoney = { moneyToDonate, password ->
-                    homeViewModel.updateLoader(true)
-                    scope.launch {
-                        homeViewModel.verifyPassword(password = password,
-                            onVerified = {
-                                scope.launch {
-                                    homeViewModel.sendMoney(
-                                        moneyToDonate = moneyToDonate,
-                                        donations = MyDonations(
-                                            myDonations = "Donated $moneyToDonate$  to: ${uiState.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
-                                        )
-                                    )
-                                }
-                            },
-                            setError = { error ->
-                                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
-                            })
-                    }
-                },
-                showDialog = uiState.dialogVisibility,
-                hideDialog = homeViewModel::hideDialog,
-                moneyToDonate = uiState.moneyToDonate,
-                onMoneyUpdate = {
-                    homeViewModel.updateMoneyToDonate(it)
-                },
-                isLoading = uiState.isLoading,
-                showText = uiState.showText,
-                newPasswordValue = uiState.newPasswordValue,
-                showPassword = uiState.showPassword,
-                newPasswordValueChange = {
-                    homeViewModel.newPasswordValueChange(it)
-                },
-                imageVector = homeViewModel.getIconVisibility(uiState.showPassword),
-                onIconClick = homeViewModel::setShowPassword
+                modifier = modifier,
+                homeUiState = homeUiState,
+                onActionHomeAction = homeViewModel::onActionHome,
             )
         }
         composable<NavigationScreens.MyDonationsPage> {
@@ -139,7 +77,7 @@ fun NavGraphBuilder.donorBoxGraph(
             val myDonationsUiState by myDonationsViewModel.myDonationsUiState.collectAsStateWithLifecycle()
 
             MyDonationPage(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
+                modifier = modifier,
                 isLoading = myDonationsUiState.isLoading,
                 list = myDonationsUiState.list,
                 isRefreshing = myDonationsUiState.isRefreshing,
@@ -152,7 +90,7 @@ fun NavGraphBuilder.donorBoxGraph(
             val receivedDonationsUiState by receivedDonationsViewModel.receivedDonationsUiState.collectAsStateWithLifecycle()
 
             ReceivedDonationsPage(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
+                modifier = modifier,
                 isLoading = receivedDonationsUiState.isLoading,
                 isRefreshing = receivedDonationsUiState.isRefreshing,
                 receivedDonationsList = receivedDonationsUiState.receivedDonationsList,
@@ -175,7 +113,7 @@ fun NavGraphBuilder.donorBoxGraph(
             }
 
             SettingsPage(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
+                modifier = modifier,
                 textPage = stringResource(R.string.settings),
                 currentPasswordValue = settingsUiState.currentPasswordValue,
                 newPasswordValue = settingsUiState.newPasswordValue,
@@ -252,7 +190,7 @@ fun NavGraphBuilder.donorBoxGraph(
             val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
 
             ProfilePage(
-                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 20.dp),
+                modifier = modifier,
                 profileUiState = profileUiState
             )
         }
