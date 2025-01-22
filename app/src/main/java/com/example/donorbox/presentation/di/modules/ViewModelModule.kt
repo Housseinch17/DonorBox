@@ -17,71 +17,67 @@ object ViewModelModule {
 
     val viewModelModule = module {
 
-        viewModel{
+        viewModel {
             AuthenticationViewModel(
                 application = androidApplication(),
-                signOutUseCase = get(),
-                saveSharedPrefUsernameUseCase = get(),
-                getSharedPrefUsernameUseCase = get(),
-                resetPasswordUseCase = get(),
-                getCurrentUserUseCase = get(),
-                updateDeviceTokenUseCase = get(),
+                authenticationUseCase = get(),
+                sharedPreferenceUseCase = get(),
+                notificationUseCase = get(),
             )
         }
 
-        viewModel{
+        viewModel {
             MainViewModel(
-                getSharedPrefUsernameUseCase = get()
-            )
-        }
-        
-        viewModel{
-            LogInViewModel(
-                logInUseCase = get(),
-                saveSharedPrefUsernameUseCase = get(),
-                getCurrentUserUseCase = get()
+                sharedPreferenceUseCase = get()
             )
         }
 
-        viewModel{
+        viewModel {
+            LogInViewModel(
+                authenticationUseCase = get(),
+                sharedPreferenceUseCase = get(),
+            )
+        }
+
+        viewModel {
             SignUpViewModel(
-                signUpUseCase = get(),
-                addUserUseCase = get(),
+                authenticationUseCase = get(),
+                firebaseWriteDataUseCase = get(),
             )
         }
 
         viewModel {
             HomeViewModel(
-                firebaseReadReceiversUseCase = get(),
-                saveDonationsUseCase = get(),
-                verifyPasswordUseCase = get(),
-                sendNotificationToTokenUseCase = get(),
-                firebaseReadFullNameUseCase = get(),
-                firebaseWriteDonationsUseCase = get(),
+                application = androidApplication(),
+                firebaseReadDataUseCase = get(),
+                localDataBaseUseCase = get(),
+                authenticationUseCase = get(),
+                notificationUseCase = get(),
+                firebaseWriteDataUseCase = get(),
             )
         }
 
         viewModel {
             MyDonationsViewModel(
-                getAllDonationsUseCase = get()
+                localDataBaseUseCase = get()
             )
         }
         viewModel {
             SettingsViewModel(
-                changePasswordUseCase = get(),
-                verifyPasswordUseCase = get()
+                authenticationUseCase = get(),
             )
         }
 
         viewModel {
             ReceivedDonationsViewModel(
-                firebaseReadAllDonationsUseCase = get(),)
+                firebaseReadDataUseCase = get()
+            )
         }
 
         viewModel {
             ProfileViewModel(
-                getCurrentUserUseCase = get(),
-                firebaseReadFullNameUseCase = get()
+                authenticationUseCase = get(),
+                firebaseReadDataUseCase = get(),
             )
         }
 

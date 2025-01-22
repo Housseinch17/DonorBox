@@ -47,8 +47,8 @@ fun NavGraphBuilder.registerGraph(
             val logInViewModel = koinViewModel<LogInViewModel>()
             val logInUiState by logInViewModel.logInUiState.collectAsStateWithLifecycle()
 
-            LaunchedEffect(logInViewModel.sharedFlow) {
-                logInViewModel.sharedFlow.collect { message ->
+            LaunchedEffect(logInViewModel.eventMessage) {
+                logInViewModel.eventMessage.collect { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
@@ -92,8 +92,8 @@ fun NavGraphBuilder.registerGraph(
             val signUpUiState by signUpViewModel.signupUiState.collectAsStateWithLifecycle()
 
 
-            LaunchedEffect(signUpViewModel.signUpSharedFlow) {
-                signUpViewModel.signUpSharedFlow.collect { error ->
+            LaunchedEffect(signUpViewModel.eventMessage) {
+                signUpViewModel.eventMessage.collect { error ->
                     Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
                 }
             }

@@ -10,4 +10,5 @@ data class AuthenticationUiState(
     val resetPassword: PasswordChangement = PasswordChangement.InitialState,
     val resetEmailValue: String = "",
     val currentScreen: NavigationScreens = NavigationScreens.HomePage,
+    val bottomBarLoading: Boolean = true,
     )

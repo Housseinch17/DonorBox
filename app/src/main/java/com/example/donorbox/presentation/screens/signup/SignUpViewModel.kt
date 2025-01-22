@@ -4,15 +4,14 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignUpUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseAddUserUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDataUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,14 +33,15 @@ sealed interface SignUpAction{
 }
 
 class SignUpViewModel(
-    private val signUpUseCase: SignUpUseCase,
-    private val addUserUseCase: FirebaseAddUserUseCase,
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val firebaseWriteDataUseCase: FirebaseWriteDataUseCase,
 ) : ViewModel() {
     private val _signupUiState: MutableStateFlow<SignUpUiState> = MutableStateFlow(SignUpUiState())
     val signupUiState: StateFlow<SignUpUiState> = _signupUiState.asStateFlow()
 
-    private val _signUpSharedFlow: MutableSharedFlow<String> = MutableSharedFlow()
-    val signUpSharedFlow: SharedFlow<String> = _signUpSharedFlow.asSharedFlow()
+
+    private val _eventMessage: Channel<String> = Channel()
+    val eventMessage = _eventMessage.receiveAsFlow()
 
     init {
         Log.d("ViewModelInitialization", "SignupViewModel created")
@@ -84,7 +84,7 @@ class SignUpViewModel(
 
     private fun emitError(message: String) {
         viewModelScope.launch {
-            _signUpSharedFlow.emit(message)
+            _eventMessage.send(message)
         }
     }
 
@@ -112,7 +112,7 @@ class SignUpViewModel(
                 } else {
                     if(password == confirmPassword){
                         if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            val response = signUpUseCase.signUp(email, password)
+                            val response = authenticationUseCase.signUp(email, password)
                             if (response is AccountStatus.Error) {
                                 emitError(response.error)
                                 _signupUiState.update { newState ->
@@ -123,7 +123,7 @@ class SignUpViewModel(
                                     newState.copy(accountStatus = AccountStatus.IsCreated(response.message))
                                 }
                                 emitError(response.message)
-                                addUserUseCase.addUser(username = email, name = name)
+                                firebaseWriteDataUseCase.addUser(username = email, name = name)
                             }
                         } else {
                             emitError("Please use a valid email account!")

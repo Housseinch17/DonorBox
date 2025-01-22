@@ -1,41 +1,43 @@
 package com.example.donorbox.presentation.screens.home
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.donorbox.MyApplication
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.data.model.Receiver
 import com.example.donorbox.data.model.notificationMessage.Message
 import com.example.donorbox.data.model.notificationMessage.Notification
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadReceiversUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDonationsUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.SendNotificationToTokenUseCase
-import com.example.donorbox.domain.useCase.localDataBaseUseCase.SaveDonationsUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadDataUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDataUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCase
+import com.example.donorbox.domain.useCase.localDataBaseUseCase.LocalDataBaseUseCase
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface ReceiversResponse {
-    data class Success(val receivers:  List<Receiver>): ReceiversResponse
-    data object IsLoading: ReceiversResponse
-    data class Error(val message: String): ReceiversResponse
+    data class Success(val receivers: List<Receiver>) : ReceiversResponse
+    data object IsLoading : ReceiversResponse
+    data class Error(val message: String) : ReceiversResponse
 }
 
 sealed interface HomeAction {
     data class OnReceiverClick(val receiver: Receiver) : HomeAction
-    data class OnOpenGoogleMap(val context: Context, val latitude: Double, val longitude: Double) : HomeAction
+    data class OnOpenGoogleMap(val context: Context, val latitude: Double, val longitude: Double) :
+        HomeAction
+
     data class OnSendButton(val receiverToken: String, val receiverUsername: String) : HomeAction
     data class SendMoney(val moneyToDonate: String, val password: String) : HomeAction
     data class OnMoneyUpdate(val moneyValue: String) : HomeAction
@@ -50,18 +52,18 @@ sealed interface HomeAction {
 
 
 class HomeViewModel(
-    private val firebaseReadReceiversUseCase: FirebaseReadReceiversUseCase,
-    private val saveDonationsUseCase: SaveDonationsUseCase,
-    private val verifyPasswordUseCase: VerifyPasswordUseCase,
-    private val sendNotificationToTokenUseCase: SendNotificationToTokenUseCase,
-    private val firebaseReadFullNameUseCase: FirebaseReadFullNameUseCase,
-    private val firebaseWriteDonationsUseCase: FirebaseWriteDonationsUseCase
-) : ViewModel() {
+    private val application: Application,
+    private val firebaseWriteDataUseCase: FirebaseWriteDataUseCase,
+    private val firebaseReadDataUseCase: FirebaseReadDataUseCase,
+    private val localDataBaseUseCase: LocalDataBaseUseCase,
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val notificationUseCase: NotificationUseCase
+) : AndroidViewModel(application) {
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _sharedFlow: MutableSharedFlow<String> = MutableSharedFlow()
-    val sharedFlow: SharedFlow<String> = _sharedFlow.asSharedFlow()
+    private val _eventMessage: Channel<String> = Channel()
+    val eventMessage = _eventMessage.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -91,6 +93,7 @@ class HomeViewModel(
             is HomeAction.OnMoneyUpdate -> updateMoneyToDonate(
                 moneyToDonate = homeAction.moneyValue
             )
+
             is HomeAction.OnOpenGoogleMap -> {
                 homeAction.context.openGoogleMap(
                     latitude = homeAction.latitude,
@@ -147,7 +150,7 @@ class HomeViewModel(
 
     private suspend fun readFullName() {
         Log.d("MyTag", "readFullName")
-        val name = firebaseReadFullNameUseCase.readFullNameByUsername()
+        val name = firebaseReadDataUseCase.readFullNameByUsername()
         Log.d("MyTag", "read $name")
         _uiState.update { newState ->
             newState.copy(
@@ -159,7 +162,7 @@ class HomeViewModel(
 
     private suspend fun sendNotification(notificationMessage: NotificationMessage) {
         Log.d("MyTag", "sendNotification")
-        sendNotificationToTokenUseCase.sendNotificationToToken(
+        notificationUseCase.sendNotificationToToken(
             notificationMessage = notificationMessage
         )
     }
@@ -174,7 +177,7 @@ class HomeViewModel(
 
     private fun emitFlow(message: String) {
         viewModelScope.launch {
-            _sharedFlow.emit(message)
+            _eventMessage.send(message)
         }
     }
 
@@ -187,13 +190,13 @@ class HomeViewModel(
         if (password.isEmpty()) {
             updateLoader(false)
             emitFlow("Password is Empty")
-        } else if(moneyToDonate.isEmpty()){
+        } else if (moneyToDonate.isEmpty()) {
             _uiState.update { newState ->
                 newState.copy(showText = true)
             }
             updateLoader(false)
-        }else {
-            verifyPasswordUseCase.verifyPassword(password, onVerified, setError)
+        } else {
+            authenticationUseCase.verifyPassword(password, onVerified, setError)
         }
     }
 
@@ -247,7 +250,7 @@ class HomeViewModel(
         }
     }
 
-    private suspend fun sendMoney(moneyToDonate: String, donations: MyDonations) {
+    private fun sendMoney(moneyToDonate: String, donations: MyDonations) {
         _uiState.update { newState ->
             newState.copy(showText = false)
         }
@@ -257,54 +260,61 @@ class HomeViewModel(
             }
             updateLoader(false)
         } else {
-            Log.d("MyTag","1")
-            try {
-                //read full name of sender
-                readFullName()
+            //getting application scope from MyApplication class
+            //it will only cancel if any child failed/cancelled or the whole app destroyed
+            val appScope = (application as MyApplication).applicationScope
 
-                val homeUiState = _uiState.value
+            appScope.launch {
+                try {
+                    //read full name of sender
+                    readFullName()
 
-                Log.d("MyTag", "HomeUiState ${homeUiState.senderName}")
-                //send notification
-                sendNotification(
-                    notificationMessage = NotificationMessage(
-                        message = Message(
-                            token = homeUiState.receiverToken,
-                            notification = Notification(
-                                title = "Received Money",
-                                body = "You have received $moneyToDonate$ from ${homeUiState.senderName}"
+                    val homeUiState = _uiState.value
+
+                    Log.d("MyTag", "HomeUiState ${homeUiState.senderName}")
+                    //send notification
+                    sendNotification(
+                        notificationMessage = NotificationMessage(
+                            message = Message(
+                                token = homeUiState.receiverToken,
+                                notification = Notification(
+                                    title = "Received Money",
+                                    body = "You have received $moneyToDonate$ from ${homeUiState.senderName}"
+                                )
                             )
                         )
                     )
-                )
 
-                //post to receiver firebase
-                firebaseWriteDonationsUseCase.writeDonationsIntoFirebase(
-                    homeUiState.receiverUsername,
-                    "You have received $moneyToDonate\$ from ${homeUiState.senderName}"
-                )
-                //save donation
-                saveDonationsUseCase.saveDonations(donations)
+                    //post to receiver firebase
+                    firebaseWriteDataUseCase.writeDonationsIntoFirebase(
+                        homeUiState.receiverUsername,
+                        "You have received $moneyToDonate\$ from ${homeUiState.senderName}"
+                    )
+                    //save donation
+                    localDataBaseUseCase.saveDonations(donations)
 
-                updateMoneyToDonate("")
-                newPasswordValueChange("")
+                    _uiState.update { newState ->
+                        newState.copy(
+                            moneyToDonate = "",
+                            newPasswordValue = "",
+                            isLoading = false
+                        )
+                    }
 
-                updateLoader(false)
-
-                emitFlow("You're donations are succeed!")
-                hideDialog()
-            } catch (e: Exception) {
-                Log.d("MyTag", "sendMoney() error: ${e.message}")
-                emitFlow(e.message.toString())
-                updateLoader(false)
+                    emitFlow("You're donations are succeed!")
+                    hideDialog()
+                } catch (e: Exception) {
+                    Log.d("MyTag", "sendMoney() error: ${e.message}")
+                    emitFlow(e.message.toString())
+                    updateLoader(false)
+                }
             }
+            updateLoader(false)
         }
-        updateLoader(false)
-
     }
 
     private suspend fun readValues() {
-        val response = firebaseReadReceiversUseCase.readReceivers()
+        val response = firebaseReadDataUseCase.readReceivers()
         Log.d("MyTag", "readValues() $response")
         if (response is ReceiversResponse.Error) {
             emitFlow(response.message)

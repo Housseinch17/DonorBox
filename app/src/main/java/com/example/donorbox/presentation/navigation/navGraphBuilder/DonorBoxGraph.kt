@@ -55,8 +55,8 @@ fun NavGraphBuilder.donorBoxGraph(
                 koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
             val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-            LaunchedEffect(homeViewModel.sharedFlow) {
-                homeViewModel.sharedFlow.collect { message ->
+            LaunchedEffect(homeViewModel.eventMessage) {
+                homeViewModel.eventMessage.collect { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
@@ -65,6 +65,7 @@ fun NavGraphBuilder.donorBoxGraph(
                 modifier = modifier,
                 homeUiState = homeUiState,
                 onActionHomeAction = homeViewModel::onActionHome,
+                onActionAuthenticationAction = authenticationViewModel::onActionAuthentication
             )
         }
         composable<NavigationScreens.MyDonationsPage> {
@@ -96,8 +97,8 @@ fun NavGraphBuilder.donorBoxGraph(
             val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
 
 
-            LaunchedEffect(settingsViewModel.emitValue) {
-                settingsViewModel.emitValue.collectLatest { message ->
+            LaunchedEffect(settingsViewModel.eventMessage) {
+                settingsViewModel.eventMessage.collectLatest { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }

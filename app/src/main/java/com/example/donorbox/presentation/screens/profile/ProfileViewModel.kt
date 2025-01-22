@@ -3,16 +3,16 @@ package com.example.donorbox.presentation.screens.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadFullNameUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadDataUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val firebaseReadFullNameUseCase: FirebaseReadFullNameUseCase
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val firebaseReadDataUseCase: FirebaseReadDataUseCase
 ) : ViewModel() {
     private val _profileUiState = MutableStateFlow(ProfileUiState())
     val profileUiState = _profileUiState.asStateFlow()
@@ -27,14 +27,14 @@ class ProfileViewModel(
     }
 
     private suspend fun getCurrentUser() {
-        val username = getCurrentUserUseCase.getCurrentUser() ?: ""
+        val username = authenticationUseCase.getCurrentUser() ?: ""
         _profileUiState.update { newState ->
             newState.copy(username = username)
         }
     }
 
     private suspend fun getFullName() {
-        val name = firebaseReadFullNameUseCase.readFullNameByUsername()
+        val name = firebaseReadDataUseCase.readFullNameByUsername()
         _profileUiState.update { newState ->
             newState.copy(name = name)
         }

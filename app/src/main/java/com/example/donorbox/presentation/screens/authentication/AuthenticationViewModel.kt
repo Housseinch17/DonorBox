@@ -6,19 +6,16 @@ import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ResetPasswordUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.SignOutUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
-import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
-import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCase
+import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCase
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.util.isInternetAvailable
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -41,34 +38,34 @@ sealed interface ResetPage {
     data object SettingsPage : ResetPage
 }
 
-sealed interface AuthenticationAction{
-    data class OnResetEmailChange(val emailValue: String): AuthenticationAction
-    data class ResetPassword(val emailValue: String, val resetPage: ResetPage): AuthenticationAction
-    data object ResetDismiss: AuthenticationAction
-    data object OnResetPassword: AuthenticationAction
-    data object ResetSignOutState: AuthenticationAction
-    data object ResetShowDialog: AuthenticationAction
-    data object ResetHideDialog: AuthenticationAction
-    data object SignOut: AuthenticationAction
+sealed interface AuthenticationAction {
+    data class OnResetEmailChange(val emailValue: String) : AuthenticationAction
+    data class ResetPassword(val emailValue: String, val resetPage: ResetPage) :
+        AuthenticationAction
+
+    data object ResetDismiss : AuthenticationAction
+    data object OnResetPassword : AuthenticationAction
+    data object ResetSignOutState : AuthenticationAction
+    data object ResetShowDialog : AuthenticationAction
+    data object ResetHideDialog : AuthenticationAction
+    data object SignOut : AuthenticationAction
+    data object BottomBarLoading : AuthenticationAction
 
 }
 
 class AuthenticationViewModel(
     application: Application,
-    private val signOutUseCase: SignOutUseCase,
-    private val saveSharedPrefUsernameUseCase: SaveSharedPrefUsernameUseCase,
-    private val getSharedPrefUsernameUseCase: GetSharedPrefUsernameUseCase,
-    private val resetPasswordUseCase: ResetPasswordUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val updateDeviceTokenUseCase: UpdateDeviceTokenUseCase
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val sharedPreferenceUseCase: SharedPreferenceUseCase,
+    private val notificationUseCase: NotificationUseCase
 ) : AndroidViewModel(application = application) {
     private val _authenticationUiState: MutableStateFlow<AuthenticationUiState> =
         MutableStateFlow(AuthenticationUiState())
     val authenticationUiState: StateFlow<AuthenticationUiState> =
         _authenticationUiState.asStateFlow()
 
-    private val _showMessage = MutableSharedFlow<String>()
-    val showMessage = _showMessage.asSharedFlow()
+    private val _eventMessage: Channel<String> = Channel()
+    val eventMessage = _eventMessage.receiveAsFlow()
 
 
     init {
@@ -85,42 +82,53 @@ class AuthenticationViewModel(
     }
 
 
-    fun onActionAuthentication(authenticationAction: AuthenticationAction){
-        when(authenticationAction){
+    fun onActionAuthentication(authenticationAction: AuthenticationAction) {
+        when (authenticationAction) {
             AuthenticationAction.ResetDismiss -> resetResetHideDialog()
             is AuthenticationAction.OnResetEmailChange -> onResetEmailValue(authenticationAction.emailValue)
             AuthenticationAction.OnResetPassword -> resetResetShowDialog()
-            is AuthenticationAction.ResetPassword -> resetPassword(email = authenticationAction.emailValue, resetPage = authenticationAction.resetPage)
+            is AuthenticationAction.ResetPassword -> resetPassword(
+                email = authenticationAction.emailValue,
+                resetPage = authenticationAction.resetPage
+            )
+
             AuthenticationAction.ResetSignOutState -> resetSignOutState()
             AuthenticationAction.ResetShowDialog -> resetShowDialog()
             AuthenticationAction.ResetHideDialog -> resetHideDialog()
             AuthenticationAction.SignOut -> signOut()
+            AuthenticationAction.BottomBarLoading -> bottomBarLoading()
+        }
+    }
+
+    private fun bottomBarLoading() {
+        _authenticationUiState.update { newState ->
+            newState.copy(bottomBarLoading = false)
         }
     }
 
 
-    fun updateCurrentScreen(currentScreen: NavigationScreens){
+    fun updateCurrentScreen(currentScreen: NavigationScreens) {
         viewModelScope.launch {
-            _authenticationUiState.update { newState->
+            _authenticationUiState.update { newState ->
                 newState.copy(currentScreen = currentScreen)
             }
         }
     }
 
-    private suspend fun updateTokenIntoFirebase(){
-        updateDeviceTokenUseCase.updateDeviceToken()
+    private suspend fun updateTokenIntoFirebase() {
+        notificationUseCase.updateDeviceToken()
     }
 
 
     private fun emitMessage(message: String = "No internet connection") {
         viewModelScope.launch {
-            _showMessage.emit(message)
+            _eventMessage.send(message)
         }
     }
 
     @SuppressLint("SuspiciousIndentation")
     suspend fun updateCurrentUserName() {
-        val currentUsername = getSharedPrefUsernameUseCase.getUsername()
+        val currentUsername = sharedPreferenceUseCase.getUsername()
         _authenticationUiState.update { newState ->
             newState.copy(username = currentUsername)
         }
@@ -160,9 +168,9 @@ class AuthenticationViewModel(
                 }
 
                 val resetPassword: PasswordChangement = when (resetPage) {
-                    ResetPage.LogInPage -> resetPasswordUseCase.resetPassword(email)
-                    ResetPage.SettingsPage -> resetPasswordUseCase.resetPassword(
-                        getCurrentUserUseCase.getCurrentUser()!!
+                    ResetPage.LogInPage -> authenticationUseCase.resetPassword(email)
+                    ResetPage.SettingsPage -> authenticationUseCase.resetPassword(
+                        authenticationUseCase.getCurrentUser()!!
                     )
                 }
                 _authenticationUiState.update { newState ->
@@ -184,7 +192,7 @@ class AuthenticationViewModel(
                         emitMessage("Check if email exists!")
                     }
                 }
-                Log.d("MyTag","resetPassword() ${_authenticationUiState.value.resetPassword}" )
+                Log.d("MyTag", "resetPassword() ${_authenticationUiState.value.resetPassword}")
             } else {
                 emitMessage("Email not valid")
             }
@@ -225,14 +233,14 @@ class AuthenticationViewModel(
             val hasInternet = getApplication<Application>().isInternetAvailable()
             Log.d("hasInternet", "$hasInternet")
             if (hasInternet) {
-                signOutUseCase.signOut()
+                authenticationUseCase.signOut()
                 _authenticationUiState.update { newState ->
                     newState.copy(
                         signOut = SignOutResponse.Success,
                         signOutShowDialog = false
                     )
                 }
-                saveSharedPrefUsernameUseCase.saveUsername(null)
+                sharedPreferenceUseCase.saveUsername(null)
             } else {
                 _authenticationUiState.update { newState ->
                     newState.copy(
@@ -245,7 +253,6 @@ class AuthenticationViewModel(
             }
         }
     }
-
 
 
 }

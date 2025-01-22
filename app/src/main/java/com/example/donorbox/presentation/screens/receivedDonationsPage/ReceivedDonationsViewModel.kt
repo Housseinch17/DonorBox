@@ -3,7 +3,7 @@ package com.example.donorbox.presentation.screens.receivedDonationsPage
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadAllDonationsUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCase.FirebaseReadDataUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +15,7 @@ sealed interface ReceivedDonationsAction{
 }
 
 class ReceivedDonationsViewModel(
-    private val firebaseReadAllDonationsUseCase: FirebaseReadAllDonationsUseCase
+    private val firebaseReadDataUseCase: FirebaseReadDataUseCase
 ) : ViewModel() {
     private val _receivedDonationsUiState: MutableStateFlow<ReceivedDonationsUiState> =
         MutableStateFlow(
@@ -41,7 +41,7 @@ class ReceivedDonationsViewModel(
         _receivedDonationsUiState.update { newState ->
             newState.copy(isLoading = true)
         }
-        val receivedDonationsList = firebaseReadAllDonationsUseCase.readAllDonations()
+        val receivedDonationsList = firebaseReadDataUseCase.readAllDonations()
         _receivedDonationsUiState.update { newState ->
             newState.copy(
                 receivedDonationsList = receivedDonationsList,

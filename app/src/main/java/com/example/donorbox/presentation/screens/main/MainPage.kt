@@ -42,6 +42,7 @@ import com.example.donorbox.presentation.theme.ClickedIconColor
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.util.SharedScreen
+import com.example.donorbox.presentation.util.ShimmerEffect
 import com.example.donorbox.presentation.util.navigateSingleTopTo
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
@@ -60,6 +61,7 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
     val authenticationViewModel = koinViewModel<AuthenticationViewModel>()
     val authenticationUiState by authenticationViewModel.authenticationUiState.collectAsStateWithLifecycle()
 
+    val bottomBarLoading: Boolean = authenticationUiState.bottomBarLoading
 
     LaunchedEffect(authenticationUiState.signOut) {
         when (authenticationUiState.signOut) {
@@ -77,15 +79,15 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
         }
     }
 
-    LaunchedEffect(authenticationViewModel.showMessage) {
-        authenticationViewModel.showMessage.collectLatest { message ->
+    LaunchedEffect(authenticationViewModel.eventMessage) {
+        authenticationViewModel.eventMessage.collectLatest { message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
 
     androidx.compose.material.Scaffold(
         floatingActionButton = {
-            if (currentGraphRoute != NavigationScreens.RegisterGraph.ROUTE) {
+            if (currentGraphRoute != NavigationScreens.RegisterGraph.ROUTE && !bottomBarLoading) {
                 FloatingButtonBar(
                     currentScreens = authenticationUiState.currentScreen,
                     onDonationClick = {
@@ -103,56 +105,69 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
         floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
             if (currentGraphRoute != NavigationScreens.RegisterGraph.ROUTE) {
-                androidx.compose.material.BottomAppBar(
-                    backgroundColor = NewBlue,
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    //will cut floating to show white background behind it
-                    cutoutShape = RoundedCornerShape(50),
-                    content = {
-                        BottomAppBar(
-                            currentScreens = authenticationUiState.currentScreen,
-                            onHomeClick = {
-                                navController.navigateSingleTopTo(
-                                    route = NavigationScreens.HomePage,
-                                    navController
-                                )
-                                authenticationViewModel.updateCurrentScreen(NavigationScreens.HomePage)
-                            },
-                            onMyDonationsClick = {
-                                navController.navigateSingleTopTo(
-                                    route = NavigationScreens.MyDonationsPage,
-                                    navController
-                                )
-                                authenticationViewModel.updateCurrentScreen(NavigationScreens.MyDonationsPage)
-                            },
-                            onSettingsClick = {
-                                navController.navigateSingleTopTo(
-                                    route = NavigationScreens.SettingsPage,
-                                    navController
-                                )
-                                authenticationViewModel.updateCurrentScreen(NavigationScreens.SettingsPage)
-                            },
-                            onProfileClick = {
-                                navController.navigateSingleTopTo(
-                                    route = NavigationScreens.ProfilePage,
-                                    navController
-                                )
-                                authenticationViewModel.updateCurrentScreen(NavigationScreens.ProfilePage)
-                            }
-                        )
-                    }
-                )
+                if (bottomBarLoading) {
+                    ShimmerEffect(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    )
+                } else {
+                    androidx.compose.material.BottomAppBar(
+                        backgroundColor = NewBlue,
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        //will cut floating to show white background behind it
+                        cutoutShape = RoundedCornerShape(50),
+                        content = {
+                            BottomAppBar(
+                                currentScreens = authenticationUiState.currentScreen,
+                                onHomeClick = {
+                                    navController.navigateSingleTopTo(
+                                        route = NavigationScreens.HomePage,
+                                        navController
+                                    )
+                                    authenticationViewModel.updateCurrentScreen(NavigationScreens.HomePage)
+                                },
+                                onMyDonationsClick = {
+                                    navController.navigateSingleTopTo(
+                                        route = NavigationScreens.MyDonationsPage,
+                                        navController
+                                    )
+                                    authenticationViewModel.updateCurrentScreen(NavigationScreens.MyDonationsPage)
+                                },
+                                onSettingsClick = {
+                                    navController.navigateSingleTopTo(
+                                        route = NavigationScreens.SettingsPage,
+                                        navController
+                                    )
+                                    authenticationViewModel.updateCurrentScreen(NavigationScreens.SettingsPage)
+                                },
+                                onProfileClick = {
+                                    navController.navigateSingleTopTo(
+                                        route = NavigationScreens.ProfilePage,
+                                        navController
+                                    )
+                                    authenticationViewModel.updateCurrentScreen(NavigationScreens.ProfilePage)
+                                }
+                            )
+                        }
+                    )
+                }
             }
         },
     ) { innerPadding ->
-        SharedScreen(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)) {
+        SharedScreen(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             NavHost(
-                modifier = Modifier.fillMaxSize().padding(bottom = 30.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 30.dp),
                 navController = navController,
                 startDestination = startDestination
             ) {

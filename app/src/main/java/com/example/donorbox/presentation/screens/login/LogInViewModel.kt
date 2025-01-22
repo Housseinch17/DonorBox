@@ -3,16 +3,14 @@ package com.example.donorbox.presentation.screens.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.GetCurrentUserUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.LogInUseCase
-import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.SaveSharedPrefUsernameUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,15 +30,14 @@ sealed interface LogInAction{
 
 
 class LogInViewModel(
-    private val logInUseCase: LogInUseCase,
-    private val saveSharedPrefUsernameUseCase: SaveSharedPrefUsernameUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val authenticationUseCase: AuthenticationUseCase,
+    private val sharedPreferenceUseCase: SharedPreferenceUseCase
 ) : ViewModel() {
     private val _logInUiState: MutableStateFlow<LogInUiState> = MutableStateFlow(LogInUiState())
     val logInUiState: StateFlow<LogInUiState> = _logInUiState.asStateFlow()
 
-    private val _sharedFlow: MutableSharedFlow<String> = MutableSharedFlow()
-    val sharedFlow: SharedFlow<String> = _sharedFlow.asSharedFlow()
+    private val _eventMessage: Channel<String> = Channel()
+    val eventMessage = _eventMessage.receiveAsFlow()
 
 
     init {
@@ -74,9 +71,9 @@ class LogInViewModel(
         }
     }
 
-    private fun emitSharedFlow(message: String) {
+    private fun emitMessage(message: String) {
         viewModelScope.launch {
-            _sharedFlow.emit(message)
+            _eventMessage.send(message)
         }
     }
 
@@ -87,14 +84,14 @@ class LogInViewModel(
                 newState.copy(authState = AuthState.Loading)
             }
             if (email.isEmpty() || password.isEmpty()) {
-                emitSharedFlow("Email and Password can't be empty")
+                emitMessage("Email and Password can't be empty")
                 _logInUiState.update { newState ->
                     newState.copy(authState = AuthState.NotLoggedIn)
                 }
             } else {
-                val response = logInUseCase.logIn(email, password)
+                val response = authenticationUseCase.logIn(email, password)
                 if (response is AuthState.Error) {
-                    emitSharedFlow(response.message)
+                    emitMessage(response.message)
                     _logInUiState.update { newState->
                         newState.copy(authState = AuthState.NotLoggedIn)
                     }
@@ -110,12 +107,12 @@ class LogInViewModel(
     }
 
     private suspend fun getCurrentUser(): String? {
-        return getCurrentUserUseCase.getCurrentUser()
+        return authenticationUseCase.getCurrentUser()
     }
 
     private suspend fun getCurrentUserAndSaveIt() {
         val currentUsername = getCurrentUser()
-        saveSharedPrefUsernameUseCase.saveUsername(currentUsername)
+        sharedPreferenceUseCase.saveUsername(currentUsername)
     }
 
 

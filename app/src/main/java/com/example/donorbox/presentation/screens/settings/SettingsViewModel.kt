@@ -3,16 +3,14 @@ package com.example.donorbox.presentation.screens.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.ChangePasswordUseCase
-import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.VerifyPasswordUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
 import com.example.donorbox.presentation.screens.authentication.PasswordChangement
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -36,15 +34,15 @@ sealed interface SettingsAction{
 }
 
 class SettingsViewModel (
-    private val changePasswordUseCase: ChangePasswordUseCase,
-    private val verifyPasswordUseCase: VerifyPasswordUseCase,
+    private val authenticationUseCase: AuthenticationUseCase,
 ) : ViewModel() {
     private val _settingsUiState: MutableStateFlow<SettingsUiState> =
         MutableStateFlow(SettingsUiState())
     val settingsUiState: StateFlow<SettingsUiState> = _settingsUiState.asStateFlow()
 
-    private val _emitValue: MutableSharedFlow<String> = MutableSharedFlow()
-    val emitValue: SharedFlow<String> = _emitValue.asSharedFlow()
+    private val _eventMessage: Channel<String> = Channel()
+    val eventMessage = _eventMessage.receiveAsFlow()
+
 
     init {
         Log.d("ViewModelInitialization", "SettingsViewModel created")
@@ -148,7 +146,7 @@ class SettingsViewModel (
 
     private fun emitValue(newText: String) {
         viewModelScope.launch {
-            _emitValue.emit(newText)
+            _eventMessage.send(newText)
         }
     }
 
@@ -160,7 +158,7 @@ class SettingsViewModel (
         if(password.isEmpty()){
             emitValue("CurrentPassword is empty!")
         }else{
-            verifyPasswordUseCase.verifyPassword(password,onVerified,setError)
+            authenticationUseCase.verifyPassword(password,onVerified,setError)
         }
     }
 
@@ -189,7 +187,7 @@ class SettingsViewModel (
                 }
             } else {
                 delay(1000)
-                val passwordChangement = changePasswordUseCase.changePassword(email = email, newPassword = newPassword)
+                val passwordChangement = authenticationUseCase.changePassword(email = email, newPassword = newPassword)
                 _settingsUiState.update { newState ->
                     newState.copy(
                         currentPasswordValue = "",

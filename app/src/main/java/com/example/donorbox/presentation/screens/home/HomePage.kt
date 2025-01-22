@@ -78,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.donorbox.R
 import com.example.donorbox.data.model.Receiver
+import com.example.donorbox.presentation.screens.authentication.AuthenticationAction
 import com.example.donorbox.presentation.theme.DescriptionTypography
 import com.example.donorbox.presentation.theme.MutedDarkBlue
 import com.example.donorbox.presentation.theme.NewBlue
@@ -95,6 +96,7 @@ fun HomePage(
     modifier: Modifier,
     homeUiState: HomeUiState,
     onActionHomeAction: (HomeAction) -> Unit,
+    onActionAuthenticationAction: (AuthenticationAction) -> Unit
 ) {
     val context = LocalContext.current
     SharedScreen {
@@ -103,6 +105,8 @@ fun HomePage(
         ) {
             when (homeUiState.receiversResponse) {
                 is ReceiversResponse.Error -> {
+                    //show bottom bar
+                    onActionAuthenticationAction(AuthenticationAction.BottomBarLoading)
                     Text(
                         text = homeUiState.receiversResponse.message,
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
@@ -114,6 +118,9 @@ fun HomePage(
                 }
 
                 is ReceiversResponse.Success -> {
+                    //show bottom bar
+                    onActionAuthenticationAction(AuthenticationAction.BottomBarLoading)
+
                     HomeSuccess(
                         receiverList = homeUiState.receiversResponse.receivers,
                         onReceiverClick = { receiver ->

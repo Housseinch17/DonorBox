@@ -3,7 +3,7 @@ package com.example.donorbox.presentation.screens.mydonations
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.localDataBaseUseCase.GetAllDonationsUseCase
+import com.example.donorbox.domain.useCase.localDataBaseUseCase.LocalDataBaseUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ sealed interface MyDonationAction{
 
 
 class MyDonationsViewModel(
-    private val getAllDonationsUseCase: GetAllDonationsUseCase
+    private val localDataBaseUseCase: LocalDataBaseUseCase
 ): ViewModel() {
     private val _myDonationsUiState: MutableStateFlow<MyDonationsUiState> =
         MutableStateFlow(MyDonationsUiState())
@@ -41,7 +41,7 @@ class MyDonationsViewModel(
         _myDonationsUiState.update { newState ->
             newState.copy(isLoading = true)
         }
-        val getAllDonations = getAllDonationsUseCase.getAllDonations()
+        val getAllDonations = localDataBaseUseCase.getAllDonations()
         _myDonationsUiState.update { newState ->
             newState.copy(
                 list = getAllDonations,

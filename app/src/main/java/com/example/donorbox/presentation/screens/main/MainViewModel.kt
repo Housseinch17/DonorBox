@@ -3,7 +3,7 @@ package com.example.donorbox.presentation.screens.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.donorbox.domain.useCase.sharedprefrenceUsecase.GetSharedPrefUsernameUseCase
+import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCase
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val getSharedPrefUsernameUseCase: GetSharedPrefUsernameUseCase,
+    private val sharedPreferenceUseCase: SharedPreferenceUseCase,
 ) : ViewModel() {
     private val _mainUiState: MutableStateFlow<MainUiState> =
         MutableStateFlow(MainUiState())
@@ -24,7 +24,7 @@ class MainViewModel(
     }
 
     private suspend fun getCurrentUserName(): String? {
-        return getSharedPrefUsernameUseCase.getUsername()
+        return sharedPreferenceUseCase.getUsername()
     }
 
     private fun checkSharedPreferUsername() {

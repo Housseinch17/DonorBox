@@ -7,7 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.donorbox.R
-import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.UpdateDeviceTokenUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +18,8 @@ import org.koin.core.component.inject
 
 class MyFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
 
-    private val updateDeviceTokenUseCase: UpdateDeviceTokenUseCase by inject()
+
+    private val notificationUseCase: NotificationUseCase by inject()
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
@@ -71,7 +72,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService(), KoinComponent {
 
 
     private suspend fun saveTokenToFirebase(token: String){
-        updateDeviceTokenUseCase.updateDeviceToken(token)
+        notificationUseCase.updateDeviceToken(token)
         Log.d("FCM", "saveTokenToFirebase: $token")
     }
 }
