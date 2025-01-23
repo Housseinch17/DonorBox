@@ -9,7 +9,6 @@ import com.example.donorbox.presentation.screens.profile.ProfileViewModel
 import com.example.donorbox.presentation.screens.receivedDonationsPage.ReceivedDonationsViewModel
 import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.screens.signup.SignUpViewModel
-import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -19,7 +18,6 @@ object ViewModelModule {
 
         viewModel {
             AuthenticationViewModel(
-                application = androidApplication(),
                 authenticationUseCase = get(),
                 sharedPreferenceUseCase = get(),
                 notificationUseCase = get(),
@@ -48,7 +46,6 @@ object ViewModelModule {
 
         viewModel {
             HomeViewModel(
-                application = androidApplication(),
                 firebaseReadDataUseCase = get(),
                 localDataBaseUseCase = get(),
                 authenticationUseCase = get(),

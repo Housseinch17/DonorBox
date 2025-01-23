@@ -47,8 +47,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -742,7 +742,7 @@ fun ShowDialog(
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
+                        TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 8.dp),
@@ -758,9 +758,11 @@ fun ShowDialog(
                             colors = TextFieldDefaults.textFieldColors(
                                 containerColor = Color.Black.copy(alpha = 0.1f),
                                 focusedIndicatorColor = NewBlue,
-                                unfocusedIndicatorColor = Color.Gray,
-                                focusedTextColor = NewWhite,
-                                unfocusedTextColor = NewWhite
+                                unfocusedIndicatorColor = NewGray,
+                                focusedTextColor = NewBlue,
+                                unfocusedTextColor = NewWhite,
+                                focusedLabelColor = NewBlue,
+                                unfocusedLabelColor = NewGray
                             )
                         )
                         if (showText) {

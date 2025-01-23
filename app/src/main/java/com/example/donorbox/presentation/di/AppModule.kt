@@ -20,7 +20,7 @@ object AppModule {
         single<CoroutineDispatcher>(named("Dispatchers.IO")) { Dispatchers.IO }
     }
     private val androidContextModule = module {
-        single { androidContext() as Application }
+        single<Application> { androidContext() as Application }
     }
 
     val appModule =

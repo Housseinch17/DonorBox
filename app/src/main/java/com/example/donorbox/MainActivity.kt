@@ -56,6 +56,8 @@ class MainActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         //saving state when app is in background
+        //if the application kills activity and recreate it when it comes from background
+        //navController will be saved which means the navController is restoring it's state instead of the initial state.
         if (::navController.isInitialized) {
             outState.putBundle("nav_state", navController.saveState())
         }

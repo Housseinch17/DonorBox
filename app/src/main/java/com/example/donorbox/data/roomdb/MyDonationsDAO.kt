@@ -11,6 +11,7 @@ interface MyDonationsDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveDonations(myDonations: MyDonations)
 
+    //can use flow for live updates but prefer to implement refresh
     @Query("SELECT * FROM myDonations_table")
     suspend fun getAllDonations(): List<MyDonations>
 }

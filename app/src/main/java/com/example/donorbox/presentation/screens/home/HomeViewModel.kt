@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.MyApplication
 import com.example.donorbox.data.model.MyDonations
@@ -26,6 +26,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
 
 sealed interface ReceiversResponse {
     data class Success(val receivers: List<Receiver>) : ReceiversResponse
@@ -52,13 +55,15 @@ sealed interface HomeAction {
 
 
 class HomeViewModel(
-    private val application: Application,
     private val firebaseWriteDataUseCase: FirebaseWriteDataUseCase,
     private val firebaseReadDataUseCase: FirebaseReadDataUseCase,
     private val localDataBaseUseCase: LocalDataBaseUseCase,
     private val authenticationUseCase: AuthenticationUseCase,
     private val notificationUseCase: NotificationUseCase
-) : AndroidViewModel(application) {
+) : ViewModel(), KoinComponent {
+
+    private val application: Application by inject()
+
     private val _uiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -297,19 +302,18 @@ class HomeViewModel(
                         newState.copy(
                             moneyToDonate = "",
                             newPasswordValue = "",
-                            isLoading = false
                         )
                     }
 
                     emitFlow("You're donations are succeed!")
                     hideDialog()
+
                 } catch (e: Exception) {
                     Log.d("MyTag", "sendMoney() error: ${e.message}")
                     emitFlow(e.message.toString())
-                    updateLoader(false)
                 }
+                updateLoader(false)
             }
-            updateLoader(false)
         }
     }
 

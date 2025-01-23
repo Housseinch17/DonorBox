@@ -336,10 +336,13 @@ fun PasswordTextField(
             focusedLeadingIconColor = NewBlue,
             unfocusedLeadingIconColor = NewGray,
             unfocusedLabelColor = NewGray,
-            focusedLabelColor = NewBlue,
             focusedTrailingIconColor = NewBlue,
-            unfocusedTrailingIconColor = NewGray
+            unfocusedTrailingIconColor = NewGray,
+            focusedLabelColor = NewBlue
+
         ),
+
+
         value = value,
         onValueChange = { newValue ->
             onValueChange(newValue)
@@ -358,7 +361,6 @@ fun PasswordTextField(
         keyboardActions = KeyboardActions(
             onDone = {
                 keyboardController?.hide()
-
             }),
         visualTransformation = visualTransformation,
         trailingIcon = trailingIcon,
@@ -405,8 +407,7 @@ fun TextFieldInput(
             focusedLeadingIconColor = NewBlue,
             unfocusedLeadingIconColor = NewGray,
             unfocusedLabelColor = NewGray,
-            focusedPlaceholderColor = NewBlue,
-            unfocusedPlaceholderColor = NewGray
+            focusedLabelColor = NewBlue
         ),
         value = value,
         onValueChange = { newValue ->
@@ -414,7 +415,7 @@ fun TextFieldInput(
         },
         singleLine = true,
         modifier = modifier,
-        placeholder = {
+        label = {
             Text(text = label)
         },
         leadingIcon = {

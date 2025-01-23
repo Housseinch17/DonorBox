@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
 import android.util.Patterns
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCase
@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 sealed interface PasswordChangement {
     data class Success(val successMessage: String) : PasswordChangement
@@ -54,11 +56,13 @@ sealed interface AuthenticationAction {
 }
 
 class AuthenticationViewModel(
-    application: Application,
     private val authenticationUseCase: AuthenticationUseCase,
     private val sharedPreferenceUseCase: SharedPreferenceUseCase,
     private val notificationUseCase: NotificationUseCase
-) : AndroidViewModel(application = application) {
+) : ViewModel(), KoinComponent {
+
+    private val application: Application by inject()
+
     private val _authenticationUiState: MutableStateFlow<AuthenticationUiState> =
         MutableStateFlow(AuthenticationUiState())
     val authenticationUiState: StateFlow<AuthenticationUiState> =
@@ -230,7 +234,7 @@ class AuthenticationViewModel(
             _authenticationUiState.update { newState ->
                 newState.copy(signOut = SignOutResponse.IsLoading)
             }
-            val hasInternet = getApplication<Application>().isInternetAvailable()
+            val hasInternet = application.isInternetAvailable()
             Log.d("hasInternet", "$hasInternet")
             if (hasInternet) {
                 authenticationUseCase.signOut()
