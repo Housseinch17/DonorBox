@@ -6,6 +6,8 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
     id("kotlin-kapt")
+    id("com.google.firebase.crashlytics")
+
 }
 
 android {
@@ -103,7 +105,12 @@ dependencies {
     implementation (libs.firebase.messaging)
 
     // When using the BoM, don't specify versions in Firebase dependencies
+    //firebase analytics
     implementation(libs.firebase.analytics)
+    //firebase crashlytics
+    implementation(libs.firebase.crashlytics)
+
+
     //Firebase Authentication
     implementation(libs.firebase.auth)
     //read data from Firebase
