@@ -38,4 +38,7 @@
     <string name="no_donations_yet">No donations yet!</string>
     <string name="amount_empty">Amount is empty</string>
     <string name="dont_have_account">Don\'t have an account,</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="title">Title</string>
+    <string name="message">Message</string>
 </resources>

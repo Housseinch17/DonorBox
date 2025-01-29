@@ -3,7 +3,9 @@ package com.example.donorbox.presentation.screens.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.donorbox.data.model.ContactUs
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseAuthenticationUseCase.AuthenticationUseCase
+import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDataUseCase
 import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -80,6 +82,8 @@ class SettingsViewModel (
             }
         }
     }
+
+
 
     private fun updatePassword(updatePassword: UpdatePassword?){
         when(updatePassword){

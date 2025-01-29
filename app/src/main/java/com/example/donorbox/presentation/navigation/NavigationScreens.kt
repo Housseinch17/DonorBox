@@ -45,4 +45,6 @@ sealed interface NavigationScreens {
     @Serializable
     data object SettingsPage: NavigationScreens
 
+    @Serializable
+    data object ContactUs: NavigationScreens
 }

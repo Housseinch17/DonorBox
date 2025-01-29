@@ -5,6 +5,7 @@ import com.example.donorbox.data.dataSource.firebase.firebaseAuthentication.Fire
 import com.example.donorbox.data.dataSource.firebase.firebaseNotification.FirebaseNotificationDataSource
 import com.example.donorbox.data.dataSource.firebase.firebaseReadData.FirebaseReadDataSource
 import com.example.donorbox.data.dataSource.firebase.firebaseWriteData.FirebaseWriteDataSource
+import com.example.donorbox.data.model.ContactUs
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.domain.repository.FirebaseRepository
 import com.example.donorbox.presentation.screens.authentication.PasswordChangement
@@ -91,6 +92,10 @@ class FirebaseRepositoryImpl(
 
     override suspend fun readAllDonations(): List<String> {
         return firebaseReadDataDataSource.readAllDonations()
+    }
+
+    override suspend fun contactUs(contactUs: ContactUs,username: String): String {
+        return firebaseWriteDataSource.contactUs(contactUs, username)
     }
 
 }

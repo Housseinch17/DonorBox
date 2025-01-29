@@ -1,6 +1,7 @@
 package com.example.donorbox.data.dataSource.firebase.firebaseWriteData
 
 import android.util.Log
+import com.example.donorbox.data.model.ContactUs
 import com.example.donorbox.presentation.util.Constants.replaceUsername
 import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,6 +10,7 @@ import kotlinx.coroutines.withContext
 class FirebaseWriteDataSourceImpl(
     private val receiversDatabaseReference: DatabaseReference,
     private val usersDatabaseReference: DatabaseReference,
+    private val contactUsDatabaseReference: DatabaseReference,
     private val coroutineDispatcher: CoroutineDispatcher
 ) : FirebaseWriteDataSource {
     override suspend fun writeToken(username: String, token: String): Unit =
@@ -69,6 +71,23 @@ class FirebaseWriteDataSourceImpl(
                             "writeDonationsIntoFirebase(): Failed to donate ${exception.message}"
                         )
                     }
+            }
+        }
+
+    override suspend fun contactUs(contactUs: ContactUs,username: String): String =
+        withContext(coroutineDispatcher) {
+            try {
+                val contactUsRef = contactUsDatabaseReference.child(contactUs.name)
+                val contactMap = mapOf(
+                    "email" to username,
+                    "title" to contactUs.title,
+                    "message" to contactUs.message,
+                    "verified" to false
+                )
+                contactUsRef.setValue(contactMap)
+                return@withContext "Message sent successfully!"
+            } catch (e: Exception) {
+                return@withContext "Error: ${e.message}"
             }
         }
 }

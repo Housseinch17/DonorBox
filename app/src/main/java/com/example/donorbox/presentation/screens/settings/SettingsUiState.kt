@@ -14,5 +14,6 @@ data class SettingsUiState(
     val showText: Boolean = false,
     val confirmShowText: Boolean = false,
     val passwordChangement: PasswordChangement = PasswordChangement.InitialState,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+
 )

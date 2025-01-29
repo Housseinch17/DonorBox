@@ -38,6 +38,10 @@ object FirebaseModule {
             FirebaseDatabase.getInstance().getReference("users")
         }
 
+        single<DatabaseReference>(named("contactUsReference")){
+            FirebaseDatabase.getInstance().getReference("contact us")
+        }
+
         single<FirebaseAuthenticationDataSource> {
             FirebaseAuthenticationDataSourceImpl(
                 auth = get(),
@@ -59,6 +63,7 @@ object FirebaseModule {
             FirebaseWriteDataSourceImpl(
                 receiversDatabaseReference = get(named("receiversReference")),
                 usersDatabaseReference = get(named("usersReference")),
+                contactUsDatabaseReference = get(named("contactUsReference")),
                 coroutineDispatcher = get(named("Dispatchers.IO")),
             )
         }

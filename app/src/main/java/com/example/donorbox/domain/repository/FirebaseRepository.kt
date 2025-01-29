@@ -1,5 +1,6 @@
 package com.example.donorbox.domain.repository
 
+import com.example.donorbox.data.model.ContactUs
 import com.example.donorbox.data.model.notificationMessage.NotificationMessage
 import com.example.donorbox.presentation.screens.authentication.PasswordChangement
 import com.example.donorbox.presentation.screens.home.ReceiversResponse
@@ -24,5 +25,6 @@ interface FirebaseRepository {
     suspend fun writeDonationsIntoFirebase(username: String, donation: String)
     suspend fun verifyPassword(password: String, onVerified: () -> Unit, setError: (String) -> Unit)
     suspend fun readAllDonations(): List<String>
+    suspend fun contactUs(contactUs: ContactUs, username: String): String
 
 }

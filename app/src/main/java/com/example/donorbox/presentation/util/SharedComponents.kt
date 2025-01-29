@@ -373,6 +373,7 @@ fun TextFieldInput(
     modifier: Modifier, label: String,
     value: String,
     imageVector: ImageVector = Icons.Filled.Email,
+    singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions, onValueChange: (String) -> Unit,
 ) {
     //keyboard controller to show or hide keyboard
@@ -413,7 +414,7 @@ fun TextFieldInput(
         onValueChange = { newValue ->
             onValueChange(newValue)
         },
-        singleLine = true,
+        singleLine = singleLine,
         modifier = modifier,
         label = {
             Text(text = label)

@@ -1,6 +1,7 @@
 package com.example.donorbox.presentation.di.modules
 
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.contactUs.ContactUsViewModel
 import com.example.donorbox.presentation.screens.home.HomeViewModel
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.main.MainViewModel
@@ -75,6 +76,13 @@ object ViewModelModule {
             ProfileViewModel(
                 authenticationUseCase = get(),
                 firebaseReadDataUseCase = get(),
+            )
+        }
+
+        viewModel{
+            ContactUsViewModel(
+                authenticationUseCase = get(),
+                firebaseWriteDataUseCase = get()
             )
         }
 
