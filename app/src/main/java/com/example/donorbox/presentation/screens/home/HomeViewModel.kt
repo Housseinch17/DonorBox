@@ -17,9 +17,11 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseReadDataUseCa
 import com.example.donorbox.domain.useCase.firebaseUseCase.firebaseWriteDataUseCase.FirebaseWriteDataUseCase
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.LocalDataBaseUseCase
+import com.example.donorbox.domain.useCase.paymentUseCase.PaymentUseCase
 import com.example.donorbox.presentation.util.callPhoneDirectly
 import com.example.donorbox.presentation.util.openApp
 import com.example.donorbox.presentation.util.openGoogleMap
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +31,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+sealed interface PaymentStatus {
+    data object Idle : PaymentStatus
+    data object Completed : PaymentStatus
+    data object Canceled : PaymentStatus
+    data class Failed(val errorMessage: String) : PaymentStatus
+}
 
 sealed interface ReceiversResponse {
     data class Success(val receivers: List<Receiver>) : ReceiversResponse
@@ -42,7 +50,12 @@ sealed interface HomeAction {
         HomeAction
 
     data class OnSendButton(val receiverToken: String, val receiverUsername: String) : HomeAction
-    data class SendMoney(val moneyToDonate: String, val password: String) : HomeAction
+    data class SendMoney(
+        val moneyToDonate: String,
+        val password: String,
+        val paymentSheet: PaymentSheet
+    ) : HomeAction
+
     data class OnMoneyUpdate(val moneyValue: String) : HomeAction
     data class NewPasswordValueChange(val newPasswordValueChange: String) : HomeAction
     data class OnCall(val context: Context, val phoneNumber: String) : HomeAction
@@ -51,6 +64,11 @@ sealed interface HomeAction {
     data object HideBottomSheetReceiver : HomeAction
     data object HideDialog : HomeAction
     data object OnIconClick : HomeAction
+    data class PaymentStatus(val paymentStatus: com.example.donorbox.presentation.screens.home.PaymentStatus) :
+        HomeAction
+
+    data class UpdatePaymentStatus(val paymentStatus: com.example.donorbox.presentation.screens.home.PaymentStatus) :
+        HomeAction
 }
 
 
@@ -59,7 +77,8 @@ class HomeViewModel(
     private val firebaseReadDataUseCase: FirebaseReadDataUseCase,
     private val localDataBaseUseCase: LocalDataBaseUseCase,
     private val authenticationUseCase: AuthenticationUseCase,
-    private val notificationUseCase: NotificationUseCase
+    private val notificationUseCase: NotificationUseCase,
+    private val paymentUseCase: PaymentUseCase
 ) : ViewModel(), KoinComponent {
 
     private val application: Application by inject()
@@ -69,6 +88,9 @@ class HomeViewModel(
 
     private val _eventMessage: Channel<String> = Channel()
     val eventMessage = _eventMessage.receiveAsFlow()
+
+    private val _paymentStatus: Channel<PaymentStatus> = Channel()
+    val paymentStatus = _paymentStatus.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -135,20 +157,124 @@ class HomeViewModel(
                         password = homeAction.password,
                         onVerified = {
                             viewModelScope.launch {
-                                sendMoney(
-                                    moneyToDonate = homeAction.moneyToDonate,
-                                    donations = MyDonations(
-                                        myDonations = "Donated ${homeAction.moneyToDonate}$  to: ${_uiState.value.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
-                                    )
+                                getPayment(
+                                    paymentSheet = homeAction.paymentSheet,
+                                    amount = homeAction.moneyToDonate.toInt() * 100
                                 )
                             }
                         },
                         setError = { error ->
                             emitFlow(error)
-                            updateLoader(false)
+
                         }
                     )
                 }
+            }
+
+            is HomeAction.PaymentStatus -> {
+                viewModelScope.launch {
+                    paymentStatusAction(homeAction.paymentStatus)
+                }
+            }
+
+            is HomeAction.UpdatePaymentStatus -> {
+                updatePaymentStatus(paymentStatus = homeAction.paymentStatus)
+            }
+
+        }
+    }
+
+    private fun presentPaymentSheet(
+        paymentSheet: PaymentSheet,
+        customerConfig: PaymentSheet.CustomerConfiguration,
+        paymentIntentClientSecret: String,
+        customerName: String,
+    ) {
+        paymentSheet.presentWithPaymentIntent(
+            paymentIntentClientSecret = paymentIntentClientSecret,
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = customerName,
+                customer = customerConfig,
+                // Set `allowsDelayedPaymentMethods` to true if your business handles
+                // delayed notification payment methods like US bank accounts.
+                allowsDelayedPaymentMethods = true
+            )
+        )
+    }
+
+
+    private suspend fun getPayment(paymentSheet: PaymentSheet, amount: Int) {
+        _uiState.update { newState ->
+            newState.copy(showText = false)
+        }
+        if (_uiState.value.moneyToDonate.isEmpty()) {
+            _uiState.update { newState ->
+                newState.copy(showText = true)
+            }
+            updateLoader(false)
+        } else {
+            //read full name of sender
+            readFullName()
+
+            val response = paymentUseCase.getPayment(amount)
+            _uiState.update { newState ->
+                newState.copy(
+                    customerId = response.customerId,
+                    ephemeralKey = response.ephemeralId,
+                    secretEphemeralKey = response.ephemeralSecret,
+                    clientSecret = response.paymentIntentClientSecret
+                )
+            }
+            Log.d("MyTag","${_uiState.value}")
+            val customerConfig = PaymentSheet.CustomerConfiguration(
+                id = _uiState.value.customerId,
+                ephemeralKeySecret = _uiState.value.secretEphemeralKey
+            )
+
+            Log.d("MyTag","customerConfig: $customerConfig")
+            val paymentIntentClientSecret = _uiState.value.clientSecret
+
+            Log.d("MyTag","paymentIntentClientSecret: $paymentIntentClientSecret")
+            presentPaymentSheet(
+                paymentSheet = paymentSheet,
+                customerConfig = customerConfig,
+                paymentIntentClientSecret = paymentIntentClientSecret,
+                customerName = _uiState.value.senderName,
+            )
+            Log.d("MyTag","Here now")
+        }
+    }
+
+    private fun paymentStatusAction(paymentStatus: PaymentStatus) {
+        when (paymentStatus) {
+            PaymentStatus.Canceled -> {
+                updatePaymentStatus(paymentStatus)
+                _uiState.update { newState ->
+                    newState.copy(
+                        moneyToDonate = "",
+                        newPasswordValue = "",
+                    )
+                }
+                hideDialog()
+            }
+
+            PaymentStatus.Completed -> {
+                sendMoney()
+            }
+
+            is PaymentStatus.Failed -> {
+                updatePaymentStatus(paymentStatus)
+                _uiState.update { newState ->
+                    newState.copy(
+                        moneyToDonate = "",
+                        newPasswordValue = "",
+                    )
+                }
+                hideDialog()
+            }
+
+            PaymentStatus.Idle -> {
+
             }
         }
     }
@@ -183,6 +309,12 @@ class HomeViewModel(
     private fun emitFlow(message: String) {
         viewModelScope.launch {
             _eventMessage.send(message)
+        }
+    }
+
+    private fun updatePaymentStatus(paymentStatus: PaymentStatus) {
+        viewModelScope.launch {
+            _paymentStatus.send(paymentStatus)
         }
     }
 
@@ -255,65 +387,54 @@ class HomeViewModel(
         }
     }
 
-    private fun sendMoney(moneyToDonate: String, donations: MyDonations) {
-        _uiState.update { newState ->
-            newState.copy(showText = false)
-        }
-        if (moneyToDonate.isEmpty()) {
-            _uiState.update { newState ->
-                newState.copy(showText = true)
-            }
-            updateLoader(false)
-        } else {
-            //getting application scope from MyApplication class
-            //it will only cancel if any child failed/cancelled or the whole app destroyed
-            val appScope = (application as MyApplication).applicationScope
+     private fun sendMoney() {
+        //getting application scope from MyApplication class
+        //it will only cancel if any child failed/cancelled or the whole app destroyed
+        val appScope = (application as MyApplication).applicationScope
+        appScope.launch {
+            try {
+                val homeUiState = _uiState.value
 
-            appScope.launch {
-                try {
-                    //read full name of sender
-                    readFullName()
-
-                    val homeUiState = _uiState.value
-
-                    Log.d("MyTag", "HomeUiState ${homeUiState.senderName}")
-                    //send notification
-                    sendNotification(
-                        notificationMessage = NotificationMessage(
-                            message = Message(
-                                token = homeUiState.receiverToken,
-                                notification = Notification(
-                                    title = "Received Money",
-                                    body = "You have received $moneyToDonate$ from ${homeUiState.senderName}"
-                                )
+                Log.d("MyTag", "HomeUiState ${homeUiState.senderName}")
+                //send notification
+                sendNotification(
+                    notificationMessage = NotificationMessage(
+                        message = Message(
+                            token = homeUiState.receiverToken,
+                            notification = Notification(
+                                title = "Received Money",
+                                body = "You have received ${homeUiState.moneyToDonate}$ from ${homeUiState.senderName}"
                             )
                         )
                     )
+                )
 
-                    //post to receiver firebase
-                    firebaseWriteDataUseCase.writeDonationsIntoFirebase(
-                        homeUiState.receiverUsername,
-                        "You have received $moneyToDonate\$ from ${homeUiState.senderName}"
+                //post to receiver firebase
+                firebaseWriteDataUseCase.writeDonationsIntoFirebase(
+                    homeUiState.receiverUsername,
+                    "You have received ${homeUiState.moneyToDonate}\$ from ${homeUiState.senderName}"
+                )
+                //save donation
+                val myDonations = MyDonations(
+                    myDonations = "Donated ${homeUiState.moneyToDonate}$  to: ${_uiState.value.modalBottomSheetReceiver.modalBottomSheetReceiver.name}"
+                )
+                localDataBaseUseCase.saveDonations(myDonations)
+
+                _uiState.update { newState ->
+                    newState.copy(
+                        moneyToDonate = "",
+                        newPasswordValue = "",
                     )
-                    //save donation
-                    localDataBaseUseCase.saveDonations(donations)
-
-                    _uiState.update { newState ->
-                        newState.copy(
-                            moneyToDonate = "",
-                            newPasswordValue = "",
-                        )
-                    }
-
-                    emitFlow("You're donations are succeed!")
-                    hideDialog()
-
-                } catch (e: Exception) {
-                    Log.d("MyTag", "sendMoney() error: ${e.message}")
-                    emitFlow(e.message.toString())
                 }
-                updateLoader(false)
+
+                emitFlow("You're donations are succeed!")
+                hideDialog()
+
+            } catch (e: Exception) {
+                Log.d("MyTag", "sendMoney() error: ${e.message}")
+                emitFlow(e.message.toString())
             }
+            updateLoader(false)
         }
     }
 

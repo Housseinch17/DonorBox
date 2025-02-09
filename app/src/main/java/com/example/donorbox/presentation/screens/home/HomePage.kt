@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -84,12 +85,16 @@ import com.example.donorbox.presentation.theme.MutedDarkBlue
 import com.example.donorbox.presentation.theme.NewBlue
 import com.example.donorbox.presentation.theme.NewGray
 import com.example.donorbox.presentation.theme.NewWhite
+import com.example.donorbox.presentation.util.Constants
 import com.example.donorbox.presentation.util.DonorBoxImage
 import com.example.donorbox.presentation.util.PasswordTextField
 import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.ShimmerEffect
 import com.example.donorbox.presentation.util.TrailingIcon
 import com.example.donorbox.presentation.util.getPasswordVisualTransformation
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 @Composable
 fun HomePage(
@@ -98,7 +103,15 @@ fun HomePage(
     onActionHomeAction: (HomeAction) -> Unit,
     onActionAuthenticationAction: (AuthenticationAction) -> Unit
 ) {
+    val paymentSheet = rememberPaymentSheet { paymentSheetResult ->
+        onPaymentSheetResult(paymentSheetResult, onActionHomeAction)
+    }
     val context = LocalContext.current
+
+    val publishableKey = Constants.PUBLISHABLE_KEY
+    PaymentConfiguration.init(context, publishableKey)
+
+
     SharedScreen {
         Box(
             modifier = modifier
@@ -128,25 +141,36 @@ fun HomePage(
                         },
                         modalBottomSheetReceiver = homeUiState.modalBottomSheetReceiver,
                         hideBottomSheetReceiver = { onActionHomeAction(HomeAction.HideBottomSheetReceiver) },
-                        onCall = { phoneNumber->
-                            onActionHomeAction(HomeAction.OnCall(context = context, phoneNumber = phoneNumber))
+                        onCall = { phoneNumber ->
+                            onActionHomeAction(
+                                HomeAction.OnCall(
+                                    context = context,
+                                    phoneNumber = phoneNumber
+                                )
+                            )
                         },
                         onOpenApp = {
-                            onActionHomeAction(HomeAction.OnOpenOmtApp(
-                                context = context
-                            ))
+                            onActionHomeAction(
+                                HomeAction.OnOpenOmtApp(
+                                    context = context
+                                )
+                            )
                         },
                         onOpenWhishApp = {
-                            onActionHomeAction(HomeAction.OnOpenWhishApp(
-                                context = context
-                            ))
+                            onActionHomeAction(
+                                HomeAction.OnOpenWhishApp(
+                                    context = context
+                                )
+                            )
                         },
-                        onOpenGoogleMap = { latitude,longitude->
-                            onActionHomeAction(HomeAction.OnOpenGoogleMap(
-                                context = context,
-                                latitude = latitude,
-                                longitude = longitude
-                            ))
+                        onOpenGoogleMap = { latitude, longitude ->
+                            onActionHomeAction(
+                                HomeAction.OnOpenGoogleMap(
+                                    context = context,
+                                    latitude = latitude,
+                                    longitude = longitude
+                                )
+                            )
                         },
                         onSendButton = { receiverToken, receiverUsername ->
                             onActionHomeAction(
@@ -156,11 +180,14 @@ fun HomePage(
                                 )
                             )
                         },
-                        sendMoney = { moneyToDonate, password->
-                            onActionHomeAction(HomeAction.SendMoney(
-                                moneyToDonate = moneyToDonate,
-                                password = password,
-                            ))
+                        sendMoney = { moneyToDonate, password ->
+                            onActionHomeAction(
+                                HomeAction.SendMoney(
+                                    moneyToDonate = moneyToDonate,
+                                    password = password,
+                                    paymentSheet = paymentSheet,
+                                )
+                            )
                         },
                         showDialog = homeUiState.dialogVisibility,
                         hideDialog = {
@@ -567,7 +594,7 @@ fun ReceiverInfo(modifier: Modifier, receiver: Receiver, onReceiverClick: (Recei
             .clickable {
                 onReceiverClick(receiver)
             },
-        colors = CardDefaults.cardColors(containerColor =  MutedDarkBlue),
+        colors = CardDefaults.cardColors(containerColor = MutedDarkBlue),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
     ) {
         Column(
@@ -810,4 +837,33 @@ private fun calculateTextWidth(): Dp {
     }
     // Convert the width in pixels to Dp
     return with(LocalDensity.current) { maxWidthPx.toDp() }
+}
+
+private fun onPaymentSheetResult(
+    paymentSheetResult: PaymentSheetResult,
+    onActions: (HomeAction) -> Unit
+) {
+    when (paymentSheetResult) {
+        is PaymentSheetResult.Canceled -> {
+            onActions(HomeAction.UpdatePaymentStatus(PaymentStatus.Canceled))
+            Log.d("MyTag", "Canceled")
+        }
+
+        is PaymentSheetResult.Failed -> {
+            onActions(
+                HomeAction.PaymentStatus(
+                    PaymentStatus.Failed(
+                        paymentSheetResult.error.message ?: "Failed!"
+                    )
+                )
+            )
+            Log.d("MyTag", "Error: ${paymentSheetResult.error}")
+        }
+
+        is PaymentSheetResult.Completed -> {
+            // Display for example, an order confirmation screen
+            onActions(HomeAction.PaymentStatus(PaymentStatus.Completed))
+            Log.d("MyTag", "Completed")
+        }
+    }
 }

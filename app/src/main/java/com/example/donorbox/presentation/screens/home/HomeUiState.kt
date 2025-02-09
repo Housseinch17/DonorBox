@@ -18,7 +18,12 @@ data class HomeUiState(
     val receiverToken: String = "",
     val receiverUsername: String = "",
     val senderName: String = "",
-
+    val customerId: String = "",
+    val ephemeralKey: String = "",
+    val clientSecret: String = "",
+    val amount: Int = 50,
+    val secretEphemeralKey: String = "",
+    val paymentStatus: PaymentStatus = PaymentStatus.Idle,
 )
 
 @Immutable

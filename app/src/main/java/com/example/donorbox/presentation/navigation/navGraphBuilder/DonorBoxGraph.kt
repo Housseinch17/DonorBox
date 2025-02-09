@@ -62,7 +62,6 @@ fun NavGraphBuilder.donorBoxGraph(
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
-
             HomePage(
                 modifier = modifier,
                 homeUiState = homeUiState,

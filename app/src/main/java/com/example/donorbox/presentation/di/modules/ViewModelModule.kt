@@ -52,6 +52,7 @@ object ViewModelModule {
                 authenticationUseCase = get(),
                 notificationUseCase = get(),
                 firebaseWriteDataUseCase = get(),
+                paymentUseCase = get(),
             )
         }
 

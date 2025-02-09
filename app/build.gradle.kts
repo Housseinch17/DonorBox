@@ -136,6 +136,10 @@ dependencies {
 //    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
     implementation(libs.dexter)
     implementation(libs.google.auth.library.oauth2.http)
+
+    //stripe
+    implementation (libs.stripe.android)
+
 }
 // Allow references to generated code
 kapt {

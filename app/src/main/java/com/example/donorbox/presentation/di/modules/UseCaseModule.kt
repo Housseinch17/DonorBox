@@ -10,6 +10,8 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.N
 import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.NotificationUseCaseImpl
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.LocalDataBaseUseCase
 import com.example.donorbox.domain.useCase.localDataBaseUseCase.LocalDataBaseUseCaseImpl
+import com.example.donorbox.domain.useCase.paymentUseCase.PaymentUseCase
+import com.example.donorbox.domain.useCase.paymentUseCase.PaymentUseCaseImpl
 import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCase
 import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCaseImpl
 import org.koin.dsl.module
@@ -54,5 +56,10 @@ object UseCaseModule {
             )
         }
 
+        single<PaymentUseCase> {
+            PaymentUseCaseImpl(
+                paymentRepository = get()
+            )
+        }
     }
 }

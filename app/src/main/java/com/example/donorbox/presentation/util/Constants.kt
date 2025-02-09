@@ -7,7 +7,8 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 
 object Constants {
-    const val BASE_URL = "https://fcm.googleapis.com/"
+    const val PUBLISHABLE_KEY = "pk_test_51QpULbLil8SeTXGgtxYR9BeafzZEizp5uavSaeNaEP6TBLsa1Rz9mBG1LCJzqIG9pBEP05yFPK7eyVSxOU5PAmki00ToniyNSy"
+    const val SECRET_KEY = "sk_test_51QpULbLil8SeTXGg57ipnNgv8qqc0GqzbfT45AqvZf61WOhxTCDu7Losm8eCqLmeQdVGkuB9FWdDVO3FDDBA4eMy00MJAI222u"
 
     fun replaceUsername(username: String?): String? {
         return username?.replace("@", "*")?.replace(".", "_")
