@@ -846,6 +846,7 @@ private fun onPaymentSheetResult(
     when (paymentSheetResult) {
         is PaymentSheetResult.Canceled -> {
             onActions(HomeAction.UpdatePaymentStatus(PaymentStatus.Canceled))
+            onActions(HomeAction.UpdateLoader)
             Log.d("MyTag", "Canceled")
         }
 
@@ -857,6 +858,7 @@ private fun onPaymentSheetResult(
                     )
                 )
             )
+            onActions(HomeAction.UpdateLoader)
             Log.d("MyTag", "Error: ${paymentSheetResult.error}")
         }
 

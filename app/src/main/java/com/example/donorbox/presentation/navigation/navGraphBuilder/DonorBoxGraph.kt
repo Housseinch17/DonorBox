@@ -25,6 +25,7 @@ import com.example.donorbox.presentation.screens.contactUs.ContactUsPage
 import com.example.donorbox.presentation.screens.contactUs.ContactUsViewModel
 import com.example.donorbox.presentation.screens.home.HomePage
 import com.example.donorbox.presentation.screens.home.HomeViewModel
+import com.example.donorbox.presentation.screens.home.PaymentStatus
 import com.example.donorbox.presentation.screens.mydonations.MyDonationPage
 import com.example.donorbox.presentation.screens.mydonations.MyDonationsViewModel
 import com.example.donorbox.presentation.screens.profile.ProfilePage
@@ -60,6 +61,20 @@ fun NavGraphBuilder.donorBoxGraph(
             LaunchedEffect(homeViewModel.eventMessage) {
                 homeViewModel.eventMessage.collect { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+            }
+
+            LaunchedEffect(homeViewModel.paymentStatus) {
+                homeViewModel.paymentStatus.collect{ paymentStatus->
+                    when(paymentStatus){
+                        PaymentStatus.Canceled -> {
+                            Toast.makeText(context,"Payment Canceled!", Toast.LENGTH_LONG).show()
+                        }
+                        is PaymentStatus.Failed -> {
+                            Toast.makeText(context,"Payment Failed: ${paymentStatus.errorMessage}!", Toast.LENGTH_LONG).show()
+                        }
+                        else -> {}
+                    }
                 }
             }
             HomePage(

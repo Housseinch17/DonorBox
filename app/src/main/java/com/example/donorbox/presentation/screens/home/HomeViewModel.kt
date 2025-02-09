@@ -69,6 +69,7 @@ sealed interface HomeAction {
 
     data class UpdatePaymentStatus(val paymentStatus: com.example.donorbox.presentation.screens.home.PaymentStatus) :
         HomeAction
+    data object UpdateLoader: HomeAction
 }
 
 
@@ -164,6 +165,7 @@ class HomeViewModel(
                             }
                         },
                         setError = { error ->
+                            updateLoader(false)
                             emitFlow(error)
 
                         }
@@ -181,6 +183,9 @@ class HomeViewModel(
                 updatePaymentStatus(paymentStatus = homeAction.paymentStatus)
             }
 
+            HomeAction.UpdateLoader -> {
+                updateLoader(false)
+            }
         }
     }
 
@@ -225,52 +230,39 @@ class HomeViewModel(
                     clientSecret = response.paymentIntentClientSecret
                 )
             }
-            Log.d("MyTag","${_uiState.value}")
+            Log.d("MyTag", "${_uiState.value}")
             val customerConfig = PaymentSheet.CustomerConfiguration(
                 id = _uiState.value.customerId,
                 ephemeralKeySecret = _uiState.value.secretEphemeralKey
             )
 
-            Log.d("MyTag","customerConfig: $customerConfig")
+            Log.d("MyTag", "customerConfig: $customerConfig")
             val paymentIntentClientSecret = _uiState.value.clientSecret
 
-            Log.d("MyTag","paymentIntentClientSecret: $paymentIntentClientSecret")
+            Log.d("MyTag", "paymentIntentClientSecret: $paymentIntentClientSecret")
             presentPaymentSheet(
                 paymentSheet = paymentSheet,
                 customerConfig = customerConfig,
                 paymentIntentClientSecret = paymentIntentClientSecret,
                 customerName = _uiState.value.senderName,
             )
-            Log.d("MyTag","Here now")
         }
     }
 
     private fun paymentStatusAction(paymentStatus: PaymentStatus) {
         when (paymentStatus) {
             PaymentStatus.Canceled -> {
+                Log.d("paymentStatusAction","canceled")
                 updatePaymentStatus(paymentStatus)
-                _uiState.update { newState ->
-                    newState.copy(
-                        moneyToDonate = "",
-                        newPasswordValue = "",
-                    )
-                }
-                hideDialog()
             }
-
             PaymentStatus.Completed -> {
+                Log.d("paymentStatusAction","completed")
                 sendMoney()
             }
 
             is PaymentStatus.Failed -> {
+                Log.d("paymentStatusAction","failed")
                 updatePaymentStatus(paymentStatus)
-                _uiState.update { newState ->
-                    newState.copy(
-                        moneyToDonate = "",
-                        newPasswordValue = "",
-                    )
-                }
-                hideDialog()
             }
 
             PaymentStatus.Idle -> {
@@ -387,7 +379,7 @@ class HomeViewModel(
         }
     }
 
-     private fun sendMoney() {
+    private fun sendMoney() {
         //getting application scope from MyApplication class
         //it will only cancel if any child failed/cancelled or the whole app destroyed
         val appScope = (application as MyApplication).applicationScope
