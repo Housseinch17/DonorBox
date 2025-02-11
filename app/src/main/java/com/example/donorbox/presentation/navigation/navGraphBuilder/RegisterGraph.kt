@@ -1,5 +1,6 @@
 package com.example.donorbox.presentation.navigation.navGraphBuilder
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.donorbox.presentation.screens.login.AuthState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -25,6 +25,7 @@ import com.example.donorbox.R
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.screens.authentication.AuthenticationUiState
 import com.example.donorbox.presentation.screens.authentication.AuthenticationViewModel
+import com.example.donorbox.presentation.screens.login.AuthState
 import com.example.donorbox.presentation.screens.login.LogInScreen
 import com.example.donorbox.presentation.screens.login.LogInViewModel
 import com.example.donorbox.presentation.screens.signup.AccountStatus
@@ -33,6 +34,7 @@ import com.example.donorbox.presentation.screens.signup.SignUpViewModel
 import org.koin.androidx.compose.koinViewModel
 
 
+@SuppressLint("RestrictedApi")
 fun NavGraphBuilder.registerGraph(
     authenticationViewModel: AuthenticationViewModel,
     authenticationUiState: AuthenticationUiState,
@@ -42,7 +44,7 @@ fun NavGraphBuilder.registerGraph(
         startDestination = NavigationScreens.LogInPage
     ) {
         composable<NavigationScreens.LogInPage> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
             val context = LocalContext.current
             val logInViewModel = koinViewModel<LogInViewModel>()
             val logInUiState by logInViewModel.logInUiState.collectAsStateWithLifecycle()
@@ -58,14 +60,14 @@ fun NavGraphBuilder.registerGraph(
                     AuthState.LoggedIn -> {
                         //update currentUsername before navigating
                         authenticationViewModel.updateCurrentUserName()
-                        navHostController.navigate(NavigationScreens.HomePage) {
-                            //remove LogInPage from currentBackStack
-                            popUpTo(NavigationScreens.LogInPage) {
+                        navHostController.navigate(NavigationScreens.DonorBoxGraph) {
+                            //remove RegisterGraph from currentBackStack
+                            popUpTo(NavigationScreens.RegisterGraph) {
                                 inclusive = true
                             }
+                            launchSingleTop = true
                         }
                     }
-
                     else -> {}
                 }
             }
@@ -86,7 +88,7 @@ fun NavGraphBuilder.registerGraph(
         }
 
         composable<NavigationScreens.SignUpPage> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
             val context = LocalContext.current
             val signUpViewModel = koinViewModel<SignUpViewModel>()
             val signUpUiState by signUpViewModel.signupUiState.collectAsStateWithLifecycle()

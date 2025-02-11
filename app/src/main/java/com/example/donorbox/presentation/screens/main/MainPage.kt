@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -44,7 +45,6 @@ import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.util.SharedScreen
 import com.example.donorbox.presentation.util.ShimmerEffect
 import com.example.donorbox.presentation.util.navigateSingleTopTo
-import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -67,20 +67,22 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
         when (authenticationUiState.signOut) {
             SignOutResponse.Success -> {
                 authenticationViewModel.resetSignOutState()
-                navController.navigate(NavigationScreens.LogInPage) {
-                    //popUpTo(0) here 0 means we will remove all the old stacks in BackStackEntry
-                    popUpTo(0) {
+
+
+
+                navController.navigate(NavigationScreens.RegisterGraph) {
+                    popUpTo(NavigationScreens.DonorBoxGraph){
                         inclusive = true
                     }
+                    launchSingleTop = true
                 }
             }
-
             else -> {}
         }
     }
 
     LaunchedEffect(authenticationViewModel.eventMessage) {
-        authenticationViewModel.eventMessage.collectLatest { message ->
+        authenticationViewModel.eventMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
@@ -169,7 +171,7 @@ fun MainPage(navController: NavHostController, startDestination: NavigationScree
                     .fillMaxSize()
                     .padding(bottom = 30.dp),
                 navController = navController,
-                startDestination = startDestination
+                startDestination = startDestination,
             ) {
                 registerGraph(
                     authenticationViewModel = authenticationViewModel,

@@ -11,11 +11,11 @@ import com.example.donorbox.domain.useCase.firebaseUseCase.notificationUseCase.N
 import com.example.donorbox.domain.useCase.sharedpreferenceUsecase.SharedPreferenceUseCase
 import com.example.donorbox.presentation.navigation.NavigationScreens
 import com.example.donorbox.presentation.util.isInternetAvailable
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -68,8 +68,8 @@ class AuthenticationViewModel(
     val authenticationUiState: StateFlow<AuthenticationUiState> =
         _authenticationUiState.asStateFlow()
 
-    private val _eventMessage: Channel<String> = Channel()
-    val eventMessage = _eventMessage.receiveAsFlow()
+    private val _eventMessage: MutableSharedFlow<String> = MutableSharedFlow()
+    val eventMessage = _eventMessage.asSharedFlow()
 
 
     init {
@@ -126,7 +126,7 @@ class AuthenticationViewModel(
 
     private fun emitMessage(message: String = "No internet connection") {
         viewModelScope.launch {
-            _eventMessage.send(message)
+            _eventMessage.emit(message)
         }
     }
 

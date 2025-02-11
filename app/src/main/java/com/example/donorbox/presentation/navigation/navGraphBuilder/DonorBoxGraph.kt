@@ -1,5 +1,6 @@
 package com.example.donorbox.presentation.navigation.navGraphBuilder
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,12 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -37,6 +38,7 @@ import com.example.donorbox.presentation.screens.settings.SettingsViewModel
 import com.example.donorbox.presentation.util.navigateSingleTopTo
 import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("RestrictedApi", "UnrememberedGetBackStackEntry")
 fun NavGraphBuilder.donorBoxGraph(
     navHostController: NavHostController,
     authenticationUiState: AuthenticationUiState,
@@ -50,12 +52,13 @@ fun NavGraphBuilder.donorBoxGraph(
     navigation<NavigationScreens.DonorBoxGraph>(startDestination = NavigationScreens.HomePage) {
         composable<NavigationScreens.HomePage> {
             val context = LocalContext.current
-
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val homeViewModel =
-                koinViewModel<HomeViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<HomeViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(homeViewModel.eventMessage) {
@@ -65,14 +68,20 @@ fun NavGraphBuilder.donorBoxGraph(
             }
 
             LaunchedEffect(homeViewModel.paymentStatus) {
-                homeViewModel.paymentStatus.collect{ paymentStatus->
-                    when(paymentStatus){
+                homeViewModel.paymentStatus.collect { paymentStatus ->
+                    when (paymentStatus) {
                         PaymentStatus.Canceled -> {
-                            Toast.makeText(context,"Payment Canceled!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Payment Canceled!", Toast.LENGTH_LONG).show()
                         }
+
                         is PaymentStatus.Failed -> {
-                            Toast.makeText(context,"Payment Failed: ${paymentStatus.errorMessage}!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                context,
+                                "Payment Failed: ${paymentStatus.errorMessage}!",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
+
                         else -> {}
                     }
                 }
@@ -85,10 +94,12 @@ fun NavGraphBuilder.donorBoxGraph(
             )
         }
         composable<NavigationScreens.MyDonationsPage> {
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val myDonationsViewModel =
-                koinViewModel<MyDonationsViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<MyDonationsViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val myDonationsUiState by myDonationsViewModel.myDonationsUiState.collectAsStateWithLifecycle()
 
             MyDonationPage(
@@ -98,11 +109,13 @@ fun NavGraphBuilder.donorBoxGraph(
             )
         }
         composable<NavigationScreens.ReceivedDonationsPage> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val receivedDonationsViewModel =
-                koinViewModel<ReceivedDonationsViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<ReceivedDonationsViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val receivedDonationsUiState by receivedDonationsViewModel.receivedDonationsUiState.collectAsStateWithLifecycle()
 
             ReceivedDonationsPage(
@@ -113,12 +126,14 @@ fun NavGraphBuilder.donorBoxGraph(
 
         }
         composable<NavigationScreens.SettingsPage> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
             val context = LocalContext.current
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val settingsViewModel =
-                koinViewModel<SettingsViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<SettingsViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
 
 
@@ -140,11 +155,13 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.ProfilePage> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val profileViewModel =
-                koinViewModel<ProfileViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<ProfileViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val profileUiState by profileViewModel.profileUiState.collectAsStateWithLifecycle()
 
             ProfilePage(
@@ -160,17 +177,19 @@ fun NavGraphBuilder.donorBoxGraph(
         }
 
         composable<NavigationScreens.ContactUs> {
-            Log.d("BackStack", "${navHostController.currentBackStackEntry}")
-            val parentBackStackEntry: NavBackStackEntry =
-                navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+            Log.d("BackStack", "${navHostController.currentBackStack.value}")
+            val donorBoxBackStackEntry =
+                remember(navHostController) {
+                    navHostController.getBackStackEntry(NavigationScreens.DonorBoxGraph)
+                }
             val contactUsViewModel =
-                koinViewModel<ContactUsViewModel>(viewModelStoreOwner = parentBackStackEntry)
+                koinViewModel<ContactUsViewModel>(viewModelStoreOwner = donorBoxBackStackEntry)
             val contactUsUiState by contactUsViewModel.contactUsUiState.collectAsStateWithLifecycle()
 
             val context = LocalContext.current
 
             LaunchedEffect(contactUsViewModel.eventMessage) {
-                contactUsViewModel.eventMessage.collect{ message->
+                contactUsViewModel.eventMessage.collect { message ->
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
             }
