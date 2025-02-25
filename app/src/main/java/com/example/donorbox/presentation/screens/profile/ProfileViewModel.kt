@@ -28,8 +28,10 @@ class ProfileViewModel(
 
     private suspend fun getCurrentUser() {
         val username = authenticationUseCase.getCurrentUser() ?: ""
+        val maskedEmail = if(username.isNotEmpty()) maskEmail(username) else username
+        Log.d("MyTag","maskedEmail: $maskedEmail")
         _profileUiState.update { newState ->
-            newState.copy(username = username)
+            newState.copy(username = maskedEmail)
         }
     }
 
@@ -40,9 +42,19 @@ class ProfileViewModel(
         }
     }
 
-    private fun setLoader(){
-        _profileUiState.update { newState->
+    private fun setLoader() {
+        _profileUiState.update { newState ->
             newState.copy(isLoading = false)
         }
     }
+
+    private fun maskEmail(email: String): String {
+        val parts = email.split("@")
+        val localPart = parts[0]
+        val halfLength = localPart.length / 2  // Take half of the email
+        val maskedLocalPart = localPart.take(halfLength) + "*".repeat(localPart.length - halfLength)
+        return maskedLocalPart + "@" + parts[1]
+    }
+
+
 }

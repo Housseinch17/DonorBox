@@ -195,6 +195,7 @@ class HomeViewModel(
         paymentIntentClientSecret: String,
         customerName: String,
     ) {
+        //merchant means  the one that is receiving the money
         paymentSheet.presentWithPaymentIntent(
             paymentIntentClientSecret = paymentIntentClientSecret,
             configuration = PaymentSheet.Configuration(
@@ -244,7 +245,7 @@ class HomeViewModel(
                 paymentSheet = paymentSheet,
                 customerConfig = customerConfig,
                 paymentIntentClientSecret = paymentIntentClientSecret,
-                customerName = _uiState.value.senderName,
+                customerName = _uiState.value.receiverUsername,
             )
         }
     }

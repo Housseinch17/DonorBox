@@ -108,6 +108,7 @@ fun HomePage(
     }
     val context = LocalContext.current
 
+    //initialize stripe sdk
     val publishableKey = Constants.PUBLISHABLE_KEY
     PaymentConfiguration.init(context, publishableKey)
 
