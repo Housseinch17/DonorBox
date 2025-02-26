@@ -13,5 +13,4 @@ interface FirebaseAuthenticationDataSource {
     suspend fun changePassword(email: String,newPassword: String): PasswordChangement
     suspend fun resetPassword(email: String): PasswordChangement
     suspend fun verifyPassword(password: String, onVerified: () -> Unit, setError: (String) -> Unit)
-
 }

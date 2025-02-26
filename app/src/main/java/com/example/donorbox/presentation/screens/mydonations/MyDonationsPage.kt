@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,21 +32,14 @@ import com.example.donorbox.presentation.theme.NewWhite
 import com.example.donorbox.presentation.theme.TitleTypography
 import com.example.donorbox.presentation.util.SharedScreen
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MyDonationPage(
     modifier: Modifier,
     myDonationsUiState: MyDonationsUiState,
-    onActionMyDonations: (MyDonationAction) -> Unit,
 ) {
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = myDonationsUiState.isRefreshing,
-        onRefresh = { onActionMyDonations(MyDonationAction.OnRefresh) },
-    )
     SharedScreen{
         Box(
-            modifier = modifier
-                .pullRefresh(pullRefreshState),
+            modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
             if (myDonationsUiState.isLoading) {
@@ -76,12 +65,6 @@ fun MyDonationPage(
                 } else {
                     MyDonationList(myDonationsUiState.list)
                 }
-                // Adding the PullRefreshIndicator
-                PullRefreshIndicator(
-                    refreshing = myDonationsUiState.isRefreshing,
-                    state = pullRefreshState,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
             }
         }
     }

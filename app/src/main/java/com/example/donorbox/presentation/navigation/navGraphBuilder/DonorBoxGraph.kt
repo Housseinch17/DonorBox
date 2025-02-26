@@ -105,7 +105,6 @@ fun NavGraphBuilder.donorBoxGraph(
             MyDonationPage(
                 modifier = modifier,
                 myDonationsUiState = myDonationsUiState,
-                onActionMyDonations = myDonationsViewModel::onActionMyDonations,
             )
         }
         composable<NavigationScreens.ReceivedDonationsPage> {

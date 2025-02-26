@@ -15,7 +15,7 @@ class MyApplication: Application() {
     val applicationScope = CoroutineScope(Job() + Dispatchers.IO)
     override fun onCreate() {
         super.onCreate()
-        //initialize firebase to read data
+        //initialize firebase
         FirebaseApp.initializeApp(this)
         startKoin {
             androidContext(this@MyApplication)

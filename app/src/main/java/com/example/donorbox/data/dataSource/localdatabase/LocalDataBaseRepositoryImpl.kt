@@ -2,6 +2,7 @@ package com.example.donorbox.data.dataSource.localdatabase
 
 import com.example.donorbox.data.model.MyDonations
 import com.example.donorbox.domain.repository.LocalDataBaseRepository
+import kotlinx.coroutines.flow.Flow
 
 class LocalDataBaseRepositoryImpl(
     private val localDataBaseDataSource: LocalDataBaseDataSource,
@@ -10,7 +11,7 @@ class LocalDataBaseRepositoryImpl(
         localDataBaseDataSource.saveDonations(donations)
     }
 
-    override suspend fun getAllDonations(): List<MyDonations> {
+    override fun getAllDonations(): Flow<List<MyDonations>> {
         return localDataBaseDataSource.getAllDonations()
     }
 }
